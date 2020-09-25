@@ -1,8 +1,6 @@
 spring:
   main:
     banner-mode: OFF
-  codec:
-    max-in-memory-size: 10MB
   sleuth:
     propagation-keys:
       - Nav-Callid
@@ -35,3 +33,12 @@ management:
       application: ${spring.application.name}
 
 SERVICE_USER_USERNAME: srvklage-dittnav
+
+no.nav.security.jwt:
+  issuer:
+    aad:
+      discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+      accepted_audience: ${AZURE_APP_CLIENT_ID}
+
+navCallId: Nav-Callid
+navConsumerId: Nav-Consumer-Id

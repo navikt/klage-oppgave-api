@@ -4,3 +4,4 @@ SERVICE_USER_PASSWORD: itest
 SLACK_URL: localhost:8080
 SLACK_CHANNEL_ID: #none
 NAIS_CLUSTER_NAME: local
+AZURE_APP_WELL_KNOWN_URL: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration
