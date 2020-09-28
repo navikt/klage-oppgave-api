@@ -38,7 +38,11 @@ no.nav.security.jwt:
   issuer:
     aad:
       discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
-      accepted_audience: ${AZURE_APP_CLIENT_ID},58f040b1-930f-42ba-b965-230b7cd01697
+      accepted_audience: ${AZURE_APP_CLIENT_ID}
 
 navCallId: Nav-Callid
 navConsumerId: Nav-Consumer-Id
+
+allowed.origins:
+  https://klage-oppgave.nav.no,
+  https://klage-oppgave.dev.nav.no
