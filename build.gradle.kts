@@ -56,6 +56,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("no.nav.security:token-validation-spring:$tokenValidationVersion")
+    implementation("no.nav.security:token-client-spring:$tokenValidationVersion")
     implementation("no.nav.security:oidc-spring-support:$oidcSupportVersion")
 
     implementation("no.nav.slackposter:simple-slack-poster:5")
