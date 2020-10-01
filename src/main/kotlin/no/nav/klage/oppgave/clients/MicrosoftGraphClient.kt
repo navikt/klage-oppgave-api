@@ -28,6 +28,6 @@ class MicrosoftGraphClient(private val microsoftGraphWebClient: WebClient) {
 
             .retrieve()
             .bodyToMono<MicrosoftGraphResponse>()
-            .block()?.onPremisesSamAccountName ?: throw RuntimeException("Tilganger could not be fetched")
+            .block()?.onPremisesSamAccountName ?: throw RuntimeException("NavIdent could not be fetched")
     }
 }
