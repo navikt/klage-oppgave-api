@@ -21,7 +21,8 @@ class MicrosoftGraphClient(private val microsoftGraphWebClient: WebClient) {
         return microsoftGraphWebClient.get()
             .uri { uriBuilder ->
                 uriBuilder
-                    .path("/me?\$select=onPremisesSamAccountName")
+                    .path("/me")
+                    .queryParam("\$select", "onPremisesSamAccountName")
                     .build()
             }.header("Authorization", "Bearer $accessToken")
 
