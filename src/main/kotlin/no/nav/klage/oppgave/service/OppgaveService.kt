@@ -40,7 +40,7 @@ class OppgaveService(
             OppgaveView(
                 id = it.id,
                 bruker = getBruker(it.aktoerId),
-                type = "TODO Klage/Anke",
+                type = it.beskrivelse ?: "",
                 ytelse = it.tema,
                 hjemmel = listOf("TODO hjemmel"),
                 frist = it.fristFerdigstillelse,
