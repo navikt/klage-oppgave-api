@@ -57,6 +57,7 @@ spec:
     - secret: oppgave-apikey
     - secret: slack-url
     - secret: slack-channel-id
+    - secret: norg2
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: {{springProfile}}

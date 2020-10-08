@@ -1,2 +1,4 @@
 SECURITY_TOKEN_SERVICE_REST_URL: https://api-gw-q1.oera.no/security-token-service
 PDL_BASE_URL: https://api-gw-q1.oera.no/pdl-api/graphql
+
+NORG2_API_V1_URL: https://api-gw-q1.oera.no/norg2/api/v1
