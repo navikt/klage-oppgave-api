@@ -16,14 +16,14 @@ class PdlClient(
     private val stsClient: StsClient
 ) {
 
-    fun getPersonInfo(aktoerId: String): HentPersonResponse {
+    fun getPersonInfo(fnrList: List<String>): HentPersonResponse {
         return pdlWebClient.post()
             .header(
                 HttpHeaders.AUTHORIZATION,
                 "Bearer ${tokenValidationContextHolder.tokenValidationContext.getJwtToken(ISSUER_AAD).tokenAsString}"
             )
             .header("Nav-Consumer-Token", "Bearer ${stsClient.oidcToken()}")
-            .bodyValue(hentPersonQuery(aktoerId))
+            .bodyValue(hentPersonQuery(fnrList))
             .retrieve()
             .bodyToMono<HentPersonResponse>()
             .block() ?: throw RuntimeException("Person not found")

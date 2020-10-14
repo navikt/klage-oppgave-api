@@ -6,10 +6,10 @@ data class PersonGraphqlQuery(
 )
 
 data class Variables(
-    val ident: String
+    val idents: List<String>
 )
 
-fun hentPersonQuery(aktoerId: String): PersonGraphqlQuery {
+fun hentPersonQuery(fnrList: List<String>): PersonGraphqlQuery {
     val query = PersonGraphqlQuery::class.java.getResource("/pdl/hentPerson.graphql").readText().replace("[\n\r]", "")
-    return PersonGraphqlQuery(query, Variables(aktoerId))
+    return PersonGraphqlQuery(query, Variables(fnrList))
 }

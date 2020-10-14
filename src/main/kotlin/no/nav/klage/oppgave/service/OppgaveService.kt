@@ -7,6 +7,7 @@ import no.nav.klage.oppgave.clients.PdlClient
 import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_FEILUTBETALING
 import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_KLAGE
 import no.nav.klage.oppgave.domain.gosys.Oppgave
+import no.nav.klage.oppgave.domain.gosys.Oppgave.Gruppe.FOLKEREGISTERIDENT
 import no.nav.klage.oppgave.domain.gosys.OppgaveResponse
 import no.nav.klage.oppgave.domain.pdl.Navn
 import no.nav.klage.oppgave.domain.view.HJEMMEL
@@ -42,29 +43,40 @@ class OppgaveService(
     }
 
     private fun OppgaveResponse.toView(): List<OppgaveView> {
+
+        val brukere = getBrukere(getFnr(this.oppgaver))
+
         return oppgaver.map {
             OppgaveView(
                 id = it.id,
-                bruker = getBruker(it.aktoerId),
+                bruker = brukere[getFnrFromOppgave(it)] ?: Bruker("Mangler fnr", "Mangler fnr"),
                 type = it.toType(),
                 ytelse = it.tema,
                 hjemmel = it.metadata.toHjemmel(),
                 frist = it.fristFerdigstillelse,
-                saksbehandler = "TODO saksbehandler"
+                saksbehandler = "todo"
             )
         }
     }
 
-    private fun getBruker(aktoerId: String?): Bruker {
-        return if (aktoerId == null) {
-            Bruker("Mangler aktoerId", "Mangler aktoerId")
-        } else {
-            val person = pdlClient.getPersonInfo(aktoerId).data?.hentPerson
-            return Bruker(
-                fnr = person?.folkeregisteridentifikator?.firstOrNull()?.identifikasjonsnummer ?: "mangler",
-                navn = person?.navn?.firstOrNull()?.toName() ?: "mangler"
-            )
+    private fun getFnr(oppgaver: List<Oppgave>): List<String> {
+        return oppgaver.mapNotNull {
+            getFnrFromOppgave(it)
         }
+    }
+
+    private fun getFnrFromOppgave(oppgave: Oppgave) =
+        oppgave.identer?.find { i -> i.gruppe == FOLKEREGISTERIDENT }?.ident
+
+    private fun getBrukere(fnrList: List<String>): Map<String, Bruker> {
+        val people = pdlClient.getPersonInfo(fnrList).data?.hentPersonBolk
+        return people?.map {
+            val fnr = it.folkeregisteridentifikator.first().identifikasjonsnummer
+            fnr to Bruker(
+                fnr = fnr,
+                navn = it.navn.firstOrNull()?.toName() ?: "mangler"
+            )
+        }?.toMap() ?: emptyMap()
     }
 
     private fun Navn.toName(): String {

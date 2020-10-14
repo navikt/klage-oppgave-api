@@ -1,9 +1,9 @@
 package no.nav.klage.oppgave.domain.pdl
 
 
-data class HentPersonResponse(val data: HentPerson?, val errors: List<PdlError>?)
+data class HentPersonResponse(val data: HentPersonBolk?, val errors: List<PdlError>? = null)
 
-data class HentPerson(val hentPerson: Person?)
+data class HentPersonBolk(val hentPersonBolk: List<Person>?)
 
 data class Person(
     val navn: List<Navn>,
@@ -12,7 +12,7 @@ data class Person(
 
 data class Navn(
     val fornavn: String,
-    val mellomnavn: String?,
+    val mellomnavn: String? = null,
     val etternavn: String
 )
 

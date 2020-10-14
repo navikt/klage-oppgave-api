@@ -3,10 +3,12 @@ package no.nav.klage.oppgave.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.klage.oppgave.clients.OppgaveClient
+import no.nav.klage.oppgave.clients.PdlClient
 import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_FEILUTBETALING
 import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_KLAGE
 import no.nav.klage.oppgave.domain.gosys.Oppgave
 import no.nav.klage.oppgave.domain.gosys.OppgaveResponse
+import no.nav.klage.oppgave.domain.pdl.*
 import no.nav.klage.oppgave.domain.view.HJEMMEL
 import no.nav.klage.oppgave.domain.view.TYPE_FEILUTBETALING
 import no.nav.klage.oppgave.domain.view.TYPE_KLAGE
@@ -47,9 +49,14 @@ internal class OppgaveServiceTest {
         assertThat(oppgaveService.getOppgaver().first().hjemmel.first()).isEqualTo("mangler")
     }
 
-    private fun oppgaveServiceWithHjemmel(hjemmel: String): OppgaveService {
+    @Test
+    fun `fnr is mapped correctly`() {
+        val fnr = "12345678910"
         val oppgaveClient = mockk<OppgaveClient>()
-        every { oppgaveClient.getOppgaver() } returns getOppgaveResponseWithHjemmel(hjemmel)
+        every { oppgaveClient.getOppgaver() } returns getOppgaveResponseWithIdenter(fnr)
+
+        val pdlClientMock = mockk<PdlClient>()
+        every { pdlClientMock.getPersonInfo(listOf(fnr)) } returns getHentPersonResponse()
 
         val oppgaveService = OppgaveService(
             mockk(),
@@ -57,22 +64,68 @@ internal class OppgaveServiceTest {
             mockk(),
             mockk(),
             oppgaveClient,
-            mockk()
+            pdlClientMock
+        )
+
+        assertThat(oppgaveService.getOppgaver().first().bruker.fnr).isEqualTo(fnr)
+    }
+
+    private fun getHentPersonResponse(): HentPersonResponse {
+        return HentPersonResponse(
+            data = HentPersonBolk(
+                listOf(
+                    Person(
+                        navn = listOf(
+                            Navn(
+                                fornavn = "Test",
+                                etternavn = "Person"
+                            )
+                        ),
+                        folkeregisteridentifikator = listOf(
+                            Folkeregisteridentifikator(
+                                identifikasjonsnummer = "12345678910",
+                                type = "FNR",
+                                status = ""
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+    private fun oppgaveServiceWithHjemmel(hjemmel: String): OppgaveService {
+        val oppgaveClientMock = mockk<OppgaveClient>()
+        every { oppgaveClientMock.getOppgaver() } returns getOppgaveResponseWithHjemmel(hjemmel)
+
+        val pdlClientMock = mockk<PdlClient>()
+        every { pdlClientMock.getPersonInfo(any()) } returns getHentPersonResponse()
+
+        val oppgaveService = OppgaveService(
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            oppgaveClientMock,
+            pdlClientMock
         )
         return oppgaveService
     }
 
     private fun oppgaveServiceWithType(type: String): OppgaveService {
-        val oppgaveClient = mockk<OppgaveClient>()
-        every { oppgaveClient.getOppgaver() } returns getOppgaveResponseWithType(type)
+        val oppgaveClientMock = mockk<OppgaveClient>()
+        every { oppgaveClientMock.getOppgaver() } returns getOppgaveResponseWithType(type)
+
+        val pdlClientMock = mockk<PdlClient>()
+        every { pdlClientMock.getPersonInfo(any()) } returns getHentPersonResponse()
 
         return OppgaveService(
             mockk(),
             mockk(),
             mockk(),
             mockk(),
-            oppgaveClient,
-            mockk()
+            oppgaveClientMock,
+            pdlClientMock
         )
     }
 
@@ -96,6 +149,27 @@ internal class OppgaveServiceTest {
                 fristFerdigstillelse = LocalDate.now(),
                 tema = "SYK",
                 metadata = mapOf(HJEMMEL to hjemmel)
+            )
+        )
+    )
+
+    private fun getOppgaveResponseWithIdenter(fnr: String) = OppgaveResponse(
+        antallTreffTotalt = 1,
+        oppgaver = listOf(
+            Oppgave(
+                id = 1,
+                fristFerdigstillelse = LocalDate.now(),
+                tema = "SYK",
+                identer = listOf(
+                    Oppgave.Ident(
+                        ident = "321321",
+                        gruppe = Oppgave.Gruppe.AKTOERID
+                    ),
+                    Oppgave.Ident(
+                        ident = fnr,
+                        gruppe = Oppgave.Gruppe.FOLKEREGISTERIDENT
+                    )
+                )
             )
         )
     )
