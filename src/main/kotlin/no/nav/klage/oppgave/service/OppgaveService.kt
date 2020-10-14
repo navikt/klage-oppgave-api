@@ -49,7 +49,7 @@ class OppgaveService(
         return oppgaver.map {
             OppgaveView(
                 id = it.id,
-                bruker = brukere[getFnrFromOppgave(it)] ?: Bruker("Mangler fnr", "Mangler fnr"),
+                bruker = brukere[it.getFnrForBruker()] ?: Bruker("Mangler fnr", "Mangler fnr"),
                 type = it.toType(),
                 ytelse = it.tema,
                 hjemmel = it.metadata.toHjemmel(),
@@ -59,14 +59,10 @@ class OppgaveService(
         }
     }
 
-    private fun getFnr(oppgaver: List<Oppgave>): List<String> {
-        return oppgaver.mapNotNull {
-            getFnrFromOppgave(it)
+    private fun getFnr(oppgaver: List<Oppgave>) =
+        oppgaver.mapNotNull {
+            it.getFnrForBruker()
         }
-    }
-
-    private fun getFnrFromOppgave(oppgave: Oppgave) =
-        oppgave.identer?.find { i -> i.gruppe == FOLKEREGISTERIDENT }?.ident
 
     private fun getBrukere(fnrList: List<String>): Map<String, Bruker> {
         val people = pdlClient.getPersonInfo(fnrList).data?.hentPersonBolk
@@ -79,13 +75,9 @@ class OppgaveService(
         }?.toMap() ?: emptyMap()
     }
 
-    private fun Navn.toName(): String {
-        return "$fornavn $etternavn"
-    }
+    private fun Navn.toName() = "$fornavn $etternavn"
 
-    private fun Map<String, String>?.toHjemmel(): List<String> {
-        return listOf(this?.get(HJEMMEL) ?: "mangler")
-    }
+    private fun Map<String, String>?.toHjemmel() = listOf(this?.get(HJEMMEL) ?: "mangler")
 
     private fun Oppgave.toType(): String {
         return if (behandlingstema == null) {
@@ -96,5 +88,6 @@ class OppgaveService(
             }
         } else "mangler"
     }
-}
 
+    private fun Oppgave.getFnrForBruker() = identer?.find { i -> i.gruppe == FOLKEREGISTERIDENT }?.ident
+}
