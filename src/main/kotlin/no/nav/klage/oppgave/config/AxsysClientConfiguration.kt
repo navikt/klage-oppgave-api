@@ -16,12 +16,16 @@ class AxsysClientConfiguration(
         private val logger = getLogger(javaClass.enclosingClass)
     }
 
+    @Value("\${AXSYS_APIKEY}")
+    private lateinit var apiKey: String
+
     @Value("\${AXSYS_URL}")
     private lateinit var axsysServiceURL: String
 
     @Bean
     fun axsysWebClient(): WebClient {
         return webClientBuilder
+            .defaultHeader("x-nav-apiKey", apiKey)
             .baseUrl(axsysServiceURL)
             .build()
     }
