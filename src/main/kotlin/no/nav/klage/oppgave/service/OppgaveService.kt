@@ -21,12 +21,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class OppgaveService(
-    val clientConfigurationProperties: ClientConfigurationProperties,
-    val oAuth2AccessTokenService: OAuth2AccessTokenService,
-    val axsysClient: AxsysClient,
-    val microsoftGraphClient: MicrosoftGraphClient,
-    val oppgaveClient: OppgaveClient,
-    val pdlClient: PdlClient
+        val clientConfigurationProperties: ClientConfigurationProperties,
+        val oAuth2AccessTokenService: OAuth2AccessTokenService,
+        val axsysClient: AxsysClient,
+        val microsoftGraphClient: MicrosoftGraphClient,
+        val oppgaveClient: OppgaveClient,
+        val pdlClient: PdlClient
 ) {
 
     fun getOppgaver(): List<OppgaveView> {
@@ -34,7 +34,7 @@ class OppgaveService(
     }
 
     fun getTilgangerForSaksbehandler() =
-        axsysClient.getTilgangerForSaksbehandler(microsoftGraphClient.getNavIdent(getTokenWithGraphScope()))
+            axsysClient.getTilgangerForSaksbehandler(microsoftGraphClient.getNavIdent(getTokenWithGraphScope()))
 
     private fun getTokenWithGraphScope(): String {
         val clientProperties = clientConfigurationProperties.registration["onbehalfof"]
@@ -48,29 +48,29 @@ class OppgaveService(
 
         return oppgaver.map {
             OppgaveView(
-                id = it.id,
-                bruker = brukere[it.getFnrForBruker()] ?: Bruker("Mangler fnr", "Mangler fnr"),
-                type = it.toType(),
-                ytelse = it.tema,
-                hjemmel = it.metadata.toHjemmel(),
-                frist = it.fristFerdigstillelse,
-                saksbehandler = "todo"
+                    id = it.id,
+                    bruker = brukere[it.getFnrForBruker()] ?: Bruker("Mangler fnr", "Mangler fnr"),
+                    type = it.toType(),
+                    ytelse = it.tema,
+                    hjemmel = it.metadata.toHjemmel(),
+                    frist = it.fristFerdigstillelse,
+                    saksbehandler = "todo"
             )
         }
     }
 
     private fun getFnr(oppgaver: List<Oppgave>) =
-        oppgaver.mapNotNull {
-            it.getFnrForBruker()
-        }
+            oppgaver.mapNotNull {
+                it.getFnrForBruker()
+            }
 
     private fun getBrukere(fnrList: List<String>): Map<String, Bruker> {
         val people = pdlClient.getPersonInfo(fnrList).data?.hentPersonBolk
         return people?.map {
             val fnr = it.folkeregisteridentifikator.first().identifikasjonsnummer
             fnr to Bruker(
-                fnr = fnr,
-                navn = it.navn.firstOrNull()?.toName() ?: "mangler"
+                    fnr = fnr,
+                    navn = it.navn.firstOrNull()?.toName() ?: "mangler"
             )
         }?.toMap() ?: emptyMap()
     }
@@ -90,4 +90,21 @@ class OppgaveService(
     }
 
     private fun Oppgave.getFnrForBruker() = identer?.find { i -> i.gruppe == FOLKEREGISTERIDENT }?.ident
+
+    fun oppgaveSok(oppgaveSokekriterier: OppgaveSokekriterier): List<OppgaveView> {
+        return oppgaveClient.oppgaverSok(oppgaveSokekriterier).toView().filter { harRiktigHjemmel(it.hjemmel, oppgaveSokekriterier.hjemmel) }
+    }
+
+    private fun harRiktigHjemmel(faktiskeHjemler: List<String>, forventetHjemmel: String?): Boolean {
+        return forventetHjemmel?.let { faktiskeHjemler.contains(it) } ?: true
+    }
+
 }
+
+data class OppgaveSokekriterier(
+        val type: String?,
+        val ytelse: String?,
+        val hjemmel: String?,
+        val erTildeltSaksbehandler: Boolean?,
+        val saksbehandler: String?
+)
