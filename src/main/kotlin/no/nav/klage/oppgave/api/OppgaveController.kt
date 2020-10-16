@@ -8,9 +8,12 @@ import no.nav.klage.oppgave.service.OppgaveService
 import no.nav.klage.oppgave.service.unleash.TokenUtils
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.CacheControl
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
+
 
 @RestController
 @ProtectedWithClaims(issuer = ISSUER_AAD)
@@ -50,15 +53,16 @@ class OppgaveController(val oppgaveService: OppgaveService, val tokenUtils: Toke
     }
 
     @GetMapping("/oppgaver/tildelt/me")
-    fun findMineTildelteOppgaver(): List<OppgaveView> {
+    fun findMineTildelteOppgaver(): ResponseEntity<List<OppgaveView>> {
         logger.debug("findMineTildelteOppgaver is requested")
         val ident = tokenUtils.getInnloggetIdent()
-        return oppgaveService.searchOppgaver(
-            OppgaveSearchCriteria(
-                erTildeltSaksbehandler = true,
-                saksbehandler = ident
-            )
+        val cacheControl = CacheControl.noStore()
+        val oppgaver = oppgaveService.searchOppgaver(
+            OppgaveSearchCriteria(erTildeltSaksbehandler = true, saksbehandler = ident)
         )
+        return ResponseEntity.ok()
+            .cacheControl(cacheControl)
+            .body(oppgaver)
     }
 
 }
