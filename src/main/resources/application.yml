@@ -62,4 +62,4 @@ allowed.origins:
 AXSYS_URL: https://axsys.dev.adeo.no/api/v1/tilgang
 MICROSOFT_GRAPH_URL: https://graph.microsoft.com/v1.0
 OPPGAVE_URL: https://api-gw-q1.oera.no/oppgave/api/v1/oppgaver
-UNLEASH_URL:  https://unleash.intern.nav.no/api/
+UNLEASH_URL: https://unleash.prod-gcp.nais.io/api/
