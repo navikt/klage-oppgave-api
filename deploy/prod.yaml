@@ -2,5 +2,6 @@ ingress: https://klage-oppgave-api.nav.no
 externalHosts:
   - login.microsoftonline.com
   - hooks.slack.com
+  - unleash.prod-gcp.nais.io
 springProfile: prod-gcp
 tenant: nav.no
