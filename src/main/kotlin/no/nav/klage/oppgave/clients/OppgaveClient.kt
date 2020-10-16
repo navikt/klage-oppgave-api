@@ -36,6 +36,7 @@ class OppgaveClient(
                     .queryParam("tema", TEMA_SYK)
                     .queryParam("behandlingstype", BEHANDLINGSTYPE_KLAGE)
                     .queryParam("behandlingstype", BEHANDLINGSTYPE_FEILUTBETALING)
+                    .queryParam("limit", 100)
                     .build()
             }
             .header("Authorization", "Bearer ${stsClient.oidcToken()}")
