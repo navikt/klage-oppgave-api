@@ -6,6 +6,7 @@ import no.finn.unleash.Unleash
 import no.finn.unleash.strategy.UserWithIdStrategy
 import no.finn.unleash.util.UnleashConfig
 import no.nav.klage.oppgave.service.unleash.ByProfileStrategy
+import no.nav.klage.oppgave.util.getLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,6 +14,11 @@ import org.springframework.context.annotation.Profile
 
 @Configuration
 class FeatureToggleConfig {
+
+    companion object {
+        @Suppress("JAVA_CLASS_ON_COMPANION")
+        private val logger = getLogger(javaClass.enclosingClass)
+    }
 
     @Value("\${spring.application.name}")
     lateinit var appName: String
@@ -31,6 +37,7 @@ class FeatureToggleConfig {
             .instanceId(instance)
             .unleashAPI(unleashUrl)
             .build()
+        logger.info("Unleash settes opp med appName {}, instanceId {} og url {}", appName, instance, unleashUrl)
         return DefaultUnleash(unleashConfig, byProfileStrategy, UserWithIdStrategy())
     }
 
