@@ -15,6 +15,7 @@ import no.nav.klage.oppgave.domain.view.OppgaveView
 import no.nav.klage.oppgave.domain.view.OppgaveView.Bruker
 import no.nav.klage.oppgave.domain.view.TYPE_FEILUTBETALING
 import no.nav.klage.oppgave.domain.view.TYPE_KLAGE
+import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.springframework.stereotype.Service
@@ -29,8 +30,13 @@ class OppgaveService(
     val pdlClient: PdlClient
 ) {
 
+    companion object {
+        @Suppress("JAVA_CLASS_ON_COMPANION")
+        private val logger = getLogger(javaClass.enclosingClass)
+    }
+
     fun getOppgaver(): List<OppgaveView> {
-        return oppgaveClient.getOppgaver().toView()
+        return oppgaveClient.getOppgaver().toView().also { logger.info("Returnerer {} oppgaver", it.size) }
     }
 
     fun getTilgangerForSaksbehandler() =
