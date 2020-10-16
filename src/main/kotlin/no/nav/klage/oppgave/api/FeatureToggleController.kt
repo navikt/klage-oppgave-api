@@ -19,4 +19,5 @@ class FeatureToggleController(private val unleash: Unleash, private val tokenUti
 
     private fun contextMedInnloggetBruker(): UnleashContext? =
         UnleashContext.builder().userId(tokenUtils.getInnloggetIdent()).build()
+    
 }
