@@ -17,7 +17,7 @@ class FeatureToggleConfig {
     @Value("\${spring.application.name}")
     lateinit var appName: String
 
-    @Value("\${springProfile}")
+    @Value("\${spring.profiles.active}")
     lateinit var instance: String
 
     @Value("\${UNLEASH_URL}")
