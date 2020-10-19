@@ -4,7 +4,7 @@ import no.finn.unleash.Unleash
 import no.finn.unleash.UnleashContext
 import no.nav.klage.oppgave.service.unleash.TokenUtils
 import no.nav.klage.oppgave.util.getLogger
-import no.nav.security.oidc.api.Unprotected
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
