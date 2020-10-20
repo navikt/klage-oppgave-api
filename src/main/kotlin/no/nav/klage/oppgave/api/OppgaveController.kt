@@ -10,6 +10,7 @@ import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 
@@ -28,9 +29,16 @@ class OppgaveController(val oppgaveService: OppgaveService) {
     }
 
     @GetMapping("/oppgaver")
-    fun getOppgaver(): List<OppgaveView> {
+    fun getOppgaver(
+        @RequestParam(name = "erTildelt", required = false) erTildelt: Boolean?,
+        @RequestParam(name = "saksbehandler", required = false) saksbehandler: String?,
+    ): List<OppgaveView> {
         logger.debug("getOppgaver is requested")
-        return oppgaveService.getOppgaver()
+        return if( erTildelt == null && saksbehandler == null) {
+            oppgaveService.getOppgaver()
+        } else {
+            oppgaveService.searchOppgaver(OppgaveSearchCriteria(erTildeltSaksbehandler = erTildelt, saksbehandler = saksbehandler))
+        }
     }
 
     @GetMapping("/oppgaver/ikketildelt")
