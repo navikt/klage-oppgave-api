@@ -5,6 +5,7 @@ import no.finn.unleash.FakeUnleash
 import no.finn.unleash.Unleash
 import no.finn.unleash.strategy.UserWithIdStrategy
 import no.finn.unleash.util.UnleashConfig
+import no.nav.klage.oppgave.service.unleash.ByEnhetStrategy
 import no.nav.klage.oppgave.service.unleash.ByProfileStrategy
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.beans.factory.annotation.Value
@@ -31,14 +32,14 @@ class FeatureToggleConfig {
 
     @Bean
     @Profile("dev-gcp", "prod-gcp")
-    fun unleash(byProfileStrategy: ByProfileStrategy): Unleash? {
+    fun unleash(byProfileStrategy: ByProfileStrategy, byEnhetStrategy: ByEnhetStrategy): Unleash? {
         val unleashConfig = UnleashConfig.builder()
             .appName(appName)
             .instanceId(instance)
             .unleashAPI(unleashUrl)
             .build()
         logger.info("Unleash settes opp med appName {}, instanceId {} og url {}", appName, instance, unleashUrl)
-        return DefaultUnleash(unleashConfig, byProfileStrategy, UserWithIdStrategy())
+        return DefaultUnleash(unleashConfig, byProfileStrategy, byEnhetStrategy, UserWithIdStrategy())
     }
 
     @Bean
