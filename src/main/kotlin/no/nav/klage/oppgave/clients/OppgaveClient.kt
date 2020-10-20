@@ -3,6 +3,7 @@ package no.nav.klage.oppgave.clients
 import brave.Tracer
 import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_FEILUTBETALING
 import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_KLAGE
+import no.nav.klage.oppgave.domain.gosys.Oppgave
 import no.nav.klage.oppgave.domain.gosys.OppgaveResponse
 import no.nav.klage.oppgave.service.OppgaveSearchCriteria
 import no.nav.klage.oppgave.util.getLogger
@@ -31,7 +32,20 @@ class OppgaveClient(
 
     fun getOppgaver(): OppgaveResponse {
         logger.debug("Fetching oppgaver")
+        
+        val allOppgaver = mutableListOf<Oppgave>()
+        var numberOfOppgaverRetrieved : Int = 0
 
+        do {
+            val onePage = getOnePage(numberOfOppgaverRetrieved)
+            allOppgaver.addAll(onePage.oppgaver)
+            numberOfOppgaverRetrieved+= onePage.oppgaver.size
+        } while( numberOfOppgaverRetrieved < onePage.antallTreffTotalt)
+
+        return OppgaveResponse(numberOfOppgaverRetrieved, allOppgaver)
+    }
+
+    private fun getOnePage(offset: Int): OppgaveResponse {
         return oppgaveWebClient.get()
             .uri { uriBuilder ->
                 uriBuilder
@@ -40,6 +54,7 @@ class OppgaveClient(
                     .queryParam("behandlingstype", BEHANDLINGSTYPE_KLAGE)
                     .queryParam("behandlingstype", BEHANDLINGSTYPE_FEILUTBETALING)
                     .queryParam("limit", 100)
+                    .queryParam("offset", offset)
                     .build()
             }
             .header("Authorization", "Bearer ${stsClient.oidcToken()}")
