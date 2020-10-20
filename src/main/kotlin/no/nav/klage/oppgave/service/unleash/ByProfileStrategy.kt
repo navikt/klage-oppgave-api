@@ -9,6 +9,7 @@ class ByProfileStrategy(env: Environment) : Strategy {
 
     companion object {
         val PROFILES = listOf("dev-gcp", "prod-gcp")
+        const val PARAM = "profile"
     }
 
     private val currentProfile = env.activeProfiles.find { PROFILES.contains(it) } ?: "dev-gcp"
@@ -19,7 +20,7 @@ class ByProfileStrategy(env: Environment) : Strategy {
         getEnabledProfiles(parameters)?.any { isCurrentProfileEnabled(it) } ?: false
 
     private fun getEnabledProfiles(parameters: Map<String, String>?) =
-        parameters?.get("profile")?.split(',')
+        parameters?.get(PARAM)?.split(',')
 
     private fun isCurrentProfileEnabled(profile: String): Boolean =
         currentProfile == profile
