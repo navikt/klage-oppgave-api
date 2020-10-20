@@ -29,15 +29,16 @@ class OppgaveClient(
 
     fun getOppgaver(): OppgaveResponse {
         logger.debug("Fetching oppgaver")
-        
+
         val allOppgaver = mutableListOf<Oppgave>()
-        var numberOfOppgaverRetrieved : Int = 0
+        var numberOfOppgaverRetrieved: Int = 0
 
         do {
             val onePage = getOnePage(numberOfOppgaverRetrieved)
             allOppgaver.addAll(onePage.oppgaver)
-            numberOfOppgaverRetrieved+= onePage.oppgaver.size
-        } while( numberOfOppgaverRetrieved < onePage.antallTreffTotalt)
+            numberOfOppgaverRetrieved += onePage.oppgaver.size
+            logger.debug("Retrieved {} of {} oppgaver", numberOfOppgaverRetrieved, onePage.antallTreffTotalt)
+        } while (numberOfOppgaverRetrieved < onePage.antallTreffTotalt)
 
         return OppgaveResponse(numberOfOppgaverRetrieved, allOppgaver)
     }
