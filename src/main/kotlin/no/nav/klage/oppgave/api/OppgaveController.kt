@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @ProtectedWithClaims(issuer = ISSUER_AAD)
-class OppgaveController(val oppgaveService: OppgaveService, val tokenUtils: TokenUtils) {
+class OppgaveController(val oppgaveService: OppgaveService) {
 
     companion object {
         @Suppress("JAVA_CLASS_ON_COMPANION")
@@ -49,4 +49,8 @@ class OppgaveController(val oppgaveService: OppgaveService, val tokenUtils: Toke
             )
         )
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> Fjernet me-endepunktet, vi har saksbehandlers ident i gui så det trengs ikke
 }
