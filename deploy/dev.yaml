@@ -2,6 +2,6 @@ ingress: https://klage-oppgave-api.dev.nav.no
 externalHosts:
   - login.microsoftonline.com
   - hooks.slack.com
-  - unleash.prod-gcp.nais.io
+  - unleash.intern.nav.no
 springProfile: dev-gcp
 tenant: trygdeetaten.no
