@@ -41,10 +41,10 @@ class OppgaveService(
 
     fun searchOppgaver(oppgaveSearchCriteria: OppgaveSearchCriteria): List<OppgaveView> {
         return oppgaveClient.searchOppgaver(oppgaveSearchCriteria).toView()
-            .filter { containsCorrentHjemmel(it.hjemmel, oppgaveSearchCriteria.hjemmel) }
+            .filter { containsCorrectHjemmel(it.hjemmel, oppgaveSearchCriteria.hjemmel) }
     }
 
-    private fun containsCorrentHjemmel(actualHjemler: List<String>, expectedHjemmel: String?): Boolean {
+    private fun containsCorrectHjemmel(actualHjemler: List<String>, expectedHjemmel: String?): Boolean {
         return expectedHjemmel?.let { actualHjemler.contains(it) } ?: true
     }
 
