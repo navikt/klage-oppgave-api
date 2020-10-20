@@ -39,6 +39,15 @@ class OppgaveService(
         return oppgaveClient.getOppgaver().toView().also { logger.info("Returnerer {} oppgaver", it.size) }
     }
 
+    fun searchOppgaver(oppgaveSearchCriteria: OppgaveSearchCriteria): List<OppgaveView> {
+        return oppgaveClient.searchOppgaver(oppgaveSearchCriteria).toView()
+            .filter { containsCorrectHjemmel(it.hjemmel, oppgaveSearchCriteria.hjemmel) }
+    }
+
+    private fun containsCorrectHjemmel(actualHjemler: List<String>, expectedHjemmel: String?): Boolean {
+        return expectedHjemmel?.let { actualHjemler.contains(it) } ?: true
+    }
+
     fun getTilgangerForSaksbehandler() =
         axsysClient.getTilgangerForSaksbehandler(microsoftGraphClient.getNavIdent(getTokenWithGraphScope()))
 
@@ -97,3 +106,11 @@ class OppgaveService(
 
     private fun Oppgave.getFnrForBruker() = identer?.find { i -> i.gruppe == FOLKEREGISTERIDENT }?.ident
 }
+
+data class OppgaveSearchCriteria(
+    val type: String? = null,
+    val ytelse: String? = null,
+    val hjemmel: String? = null,
+    val erTildeltSaksbehandler: Boolean? = null,
+    val saksbehandler: String? = null
+)

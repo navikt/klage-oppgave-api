@@ -5,11 +5,14 @@ import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_FEILUTBETALING
 import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_KLAGE
 import no.nav.klage.oppgave.domain.gosys.Oppgave
 import no.nav.klage.oppgave.domain.gosys.OppgaveResponse
+import no.nav.klage.oppgave.service.OppgaveSearchCriteria
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import org.springframework.web.util.UriBuilder
+import java.net.URI
 
 @Component
 class OppgaveClient(
@@ -35,7 +38,7 @@ class OppgaveClient(
 
         do {
             val onePage = getOnePage(numberOfOppgaverRetrieved)
-            allOppgaver.addAll(onePage.oppgaver)
+            allOppgaver += onePage.oppgaver
             numberOfOppgaverRetrieved += onePage.oppgaver.size
             logger.debug("Retrieved {} of {} oppgaver", numberOfOppgaverRetrieved, onePage.antallTreffTotalt)
         } while (numberOfOppgaverRetrieved < onePage.antallTreffTotalt)
@@ -46,14 +49,7 @@ class OppgaveClient(
     private fun getOnePage(offset: Int): OppgaveResponse {
         return oppgaveWebClient.get()
             .uri { uriBuilder ->
-                uriBuilder
-                    .queryParam("statuskategori", STATUSKATEGORI_AAPEN)
-                    .queryParam("tema", TEMA_SYK)
-                    .queryParam("behandlingstype", BEHANDLINGSTYPE_KLAGE)
-                    .queryParam("behandlingstype", BEHANDLINGSTYPE_FEILUTBETALING)
-                    .queryParam("limit", 100)
-                    .queryParam("offset", offset)
-                    .build()
+                buildDefaultUri(uriBuilder, offset)
             }
             .header("Authorization", "Bearer ${stsClient.oidcToken()}")
             .header("X-Correlation-ID", tracer.currentSpan().context().traceIdString())
@@ -61,6 +57,68 @@ class OppgaveClient(
             .retrieve()
             .bodyToMono<OppgaveResponse>()
             .block() ?: throw RuntimeException("Oppgaver could not be fetched")
+    }
+
+    private fun buildDefaultUri(uriBuilder: UriBuilder, offset: Int): URI {
+        return uriBuilder
+            .queryParam("statuskategori", STATUSKATEGORI_AAPEN)
+            .queryParam("tema", TEMA_SYK)
+            .queryParam("behandlingstype", BEHANDLINGSTYPE_KLAGE)
+            .queryParam("behandlingstype", BEHANDLINGSTYPE_FEILUTBETALING)
+            .queryParam("limit", 100)
+            .queryParam("offset", offset)
+            .build()
+    }
+
+    private fun getOneSearchPage(oppgaveSearchCriteria: OppgaveSearchCriteria, offset: Int): OppgaveResponse {
+        return oppgaveWebClient.get()
+            .uri { uriBuilder -> oppgaveSearchCriteria.buildUri(uriBuilder, offset) }
+            .header("Authorization", "Bearer ${stsClient.oidcToken()}")
+            .header("X-Correlation-ID", tracer.currentSpan().context().traceIdString())
+            .header("Nav-Consumer-Id", applicationName)
+            .retrieve()
+            .bodyToMono<OppgaveResponse>()
+            .block() ?: throw RuntimeException("Oppgaver could not be fetched")
+    }
+
+    fun searchOppgaver(oppgaveSearchCriteria: OppgaveSearchCriteria): OppgaveResponse {
+        logger.debug("Searching for oppgaver")
+
+        val allOppgaver = mutableListOf<Oppgave>()
+        var numberOfOppgaverRetrieved: Int = 0
+
+        do {
+            val onePage = getOneSearchPage(oppgaveSearchCriteria, numberOfOppgaverRetrieved)
+            allOppgaver += onePage.oppgaver
+            numberOfOppgaverRetrieved += onePage.oppgaver.size
+            logger.debug("Retrieved {} of {} oppgaver", numberOfOppgaverRetrieved, onePage.antallTreffTotalt)
+        } while (numberOfOppgaverRetrieved < onePage.antallTreffTotalt)
+
+        return OppgaveResponse(numberOfOppgaverRetrieved, allOppgaver)
+    }
+
+    private fun OppgaveSearchCriteria.buildUri(origUriBuilder: UriBuilder, offset: Int): URI {
+        var uriBuilder = origUriBuilder
+            .queryParam("statuskategori", OppgaveClient.STATUSKATEGORI_AAPEN)
+            .queryParam("limit", 100)
+            .queryParam("offset", offset)
+
+        this.type?.let { uriBuilder = uriBuilder.queryParam("behandlingstype", mapType(it)) }
+        this.ytelse?.let { uriBuilder = uriBuilder.queryParam("tema", mapYtelseTilTema(it)) }
+        this.erTildeltSaksbehandler?.let { uriBuilder = uriBuilder.queryParam("tildeltRessurs", it) }
+        this.saksbehandler?.let { uriBuilder = uriBuilder.queryParam("tilordnetRessurs", it) }
+
+        return uriBuilder.build()
+    }
+
+    private fun mapType(type: String): String {
+        //TODO
+        return BEHANDLINGSTYPE_KLAGE
+    }
+
+    private fun mapYtelseTilTema(ytelse: String): String {
+        //TODO
+        return TEMA_SYK
     }
 }
 
