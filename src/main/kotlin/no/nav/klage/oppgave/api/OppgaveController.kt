@@ -44,7 +44,7 @@ class OppgaveController(val oppgaveService: OppgaveService) {
     }
 
     @GetMapping("/oppgaver/{id}")
-    fun getOppgave(@PathVariable oppgaveId: Int): OppgaveView {
+    fun getOppgave(@PathVariable("id") oppgaveId: Int): OppgaveView {
         logger.debug("getOppgave is requested")
         return oppgaveService.getOppgave(oppgaveId)
     }
