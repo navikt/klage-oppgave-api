@@ -58,4 +58,10 @@ class OppgaveController(val oppgaveService: OppgaveService) {
             .buildAndExpand(oppgaveId).toUri()
         return ResponseEntity.ok().location(uri).body(oppgave)
     }
+
+    @GetMapping("/oppgaver/randomhjemler")
+    fun endreHjemlerAtRandomViolatingGetRpcStyleAndTotallyNotRestish(): List<OppgaveView> {
+        logger.debug("endreHjemlerAtRandomViolatingGetRpcStyleAndTotallyNotRestish is requested")
+        return oppgaveService.assignRandomHjemler()
+    }
 }
