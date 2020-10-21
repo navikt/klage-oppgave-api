@@ -123,7 +123,7 @@ class OppgaveClient(
         return TEMA_SYK
     }
 
-    fun endreHjemmel(oppgaveId: Int, hjemmel: String) : Oppgave {
+    fun endreHjemmel(oppgaveId: Int, hjemmel: String): Oppgave {
         var oppgave = oppgaveWebClient.get()
             .uri { uriBuilder ->
                 uriBuilder.pathSegment("{id}}").build(oppgaveId)
@@ -135,8 +135,10 @@ class OppgaveClient(
             .bodyToMono<EndreOppgave>()
             .block() ?: throw RuntimeException("Oppgave could not be fetched")
         logger.info("Endrer hjemmel for oppgave {} fra {} til {}", oppgave.id, oppgave.metadata?.get(HJEMMEL), hjemmel)
-        if( oppgave.metadata == null) { oppgave.metadata = mutableMapOf() }
-        oppgave.metadata!!.put(HJEMMEL, hjemmel)
+        if (oppgave.metadata == null) {
+            oppgave.metadata = mutableMapOf()
+        }
+        oppgave.metadata!![HJEMMEL] = hjemmel
 
         return oppgaveWebClient.put()
             .uri { uriBuilder ->

@@ -86,6 +86,10 @@ enum class Prioritet {
     HOY, NORM, LAV
 }
 
+enum class Status {
+    OPPRETTET, AAPNET, UNDER_BEHANDLING, FERDIGSTILT, FEILREGISTRERT
+}
+
 
 val hjemler = listOf(
     "8-1",
@@ -146,8 +150,5 @@ val hjemler = listOf(
     "21-7",
     "21-12",
     "22-3",
-    "22-13")
-
-enum class Status {
-    OPPRETTET, AAPNET, UNDER_BEHANDLING, FERDIGSTILT, FEILREGISTRERT
-}
+    "22-13"
+)

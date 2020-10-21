@@ -20,8 +20,6 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
 
-
-
 @Service
 class OppgaveService(
     val clientConfigurationProperties: ClientConfigurationProperties,
@@ -115,7 +113,7 @@ class OppgaveService(
 
     private fun Oppgave.getFnrForBruker() = identer?.find { i -> i.gruppe == FOLKEREGISTERIDENT }?.ident
 
-    fun assignRandomHjemler() : List<OppgaveView> {
+    fun assignRandomHjemler(): List<OppgaveView> {
         val oppgaver = getOppgaver().map {
             oppgaveClient.endreHjemmel(it.id, hjemler.random())
         }

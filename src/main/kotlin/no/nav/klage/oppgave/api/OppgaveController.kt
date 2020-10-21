@@ -2,7 +2,6 @@ package no.nav.klage.oppgave.api
 
 import no.nav.klage.oppgave.config.SecurityConfiguration.Companion.ISSUER_AAD
 import no.nav.klage.oppgave.domain.Tilganger
-import no.nav.klage.oppgave.domain.gosys.Oppgave
 import no.nav.klage.oppgave.domain.view.OppgaveView
 import no.nav.klage.oppgave.service.OppgaveSearchCriteria
 import no.nav.klage.oppgave.service.OppgaveService
@@ -11,8 +10,6 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import org.springframework.web.util.UriComponentsBuilder
 
 @RestController
 @ProtectedWithClaims(issuer = ISSUER_AAD)
@@ -47,13 +44,13 @@ class OppgaveController(val oppgaveService: OppgaveService) {
     }
 
     @GetMapping("/oppgaver/{id}")
-    fun getOppgave(@PathVariable oppgaveId : Int): OppgaveView {
+    fun getOppgave(@PathVariable oppgaveId: Int): OppgaveView {
         logger.debug("getOppgave is requested")
         return oppgaveService.getOppgave(oppgaveId)
     }
 
     @PutMapping("/oppgaver/{id}/hjemmel")
-    fun setHjemmel(@PathVariable oppgaveId : Int, @RequestBody hjemmel: String): ResponseEntity<OppgaveView> {
+    fun setHjemmel(@PathVariable oppgaveId: Int, @RequestBody hjemmel: String): ResponseEntity<OppgaveView> {
         logger.debug("endreHjemmel is requested")
         val oppgave = oppgaveService.setHjemmel(oppgaveId, hjemmel)
         val uri = MvcUriComponentsBuilder
