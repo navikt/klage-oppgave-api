@@ -15,7 +15,12 @@ import no.nav.klage.oppgave.domain.view.TYPE_KLAGE
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
+
+
+
 
 @Service
 class OppgaveService(
@@ -124,6 +129,14 @@ class OppgaveService(
         val oppgave = oppgaveClient.endreHjemmel(oppgaveId, hjemmel)
         val brukere = getBrukere(getFnr(listOf(oppgave)))
         return toView(oppgave, brukere)
+    }
+
+    fun getOppgave(oppgaveId: Int): OppgaveView {
+        //TODO: Må implementeres bedre enn dette.. :)
+        return getOppgaver().firstOrNull { it.id == oppgaveId } ?: throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Oppgave ikke funnet"
+        )
     }
 }
 
