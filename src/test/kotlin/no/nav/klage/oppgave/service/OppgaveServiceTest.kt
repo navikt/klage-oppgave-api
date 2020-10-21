@@ -4,10 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.klage.oppgave.clients.OppgaveClient
 import no.nav.klage.oppgave.clients.PdlClient
-import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_FEILUTBETALING
-import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_KLAGE
-import no.nav.klage.oppgave.domain.gosys.Oppgave
-import no.nav.klage.oppgave.domain.gosys.OppgaveResponse
+import no.nav.klage.oppgave.domain.gosys.*
 import no.nav.klage.oppgave.domain.pdl.*
 import no.nav.klage.oppgave.domain.view.HJEMMEL
 import no.nav.klage.oppgave.domain.view.TYPE_FEILUTBETALING
@@ -161,13 +158,13 @@ internal class OppgaveServiceTest {
                 fristFerdigstillelse = LocalDate.now(),
                 tema = "SYK",
                 identer = listOf(
-                    Oppgave.Ident(
+                    Ident(
                         ident = "321321",
-                        gruppe = Oppgave.Gruppe.AKTOERID
+                        gruppe = Gruppe.AKTOERID
                     ),
-                    Oppgave.Ident(
+                    Ident(
                         ident = fnr,
-                        gruppe = Oppgave.Gruppe.FOLKEREGISTERIDENT
+                        gruppe = Gruppe.FOLKEREGISTERIDENT
                     )
                 )
             )

@@ -1,17 +1,17 @@
 package no.nav.klage.oppgave.clients
 
 import brave.Tracer
-import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_FEILUTBETALING
-import no.nav.klage.oppgave.domain.gosys.BEHANDLINGSTYPE_KLAGE
-import no.nav.klage.oppgave.domain.gosys.Oppgave
-import no.nav.klage.oppgave.domain.gosys.OppgaveResponse
+import no.nav.klage.oppgave.domain.gosys.*
 import no.nav.klage.oppgave.service.OppgaveSearchCriteria
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.body
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.util.UriBuilder
+import reactor.core.publisher.Mono
 import java.net.URI
 
 @Component
@@ -28,6 +28,8 @@ class OppgaveClient(
 
         const val TEMA_SYK = "SYK"
         const val STATUSKATEGORI_AAPEN = "AAPEN"
+        const val HJEMMEL = "HJEMMEL"
+
     }
 
     fun getOppgaver(): OppgaveResponse {
@@ -120,6 +122,36 @@ class OppgaveClient(
         //TODO
         return TEMA_SYK
     }
+
+    fun endreHjemmel(oppgaveId: Int, hjemmel: String) : Oppgave {
+        var oppgave = oppgaveWebClient.get()
+            .uri { uriBuilder ->
+                uriBuilder.pathSegment("{id}}").build(oppgaveId)
+            }
+            .header("Authorization", "Bearer ${stsClient.oidcToken()}")
+            .header("X-Correlation-ID", tracer.currentSpan().context().traceIdString())
+            .header("Nav-Consumer-Id", applicationName)
+            .retrieve()
+            .bodyToMono<EndreOppgave>()
+            .block() ?: throw RuntimeException("Oppgave could not be fetched")
+        logger.info("Endrer hjemmel for oppgave {} fra {} til {}", oppgave.id, oppgave.metadata?.get(HJEMMEL), hjemmel)
+        if( oppgave.metadata == null) { oppgave.metadata = mutableMapOf() }
+        oppgave.metadata!!.put(HJEMMEL, hjemmel)
+
+        return oppgaveWebClient.put()
+            .uri { uriBuilder ->
+                uriBuilder.pathSegment("{id}}").build(oppgaveId)
+            }
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer ${stsClient.oidcToken()}")
+            .header("X-Correlation-ID", tracer.currentSpan().context().traceIdString())
+            .header("Nav-Consumer-Id", applicationName)
+            .body(Mono.just(oppgave))
+            .retrieve()
+            .bodyToMono<Oppgave>()
+            .block() ?: throw RuntimeException("Oppgave could not be put")
+    }
+
 }
 
 

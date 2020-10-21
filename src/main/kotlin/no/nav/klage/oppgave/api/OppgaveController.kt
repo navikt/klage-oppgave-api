@@ -7,9 +7,7 @@ import no.nav.klage.oppgave.service.OppgaveSearchCriteria
 import no.nav.klage.oppgave.service.OppgaveService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @ProtectedWithClaims(issuer = ISSUER_AAD)
@@ -41,5 +39,11 @@ class OppgaveController(val oppgaveService: OppgaveService) {
                 )
             )
         }
+    }
+
+    @PutMapping("/oppgaver/{id}/hjemmel")
+    fun setHjemmel(@PathVariable oppgaveId : Int, @RequestBody hjemmel: String): OppgaveView {
+        logger.debug("endreHjemmel is requested")
+        return oppgaveService.setHjemmel(oppgaveId, hjemmel)
     }
 }
