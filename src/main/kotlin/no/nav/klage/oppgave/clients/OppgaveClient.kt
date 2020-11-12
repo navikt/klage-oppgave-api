@@ -8,6 +8,7 @@ import no.nav.klage.oppgave.domain.view.TYPE_KLAGE
 import no.nav.klage.oppgave.domain.view.YTELSE_FOR
 import no.nav.klage.oppgave.domain.view.YTELSE_SYK
 import no.nav.klage.oppgave.exceptions.OppgaveNotFoundException
+import no.nav.klage.oppgave.service.HjemmelParsingService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.klage.oppgave.util.getSecureLogger
 import org.springframework.beans.factory.annotation.Value
@@ -26,6 +27,7 @@ class OppgaveClient(
     private val oppgaveWebClient: WebClient,
     private val stsClient: StsClient,
     private val tracer: Tracer,
+    private val hjemmelParsingService: HjemmelParsingService,
     @Value("\${spring.application.name}") val applicationName: String
 ) {
 
@@ -40,7 +42,7 @@ class OppgaveClient(
 
     @Retryable
     fun getOneSearchPage(oppgaveSearchCriteria: OppgaverSearchCriteria): OppgaveResponse {
-        return logTimingAndWebClientResponseException("getOneSearchPage") {
+        val response = logTimingAndWebClientResponseException("getOneSearchPage") {
             oppgaveWebClient.get()
                 .uri { uriBuilder -> oppgaveSearchCriteria.buildUri(uriBuilder) }
                 .header("Authorization", "Bearer ${stsClient.oidcToken()}")
@@ -50,6 +52,34 @@ class OppgaveClient(
                 .bodyToMono<OppgaveResponse>()
                 .block() ?: throw RuntimeException("Oppgaver could not be fetched")
         }
+
+        val newOppgaveWithHjemler: List<Oppgave> = response.oppgaver.filter {
+            it.metadata?.get(HJEMMEL) == null
+        }.mapNotNull {
+            val hjemmler = hjemmelParsingService.extractHjemmel(it.beskrivelse)
+            if (hjemmler.isNotEmpty()) {
+                val newOppgave = it.copy(metadata = HashMap(it.metadata).apply { put(HJEMMEL, hjemmler[0]) })
+                putOppgave(newOppgave.id, EndreOppgave(
+                    id = newOppgave.id,
+                    tema = newOppgave.tema,
+                    metadata = newOppgave.metadata?.toMutableMap(),
+                    fristFerdigstillelse = newOppgave.fristFerdigstillelse,
+                    versjon = newOppgave.versjon
+                ))
+                newOppgave
+            } else {
+                null
+            }
+        }
+
+        return response.copy(oppgaver = ArrayList(
+            response.oppgaver.filter { oppg ->
+                newOppgaveWithHjemler.find {
+                    it.id == oppg.id
+                } == null
+            }).apply {
+            addAll(newOppgaveWithHjemler)
+        })
     }
 
     private fun OppgaverSearchCriteria.buildUri(origUriBuilder: UriBuilder): URI {
