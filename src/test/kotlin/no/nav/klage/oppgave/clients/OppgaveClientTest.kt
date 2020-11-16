@@ -7,6 +7,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.domain.gosys.Oppgave
 import no.nav.klage.oppgave.domain.gosys.OppgaveResponse
+import no.nav.klage.oppgave.service.HjemmelParsingService
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -26,6 +27,9 @@ internal class OppgaveClientTest {
 
     @MockK
     lateinit var tracerMock: Tracer
+
+    @MockK
+    lateinit var hjemmelParserMock: HjemmelParsingService
 
     @BeforeEach
     fun before() {
@@ -65,6 +69,7 @@ internal class OppgaveClientTest {
             createShortCircuitWebClient(jsonResponse),
             stsClientMock,
             tracerMock,
+            hjemmelParserMock,
             "appName"
         )
 
@@ -76,6 +81,7 @@ internal class OppgaveClientTest {
             createShortCircuitWebClientWithStatus(oppgave404(), HttpStatus.NOT_FOUND),
             stsClientMock,
             tracerMock,
+            hjemmelParserMock,
             "appName"
         )
 

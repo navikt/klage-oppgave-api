@@ -56,21 +56,15 @@ class OppgaveClient(
         val newOppgaveWithHjemler: List<Oppgave> = response.oppgaver.filter {
             it.metadata?.get(HJEMMEL) == null
         }.mapNotNull {
-            val hjemmler = hjemmelParsingService.extractHjemmel(it.beskrivelse)
+            val hjemmler = it.beskrivelse?.let {besk -> hjemmelParsingService.extractHjemmel(besk)} ?: listOf()
             if (hjemmler.isNotEmpty()) {
-                val newOppgave = it.copy(metadata = HashMap(it.metadata).apply { put(HJEMMEL, hjemmler[0]) })
-                putOppgave(newOppgave.id, EndreOppgave(
-                    id = newOppgave.id,
-                    tema = newOppgave.tema,
-                    metadata = newOppgave.metadata?.toMutableMap(),
-                    fristFerdigstillelse = newOppgave.fristFerdigstillelse,
-                    versjon = newOppgave.versjon
-                ))
-                newOppgave
+                it.copy(metadata = HashMap(it.metadata).apply { put(HJEMMEL, hjemmler[0]) })
             } else {
                 null
             }
         }
+
+        updateOppgave(newOppgaveWithHjemler)
 
         return response.copy(oppgaver = ArrayList(
             response.oppgaver.filter { oppg ->
@@ -80,6 +74,18 @@ class OppgaveClient(
             }).apply {
             addAll(newOppgaveWithHjemler)
         })
+    }
+
+    private fun updateOppgave(oppgaverWithHjemler: List<Oppgave>) {
+        oppgaverWithHjemler.forEach {
+            putOppgave(it.id, EndreOppgave(
+                id = it.id,
+                tema = it.tema,
+                metadata = it.metadata?.toMutableMap(),
+                fristFerdigstillelse = it.fristFerdigstillelse,
+                versjon = it.versjon
+            ))
+        }
     }
 
     private fun OppgaverSearchCriteria.buildUri(origUriBuilder: UriBuilder): URI {
