@@ -47,10 +47,26 @@ no.nav.security.jwt:
       accepted_audience: ${AZURE_APP_CLIENT_ID}
   client:
     registration:
-      onbehalfof:
+      azure-onbehalfof:
         token-endpoint-url: https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: https://graph.microsoft.com/.default
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      oppgave-onbehalfof:
+        token-endpoint-url: https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: api://41ca50ba-e44f-4bc8-9e31-b745a0041926/.default
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      proxy-onbehalfof:
+        token-endpoint-url: https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: api://c6050231-3b9f-4173-8d1e-39b7e6e3392e/.default
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
@@ -71,7 +87,9 @@ allowed.origins:
   https://klage-oppgave.nav.no,
   https://klage-oppgave.dev.nav.no
 
-AXSYS_URL: https://api-gw-q1.oera.no/axsys/api/v1/tilgang
+AXSYS_URL: https://api-gw-q1.oera.no/axsys/api/v1
 MICROSOFT_GRAPH_URL: https://graph.microsoft.com/v1.0
-OPPGAVE_URL: https://api-gw-q1.oera.no/oppgave/api/v1/oppgaver
+OPPGAVE_URL_Q1: https://api-gw-q1.oera.no/oppgave/api/v1/oppgaver
+OPPGAVE_URL_Q2: https://api-gw-q2.oera.no/oppgave/api/v1/oppgaver
 UNLEASH_URL: https://unleash.nais.io/api/
+KLAGEPROXY_URL: https://klage-fss-proxy.dev-fss-pub.nais.io

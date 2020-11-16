@@ -23,3 +23,13 @@ spec:
       expr: selftests_aggregate_result_status{app="klage-oppgave-api"} > 0
       for: 1m
       action: "Check selftest of app \{{ $labels.app }} in namespace \{{ $labels.kubernetes_namespace }} to see what's wrong."
+    - alert: High amount of HTTP server errors (5xx responses)
+      severity: danger
+      expr: (100 * (sum by (destination_app) (rate(istio_requests_total{response_code=~"^5\\d\\d", destination_app=~"klage-oppgave-api*"}[3m])) / sum by (destination_app) (rate(istio_requests_total{destination_app=~"klage-oppgave-api*"}[3m])))) > 1
+      for: 3m
+      action: "Check the logs to see why \{{ $labels.destination_app }} returns error responses."
+    - alert: High amount of HTTP client errors (4xx responses)
+      severity: warning
+      expr: (100 * (sum by (destination_app) (rate(istio_requests_total{response_code=~"^4\\d\\d", destination_app=~"klage-oppgave-api*"}[3m])) / sum by (destination_app) (rate(istio_requests_total{destination_app=~"klage-oppgave-api*"}[3m])))) > 10
+      for: 3m
+      action: "Check the logs to see why \{{ $labels.destination_app }} returns error responses."

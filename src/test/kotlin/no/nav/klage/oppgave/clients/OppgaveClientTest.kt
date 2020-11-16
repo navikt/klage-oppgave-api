@@ -4,9 +4,11 @@ import brave.Tracer
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.finn.unleash.Unleash
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.domain.gosys.Oppgave
 import no.nav.klage.oppgave.domain.gosys.OppgaveResponse
+import no.nav.klage.oppgave.service.TokenService
 import no.nav.klage.oppgave.service.HjemmelParsingService
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
@@ -23,7 +25,7 @@ import java.time.Month
 internal class OppgaveClientTest {
 
     @MockK
-    lateinit var stsClientMock: StsClient
+    lateinit var tokenServiceMock: TokenService
 
     @MockK
     lateinit var tracerMock: Tracer
@@ -31,10 +33,14 @@ internal class OppgaveClientTest {
     @MockK
     lateinit var hjemmelParserMock: HjemmelParsingService
 
+    @MockK
+    lateinit var unleashMock: Unleash
+
     @BeforeEach
     fun before() {
-        every { stsClientMock.oidcToken() } returns "abc"
+        every { tokenServiceMock.getFeatureToggledAccessTokenForOppgave() } returns "abc"
         every { tracerMock.currentSpan().context().traceIdString() } returns "def"
+        every { unleashMock.isEnabled(any()) } returns false
     }
 
     @Test
@@ -67,10 +73,12 @@ internal class OppgaveClientTest {
     fun getOppgaver(jsonResponse: String): OppgaveResponse {
         val oppgaveClient = OppgaveClient(
             createShortCircuitWebClient(jsonResponse),
-            stsClientMock,
+            createShortCircuitWebClient(jsonResponse),
+            tokenServiceMock,
             tracerMock,
             hjemmelParserMock,
-            "appName"
+            "appName",
+            unleashMock
         )
 
         return oppgaveClient.getOneSearchPage(OppgaverSearchCriteria(offset = 0, limit = 1))
@@ -79,10 +87,12 @@ internal class OppgaveClientTest {
     fun getNonExistingOppgave(): Oppgave {
         val oppgaveClient = OppgaveClient(
             createShortCircuitWebClientWithStatus(oppgave404(), HttpStatus.NOT_FOUND),
-            stsClientMock,
+            createShortCircuitWebClientWithStatus(oppgave404(), HttpStatus.NOT_FOUND),
+            tokenServiceMock,
             tracerMock,
             hjemmelParserMock,
-            "appName"
+            "appName",
+            unleashMock
         )
 
         return oppgaveClient.getOppgave(3333)

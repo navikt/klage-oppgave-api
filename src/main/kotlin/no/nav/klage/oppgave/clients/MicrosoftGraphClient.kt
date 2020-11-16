@@ -2,9 +2,8 @@ package no.nav.klage.oppgave.clients
 
 import no.nav.klage.oppgave.domain.MicrosoftGraphIdentResponse
 import no.nav.klage.oppgave.domain.MicrosoftGraphNameResponse
+import no.nav.klage.oppgave.service.TokenService
 import no.nav.klage.oppgave.util.getLogger
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
-import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -16,8 +15,7 @@ import reactor.core.scheduler.Schedulers
 @Component
 class MicrosoftGraphClient(
     private val microsoftGraphWebClient: WebClient,
-    private val clientConfigurationProperties: ClientConfigurationProperties,
-    private val oAuth2AccessTokenService: OAuth2AccessTokenService
+    private val tokenService: TokenService
 ) {
 
     companion object {
@@ -35,7 +33,7 @@ class MicrosoftGraphClient(
                     .path("/me")
                     .queryParam("\$select", "onPremisesSamAccountName")
                     .build()
-            }.header("Authorization", "Bearer ${getSaksbehandlerTokenWithGraphScope()}")
+            }.header("Authorization", "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
 
             .retrieve()
             .bodyToMono<MicrosoftGraphIdentResponse>()
@@ -76,24 +74,12 @@ class MicrosoftGraphClient(
                         .queryParam("\$filter", "mailnickname in $idents")
                         .queryParam("\$select", "onPremisesSamAccountName,displayName")
                         .build()
-                }.header("Authorization", "Bearer ${getAppTokenWithGraphScope()}")
+                }.header("Authorization", "Bearer ${tokenService.getAppAccessTokenWithGraphScope()}")
                 .retrieve()
                 .bodyToMono()
         } catch (e: Exception) {
             logger.warn("Could not fetch displayname for idents: $idents", e)
             Mono.empty()
         }
-    }
-
-    private fun getSaksbehandlerTokenWithGraphScope(): String {
-        val clientProperties = clientConfigurationProperties.registration["onbehalfof"]
-        val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
-        return response.accessToken
-    }
-
-    private fun getAppTokenWithGraphScope(): String {
-        val clientProperties = clientConfigurationProperties.registration["app"]
-        val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
-        return response.accessToken
     }
 }

@@ -54,7 +54,7 @@ spec:
     - secret: srvklage-saksbeh
     - secret: sts-apikey
     - secret: pdl-apikey
-    - secret: oppgave-apikey
+    - secret: oppgave-apikeys
     - secret: slack-url
     - secret: slack-channel-id
     - secret: norg2

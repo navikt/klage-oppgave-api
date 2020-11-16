@@ -11,6 +11,7 @@ import no.nav.klage.oppgave.domain.view.Oppgave
 import no.nav.klage.oppgave.domain.view.OppgaverRespons
 import no.nav.klage.oppgave.exceptions.OppgaveIdWrongFormatException
 import no.nav.klage.oppgave.exceptions.OppgaveVersjonWrongFormatException
+import no.nav.klage.oppgave.repositories.InnloggetSaksbehandlerRepository
 import no.nav.klage.oppgave.service.OppgaveService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -21,7 +22,10 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 @RestController
 @Api(tags = ["klage-oppgave-api"])
 @ProtectedWithClaims(issuer = ISSUER_AAD)
-class OppgaveController(val oppgaveService: OppgaveService) {
+class OppgaveController(
+    private val oppgaveService: OppgaveService,
+    private val innloggetSaksbehandlerRepository: InnloggetSaksbehandlerRepository
+) {
 
     companion object {
         @Suppress("JAVA_CLASS_ON_COMPANION")
@@ -39,6 +43,7 @@ class OppgaveController(val oppgaveService: OppgaveService) {
         queryParams: OppgaverQueryParams
     ): OppgaverRespons {
         logger.debug("Params: {}", queryParams)
+        debugRollerOgTilganger()
         return oppgaveService.searchOppgaver(navIdent, queryParams.toSearchCriteria())
     }
 
@@ -108,5 +113,20 @@ class OppgaveController(val oppgaveService: OppgaveService) {
 //        return ResponseEntity.ok().location(uri).body(oppgave)
 //    }
 //
+
+    private fun debugRollerOgTilganger() {
+        try {
+            val innloggetIdent = innloggetSaksbehandlerRepository.getInnloggetIdent()
+            innloggetSaksbehandlerRepository.getRoller().forEach {
+                logger.debug("Funnet rolle {} for saksbehandler {}", it, innloggetIdent)
+            }
+            logger.debug("Er {} saksbehandler? {}", innloggetIdent, innloggetSaksbehandlerRepository.erSaksbehandler())
+            innloggetSaksbehandlerRepository.getTilgangerForSaksbehandler().enheter.forEach {
+                logger.debug("Saksbehandler {} har tilganger {} i enhet {}", innloggetIdent, it.fagomrader, it.enhetId)
+            }
+        } catch (e: Exception) {
+            logger.debug("Klarte ikke å hente ut roller og tilganger", e)
+        }
+    }
 
 }

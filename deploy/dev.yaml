@@ -3,5 +3,6 @@ externalHosts:
   - login.microsoftonline.com
   - hooks.slack.com
   - unleash.nais.io
+  - klage-fss-proxy.dev-fss-pub.nais.io
 springProfile: dev-gcp
 tenant: trygdeetaten.no

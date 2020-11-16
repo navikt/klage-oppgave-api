@@ -1,9 +1,8 @@
 package no.nav.klage.oppgave.clients
 
-import no.nav.klage.oppgave.config.SecurityConfiguration.Companion.ISSUER_AAD
 import no.nav.klage.oppgave.domain.pdl.HentPersonResponse
 import no.nav.klage.oppgave.domain.pdl.hentPersonQuery
-import no.nav.security.token.support.core.context.TokenValidationContextHolder
+import no.nav.klage.oppgave.service.TokenService
 import org.springframework.http.HttpHeaders
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -13,8 +12,7 @@ import org.springframework.web.reactive.function.client.bodyToMono
 @Component
 class PdlClient(
     private val pdlWebClient: WebClient,
-    val tokenValidationContextHolder: TokenValidationContextHolder,
-    private val stsClient: StsClient
+    private val tokenService: TokenService
 ) {
 
     @Retryable
@@ -22,9 +20,9 @@ class PdlClient(
         return pdlWebClient.post()
             .header(
                 HttpHeaders.AUTHORIZATION,
-                "Bearer ${tokenValidationContextHolder.tokenValidationContext.getJwtToken(ISSUER_AAD).tokenAsString}"
+                "Bearer ${tokenService.getAccessTokenFrontendSent()}"
             )
-            .header("Nav-Consumer-Token", "Bearer ${stsClient.oidcToken()}")
+            .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
             .bodyValue(hentPersonQuery(fnrList))
             .retrieve()
             .bodyToMono<HentPersonResponse>()
