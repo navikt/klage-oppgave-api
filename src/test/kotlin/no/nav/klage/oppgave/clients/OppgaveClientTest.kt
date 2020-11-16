@@ -41,6 +41,7 @@ internal class OppgaveClientTest {
         every { tokenServiceMock.getFeatureToggledAccessTokenForOppgave() } returns "abc"
         every { tracerMock.currentSpan().context().traceIdString() } returns "def"
         every { unleashMock.isEnabled(any()) } returns false
+        every { hjemmelParserMock.extractHjemmel(any()) } returns listOf()
     }
 
     @Test
