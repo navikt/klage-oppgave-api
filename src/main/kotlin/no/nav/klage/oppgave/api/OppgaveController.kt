@@ -14,8 +14,11 @@ import no.nav.klage.oppgave.exceptions.OppgaveIdWrongFormatException
 import no.nav.klage.oppgave.exceptions.OppgaveVersjonWrongFormatException
 import no.nav.klage.oppgave.repositories.InnloggetSaksbehandlerRepository
 import no.nav.klage.oppgave.service.OppgaveService
+import no.nav.klage.oppgave.util.AuditLogger
+import no.nav.klage.oppgave.util.LogEvent
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
@@ -26,7 +29,8 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 class OppgaveController(
     private val oppgaveService: OppgaveService,
     private val oppgaverQueryParamsMapper: OppgaverQueryParamsMapper,
-    private val innloggetSaksbehandlerRepository: InnloggetSaksbehandlerRepository
+    private val innloggetSaksbehandlerRepository: InnloggetSaksbehandlerRepository,
+    private val auditLogger: AuditLogger
 ) {
 
     companion object {
@@ -96,10 +100,20 @@ class OppgaveController(
     @GetMapping("/ansatte/{navIdent}/oppgaver/{id}")
     fun getOppgave(
         @PathVariable navIdent: String,
-        @PathVariable("id") oppgaveId: String
+        @PathVariable("id") oppgaveId: String,
+        request: HttpRequest
     ): Oppgave {
         logger.debug("getOppgave is requested: {}", oppgaveId)
-        return oppgaveService.getOppgave(oppgaveId.toLongOrException())
+        return oppgaveService.getOppgave(oppgaveId.toLongOrException()).also {
+            auditLogger.logInfo(
+                LogEvent(
+                    navIdent = navIdent,
+                    requestURL = request.uri.toString(),
+                    requestMethod = request.method?.name,
+                    personFnr = it.person?.fnr
+                )
+            )
+        }
     }
 
     private fun String?.toLongOrException() =
