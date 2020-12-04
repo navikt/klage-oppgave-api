@@ -20,7 +20,6 @@ class FeatureToggleConfig {
         @Suppress("JAVA_CLASS_ON_COMPANION")
         private val logger = getLogger(javaClass.enclosingClass)
         const val KLAGE_GENERELL_TILGANG = "klage.generellTilgang"
-        const val OPPGAVE_MED_BRUKERKONTEKST = "klage.oppgaveMedBrukerkontekst"
     }
 
     @Value("\${spring.application.name}")

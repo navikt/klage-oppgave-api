@@ -1,8 +1,6 @@
 package no.nav.klage.oppgave.clients
 
 import brave.Tracer
-import no.finn.unleash.Unleash
-import no.nav.klage.oppgave.config.FeatureToggleConfig
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.domain.gosys.*
 import no.nav.klage.oppgave.domain.view.TYPE_ANKE
@@ -27,12 +25,10 @@ import java.time.format.DateTimeFormatter
 
 @Component
 class OppgaveClient(
-    private val oppgaveWebClientQ1: WebClient,
-    private val oppgaveWebClientQ2: WebClient,
+    private val oppgaveWebClient: WebClient,
     private val tokenService: TokenService,
     private val tracer: Tracer,
-    @Value("\${spring.application.name}") val applicationName: String,
-    private val unleash: Unleash
+    @Value("\${spring.application.name}") val applicationName: String
 ) {
 
     companion object {
@@ -47,7 +43,7 @@ class OppgaveClient(
     @Retryable
     fun getOppgaveCount(oppgaveSearchCriteria: OppgaverSearchCriteria): Int {
         return logTimingAndWebClientResponseException("getOneSearchPage") {
-            oppgaveWebClientQ1.get()
+            oppgaveWebClient.get()
                 .uri { uriBuilder -> oppgaveSearchCriteria.buildUri(uriBuilder) }
                 .header("Authorization", "Bearer ${tokenService.getStsSystembrukerToken()}")
                 .header("X-Correlation-ID", tracer.currentSpan().context().traceIdString())
@@ -60,15 +56,10 @@ class OppgaveClient(
 
     @Retryable
     fun getOneSearchPage(oppgaveSearchCriteria: OppgaverSearchCriteria): OppgaveResponse {
-        val oppgaveWebClient = if (unleash.isEnabled("OppgaveMedBrukerkontekst")) {
-            oppgaveWebClientQ1
-        } else {
-            oppgaveWebClientQ2
-        }
         return logTimingAndWebClientResponseException("getOneSearchPage") {
             oppgaveWebClient.get()
                 .uri { uriBuilder -> oppgaveSearchCriteria.buildUri(uriBuilder) }
-                .header("Authorization", "Bearer ${getFeatureToggledAccessTokenForOppgave()}")
+                .header("Authorization", "Bearer ${tokenService.getSaksbehandlerAccessTokenWithOppgaveScope()}")
                 .header("X-Correlation-ID", tracer.currentSpan().context().traceIdString())
                 .header("Nav-Consumer-Id", applicationName)
                 .retrieve()
@@ -100,7 +91,7 @@ class OppgaveClient(
         ytelser.forEach {
             uriBuilder.queryParam("tema", mapYtelse(it))
         }
-        
+
         erTildeltSaksbehandler?.let {
             uriBuilder.queryParam("tildeltRessurs", erTildeltSaksbehandler)
         }
@@ -170,18 +161,13 @@ class OppgaveClient(
         oppgaveId: Long,
         oppgave: EndreOppgave
     ): Oppgave {
-        val oppgaveWebClient = if (unleash.isEnabled("OppgaveMedBrukerkontekst")) {
-            oppgaveWebClientQ1
-        } else {
-            oppgaveWebClientQ2
-        }
         return logTimingAndWebClientResponseException("putOppgave") {
             oppgaveWebClient.put()
                 .uri { uriBuilder ->
                     uriBuilder.pathSegment("{id}").build(oppgaveId)
                 }
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer ${getFeatureToggledAccessTokenForOppgave()}")
+                .header("Authorization", "Bearer ${tokenService.getSaksbehandlerAccessTokenWithOppgaveScope()}")
                 .header("X-Correlation-ID", tracer.currentSpan().context().traceIdString())
                 .header("Nav-Consumer-Id", applicationName)
                 .bodyValue(oppgave)
@@ -193,17 +179,12 @@ class OppgaveClient(
 
     @Retryable
     fun getOppgave(oppgaveId: Long): Oppgave {
-        val oppgaveWebClient = if (unleash.isEnabled("OppgaveMedBrukerkontekst")) {
-            oppgaveWebClientQ1
-        } else {
-            oppgaveWebClientQ2
-        }
         return logTimingAndWebClientResponseException("getOppgave") {
             oppgaveWebClient.get()
                 .uri { uriBuilder ->
                     uriBuilder.pathSegment("{id}").build(oppgaveId)
                 }
-                .header("Authorization", "Bearer ${getFeatureToggledAccessTokenForOppgave()}")
+                .header("Authorization", "Bearer ${tokenService.getSaksbehandlerAccessTokenWithOppgaveScope()}")
                 .header("X-Correlation-ID", tracer.currentSpan().context().traceIdString())
                 .header("Nav-Consumer-Id", applicationName)
                 .retrieve()
@@ -234,11 +215,4 @@ class OppgaveClient(
             logger.info("Method {} took {} millis", methodName, (end - start))
         }
     }
-
-    fun getFeatureToggledAccessTokenForOppgave(): String =
-        if (unleash.isEnabled(FeatureToggleConfig.OPPGAVE_MED_BRUKERKONTEKST)) {
-            tokenService.getSaksbehandlerAccessTokenWithOppgaveScope()
-        } else {
-            tokenService.getStsSystembrukerToken()
-        }
 }

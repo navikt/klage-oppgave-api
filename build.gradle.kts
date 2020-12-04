@@ -48,17 +48,18 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
 
     implementation("org.springframework.cloud:spring-cloud-starter-sleuth:$springSleuthVersion")
     implementation("io.springfox:springfox-boot-starter:$springFoxVersion")
 
     implementation("org.projectreactor:reactor-spring:1.0.1.RELEASE")
 
-//    implementation("org.flywaydb:flyway-core")
-//    implementation("com.zaxxer:HikariCP")
+    implementation("org.flywaydb:flyway-core")
+    implementation("com.zaxxer:HikariCP")
 //    implementation("org.jetbrains.exposed:exposed-spring-boot-starter:$exposedVersion")
 //    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-//    implementation("org.postgresql:postgresql")
+    implementation("org.postgresql:postgresql")
 
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("ch.qos.logback:logback-classic")
