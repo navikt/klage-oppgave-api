@@ -7,13 +7,13 @@ import org.springframework.stereotype.Service
 @Service
 class InnloggetSaksbehandlerRepository(
     private val saksbehandlerRepository: SaksbehandlerRepository,
-    private val tokenService: TokenService
+    private val microsoftGraphClient: MicrosoftGraphClient
 ) {
 
     fun getTilgangerForSaksbehandler() =
         saksbehandlerRepository.getTilgangerForSaksbehandler(getInnloggetIdent())
 
-    fun getInnloggetIdent() = tokenService.getIdent()
+    fun getInnloggetIdent() = microsoftGraphClient.getNavIdentForAuthenticatedUser()
 
     fun erLeder(): Boolean = saksbehandlerRepository.erLeder(getInnloggetIdent())
 
