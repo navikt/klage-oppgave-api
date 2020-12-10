@@ -18,6 +18,7 @@
             <appender-ref ref="text"/>
         </root>
         <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="debug"/>
+        <logger name="org.springframework.jdbc.core" level="debug"/>
     </springProfile>
 
     <springProfile name="!local">

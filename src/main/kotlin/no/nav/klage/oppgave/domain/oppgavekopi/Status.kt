@@ -15,6 +15,16 @@ enum class Status(val statusId: Long) {
                 FEILREGISTRERT, FERDIGSTILT -> Statuskategori.AVSLUTTET
             }
         }
+
+        fun fraStatusId(statusId: Long): Status =
+            when (statusId) {
+                1L -> OPPRETTET
+                2L -> AAPNET
+                3L -> UNDER_BEHANDLING
+                4L -> FERDIGSTILT
+                5L -> FEILREGISTRERT
+                else -> throw RuntimeException("Unknown status")
+            }
     }
 
     fun kategoriForStatus(): Statuskategori {
