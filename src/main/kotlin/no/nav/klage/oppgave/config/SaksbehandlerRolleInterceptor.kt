@@ -15,6 +15,7 @@ class SaksbehandlerRolleInterceptor(
     private val innloggetSaksbehandlerRepository: InnloggetSaksbehandlerRepository
 ) : HandlerInterceptorAdapter() {
 
+
     @Throws(Exception::class)
     override fun preHandle(
         request: HttpServletRequest,

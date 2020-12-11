@@ -17,6 +17,8 @@ val springFoxVersion = "3.0.0"
 val githubUser: String by project
 val githubPassword: String by project
 
+val testContainersVersion = "1.12.3"
+
 repositories {
     mavenCentral()
     maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
@@ -75,6 +77,8 @@ dependencies {
     implementation("no.finn.unleash:unleash-client-java:$unleashVersion")
     implementation("org.zalando:problem-spring-web-starter:$problemSpringWebStartVersion")
 
+    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
+
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.ninja-squad:springmockk:$springMockkVersion")
 
@@ -83,6 +87,9 @@ dependencies {
         exclude(group = "org.junit.vintage")
         exclude(group = "org.mockito")
     }
+    testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testImplementation("org.testcontainers:elasticsearch:$testContainersVersion")
 }
 
 idea {
@@ -92,7 +99,9 @@ idea {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 tasks.withType<Test> {
