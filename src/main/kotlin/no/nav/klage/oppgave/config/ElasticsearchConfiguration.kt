@@ -17,7 +17,7 @@ class ElasticsearchConfiguration(
     @Value("\${aiven.es.host}") val host: String,
     @Value("\${aiven.es.port}") val port: String,
     @Value("\${aiven.es.username}") val username: String,
-    @Value("\${aiven.es.username}") val password: String
+    @Value("\${aiven.es.password}") val password: String
 ) : AbstractElasticsearchConfiguration() {
 
     @Bean
@@ -36,5 +36,4 @@ class ElasticsearchConfiguration(
             .build();
         return RestClients.create(clientConfiguration).rest();
     }
-
 }

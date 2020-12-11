@@ -17,7 +17,7 @@ val springFoxVersion = "3.0.0"
 val githubUser: String by project
 val githubPassword: String by project
 
-val testContainersVersion = "1.12.3"
+val testContainersVersion = "1.15.0"
 
 repositories {
     mavenCentral()

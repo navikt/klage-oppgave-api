@@ -1,14 +1,21 @@
 package no.nav.klage.oppgave.domain.elasticsearch
 
+import org.elasticsearch.index.VersionType
+import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.elasticsearch.annotations.Document
 
-@Document(indexName = "oppgavekopier", shards = 3, replicas = 2)
+@Document(indexName = "oppgavekopier", shards = 3, replicas = 2, versionType = VersionType.EXTERNAL)
 class EsOppgave {
-/*
+
     @Id
-    val id: Long,
-    val versjon: Int,
-    val journalpostId: String? = null,
+    var id: Long? = null
+
+    @Version
+    var versjon: Long? = null
+    var journalpostId: String? = null
+
+    /*
     val saksreferanse: String? = null,
     val mappeId: Long? = null,
     @Field(type = FieldType.Keyword)
