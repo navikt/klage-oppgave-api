@@ -1,13 +1,12 @@
 package no.nav.klage.oppgave.service
 
 import no.nav.klage.oppgave.config.ElasticsearchServiceConfiguration
-import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
 import no.nav.klage.oppgave.domain.elasticsearch.Prioritet
 import no.nav.klage.oppgave.domain.elasticsearch.Status
-import no.nav.klage.oppgave.domain.elasticsearch.Statuskategori
 import org.assertj.core.api.Assertions.assertThat
-import org.elasticsearch.client.RestHighLevelClient
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.elasticsearch.ElasticsearchStatusException
 import org.elasticsearch.index.query.QueryBuilders
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.data.elasticsearch.UncategorizedElasticsearchException
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate
 import org.springframework.data.elasticsearch.core.SearchHits
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
@@ -37,10 +37,10 @@ import java.time.LocalDateTime
 @Testcontainers
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(
-    initializers = [ElasticsearchServiceTest.Companion.Initializer::class],
+    initializers = [ElasticsearchIndexingTest.Companion.Initializer::class],
     classes = [ElasticsearchServiceConfiguration::class]
 )
-class ElasticsearchServiceTest {
+class ElasticsearchIndexingTest {
 
     companion object {
         @Container
@@ -60,15 +60,9 @@ class ElasticsearchServiceTest {
             }
         }
     }
-
-    @Autowired
-    lateinit var service: ElasticsearchService
-
+    
     @Autowired
     lateinit var esTemplate: ElasticsearchRestTemplate
-
-    @Autowired
-    lateinit var client: RestHighLevelClient
 
     @Test
     @Order(1)
@@ -86,42 +80,14 @@ class ElasticsearchServiceTest {
 
     @Test
     @Order(3)
-    fun `lagrer to oppgaver for senere tester`() {
+    fun `oppgave can be saved and retrieved`() {
 
-        val oppgave1 = EsOppgave(
+        val oppgave = oppgaveWith(
             id = 1001L,
             versjon = 1L,
-            tema = "Sykepenger",
-            status = Status.OPPRETTET,
-            tildeltEnhetsnr = "4219",
-            oppgavetype = "hvaErDette?",
-            behandlingstype = "Anke",
-            prioritet = Prioritet.NORM,
-            fristFerdigstillelse = LocalDate.of(2020, 12, 1),
-            aktivDato = LocalDate.now(),
-            opprettetAv = "H149290",
-            opprettetTidspunkt = LocalDateTime.of(2020, 12, 1, 20, 15),
-            beskrivelse = "beskrivelse",
-            statuskategori = Statuskategori.AAPEN
+            beskrivelse = "hei"
         )
-        val oppgave2 = EsOppgave(
-            id = 1002L,
-            versjon = 1L,
-            tema = "Foreldrepenger",
-            status = Status.AAPNET,
-            tildeltEnhetsnr = "4220",
-            oppgavetype = "hvaErDette?",
-            behandlingstype = "Anke",
-            prioritet = Prioritet.HOY,
-            fristFerdigstillelse = LocalDate.of(2019, 12, 1),
-            aktivDato = LocalDate.now(),
-            opprettetAv = "H149290",
-            opprettetTidspunkt = LocalDateTime.of(2019, 12, 1, 20, 15),
-            beskrivelse = "beskrivelse",
-            statuskategori = Statuskategori.AAPEN
-        )
-        esTemplate.save(oppgave1)
-        esTemplate.save(oppgave2)
+        esTemplate.save(oppgave)
 
         sleep(2000L)
 
@@ -129,27 +95,85 @@ class ElasticsearchServiceTest {
             .withQuery(QueryBuilders.matchAllQuery())
             .build()
         val searchHits: SearchHits<EsOppgave> = esTemplate.search(query, EsOppgave::class.java)
-        assertThat(searchHits.totalHits).isEqualTo(2L)
+        assertThat(searchHits.totalHits).isEqualTo(1L)
+        assertThat(searchHits.searchHits.first().content.beskrivelse).isEqualTo("hei")
     }
 
     @Test
     @Order(4)
-    fun `oppgave can be searched for by tema`() {
-        val oppgaver: List<EsOppgave> =
-            service.oppgaveSearch(OppgaverSearchCriteria(ytelser = listOf("Sykepenger"), offset = 0, limit = 10))
-        assertThat(oppgaver.size).isEqualTo(1L)
-        assertThat(oppgaver.first().id).isEqualTo(1001L)
+    fun `oppgave can be saved twice without creating a duplicate`() {
+
+        var oppgave = oppgaveWith(
+            id = 2001L,
+            versjon = 1L,
+            beskrivelse = "hei"
+        )
+        esTemplate.save(oppgave)
+
+        oppgave = oppgaveWith(
+            id = 2001L,
+            versjon = 2L,
+            beskrivelse = "hallo"
+        )
+        esTemplate.save(oppgave)
+        sleep(2000L)
+
+        val query: Query = NativeSearchQueryBuilder()
+            .withQuery(QueryBuilders.idsQuery().addIds("2001"))
+            .build()
+        val searchHits: SearchHits<EsOppgave> = esTemplate.search(query, EsOppgave::class.java)
+        assertThat(searchHits.totalHits).isEqualTo(1L)
+        assertThat(searchHits.searchHits.first().content.beskrivelse).isEqualTo("hallo")
     }
 
     @Test
     @Order(5)
-    fun `oppgave can be searched for by frist`() {
-        val oppgaver: List<EsOppgave> =
-            service.oppgaveSearch(OppgaverSearchCriteria(fristFom = LocalDate.of(2020, 12, 1), offset = 0, limit = 10))
-        assertThat(oppgaver.size).isEqualTo(1L)
-        assertThat(oppgaver.first().id).isEqualTo(1001L)
+    fun `saving an earlier version of oppgave causes a conflict`() {
+
+        var oppgave = oppgaveWith(
+            id = 3001L,
+            versjon = 2L,
+            beskrivelse = "hei"
+        )
+        esTemplate.save(oppgave)
+
+        oppgave = oppgaveWith(
+            id = 3001L,
+            versjon = 1L,
+            beskrivelse = "hallo"
+        )
+        assertThatThrownBy {
+            esTemplate.save(oppgave)
+        }.isInstanceOf(UncategorizedElasticsearchException::class.java)
+            .hasRootCauseInstanceOf(ElasticsearchStatusException::class.java)
+            .hasMessageContaining("type=version_conflict_engine_exception")
+
+        sleep(2000L)
+
+        val query: Query = NativeSearchQueryBuilder()
+            .withQuery(QueryBuilders.idsQuery().addIds("3001"))
+            .build()
+        val searchHits: SearchHits<EsOppgave> = esTemplate.search(query, EsOppgave::class.java)
+        assertThat(searchHits.totalHits).isEqualTo(1L)
+        assertThat(searchHits.searchHits.first().content.beskrivelse).isEqualTo("hei")
     }
 
+    private fun oppgaveWith(id: Long, versjon: Long, beskrivelse: String): EsOppgave {
+        return EsOppgave(
+            id = id,
+            versjon = versjon,
+            tema = "tema",
+            status = Status.OPPRETTET,
+            tildeltEnhetsnr = "4219",
+            oppgavetype = "KLAGE",
+            prioritet = Prioritet.NORM,
+            fristFerdigstillelse = LocalDate.now(),
+            aktivDato = LocalDate.now(),
+            opprettetAv = "H149290",
+            opprettetTidspunkt = LocalDateTime.now(),
+            beskrivelse = beskrivelse
+        )
+    }
 }
 
 
