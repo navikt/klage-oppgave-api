@@ -42,10 +42,85 @@ class ElasticsearchService(val esTemplate: ElasticsearchRestTemplate) :
                 }
               }
             },
+            "aktivDato": {
+              "type": "date"
+            },
+            "beskrivelse": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "egenAnsatt": {
+              "type": "boolean"
+            },
+            "fristFerdigstillelse": {
+              "type": "date"
+            },
             "id": {
               "type": "long"
             },
-            "journalpostId": {
+            "oppgavetype": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "opprettetAv": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "opprettetTidspunkt": {
+              "type": "date"
+            },
+            "prioritet": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "status": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "statuskategori": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "tema": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "tildeltEnhetsnr": {
               "type": "text",
               "fields": {
                 "keyword": {
@@ -58,7 +133,7 @@ class ElasticsearchService(val esTemplate: ElasticsearchRestTemplate) :
               "type": "long"
             }
           }
-        }       
+        }     
         """.trimIndent()
     )
 

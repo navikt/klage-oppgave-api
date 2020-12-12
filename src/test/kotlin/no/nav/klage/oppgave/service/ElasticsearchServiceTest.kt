@@ -2,14 +2,17 @@ package no.nav.klage.oppgave.service
 
 import no.nav.klage.oppgave.config.ElasticsearchServiceConfiguration
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
-import org.apache.http.util.EntityUtils
+import no.nav.klage.oppgave.domain.elasticsearch.Prioritet
+import no.nav.klage.oppgave.domain.elasticsearch.Status
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.elasticsearch.ElasticsearchStatusException
-import org.elasticsearch.client.Request
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.index.query.QueryBuilders
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.MethodOrderer
+import org.junit.jupiter.api.Order
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.util.TestPropertyValues
@@ -27,6 +30,8 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.lang.Thread.sleep
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
@@ -84,10 +89,11 @@ class ElasticsearchServiceTest {
     @Order(3)
     fun `oppgave can be saved and retrieved`() {
 
-        val oppgave = EsOppgave()
-        oppgave.id = 1001L
-        oppgave.versjon = 1L
-        oppgave.journalpostId = "hei"
+        val oppgave = oppgaveWith(
+            id = 1001L,
+            versjon = 1L,
+            beskrivelse = "hei"
+        )
         esTemplate.save(oppgave)
 
         sleep(2000L)
@@ -97,21 +103,25 @@ class ElasticsearchServiceTest {
             .build()
         val searchHits: SearchHits<EsOppgave> = esTemplate.search(query, EsOppgave::class.java)
         assertThat(searchHits.totalHits).isEqualTo(1L)
-        assertThat(searchHits.searchHits.first().content.journalpostId).isEqualTo("hei")
+        assertThat(searchHits.searchHits.first().content.beskrivelse).isEqualTo("hei")
     }
 
     @Test
     @Order(4)
     fun `oppgave can be saved twice without creating a duplicate`() {
 
-        val oppgave = EsOppgave()
-        oppgave.id = 2001L
-        oppgave.versjon = 1L
-        oppgave.journalpostId = "hei"
+        var oppgave = oppgaveWith(
+            id = 2001L,
+            versjon = 1L,
+            beskrivelse = "hei"
+        )
         esTemplate.save(oppgave)
 
-        oppgave.versjon = 2L
-        oppgave.journalpostId = "hallo"
+        oppgave = oppgaveWith(
+            id = 2001L,
+            versjon = 2L,
+            beskrivelse = "hallo"
+        )
         esTemplate.save(oppgave)
         sleep(2000L)
 
@@ -120,21 +130,25 @@ class ElasticsearchServiceTest {
             .build()
         val searchHits: SearchHits<EsOppgave> = esTemplate.search(query, EsOppgave::class.java)
         assertThat(searchHits.totalHits).isEqualTo(1L)
-        assertThat(searchHits.searchHits.first().content.journalpostId).isEqualTo("hallo")
+        assertThat(searchHits.searchHits.first().content.beskrivelse).isEqualTo("hallo")
     }
 
     @Test
     @Order(5)
     fun `saving an earlier version of oppgave causes a conflict`() {
 
-        val oppgave = EsOppgave()
-        oppgave.id = 3001L
-        oppgave.versjon = 2L
-        oppgave.journalpostId = "hei"
+        var oppgave = oppgaveWith(
+            id = 3001L,
+            versjon = 2L,
+            beskrivelse = "hei"
+        )
         esTemplate.save(oppgave)
 
-        oppgave.versjon = 1L
-        oppgave.journalpostId = "hallo"
+        oppgave = oppgaveWith(
+            id = 3001L,
+            versjon = 1L,
+            beskrivelse = "hallo"
+        )
         assertThatThrownBy {
             esTemplate.save(oppgave)
         }.isInstanceOf(UncategorizedElasticsearchException::class.java)
@@ -148,19 +162,24 @@ class ElasticsearchServiceTest {
             .build()
         val searchHits: SearchHits<EsOppgave> = esTemplate.search(query, EsOppgave::class.java)
         assertThat(searchHits.totalHits).isEqualTo(1L)
-        assertThat(searchHits.searchHits.first().content.journalpostId).isEqualTo("hei")
+        assertThat(searchHits.searchHits.first().content.beskrivelse).isEqualTo("hei")
     }
 
-    @Test
-    @Order(6)
-    @Disabled("kan brukes for å generere settings og mapping, for så å lagre som fil")
-    fun `denne vil printe ut settings og mapping`() {
-        val mappingResponse = client.lowLevelClient.performRequest(Request("GET", "/_all/_mapping"))
-        val mapping: String = EntityUtils.toString(mappingResponse.entity)
-        println(mapping)
-        val settingsResponse = client.lowLevelClient.performRequest(Request("GET", "/_all/_settings"))
-        val settings: String = EntityUtils.toString(settingsResponse.entity)
-        println(settings)
+    private fun oppgaveWith(id: Long, versjon: Long, beskrivelse: String): EsOppgave {
+        return EsOppgave(
+            id = id,
+            versjon = versjon,
+            tema = "tema",
+            status = Status.OPPRETTET,
+            tildeltEnhetsnr = "4219",
+            oppgavetype = "KLAGE",
+            prioritet = Prioritet.NORM,
+            fristFerdigstillelse = LocalDate.now(),
+            aktivDato = LocalDate.now(),
+            opprettetAv = "H149290",
+            opprettetTidspunkt = LocalDateTime.now(),
+            beskrivelse = beskrivelse
+        )
     }
 }
 

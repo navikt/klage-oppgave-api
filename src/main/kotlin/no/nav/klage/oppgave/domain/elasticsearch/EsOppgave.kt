@@ -3,19 +3,22 @@ package no.nav.klage.oppgave.domain.elasticsearch
 import org.elasticsearch.index.VersionType
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
+import org.springframework.data.elasticsearch.annotations.DateFormat
 import org.springframework.data.elasticsearch.annotations.Document
+import org.springframework.data.elasticsearch.annotations.Field
+import org.springframework.data.elasticsearch.annotations.FieldType
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Document(indexName = "oppgavekopier", shards = 3, replicas = 2, versionType = VersionType.EXTERNAL)
-class EsOppgave {
+data class EsOppgave(
 
     @Id
-    var id: Long? = null
-
+    val id: Long,
+    //Må være Long? for å bli Long på JVMen (isf long), og det krever Spring DataES..
     @Version
-    var versjon: Long? = null
-    var journalpostId: String? = null
-
-    /*
+    val versjon: Long? = null,
+    val journalpostId: String? = null,
     val saksreferanse: String? = null,
     val mappeId: Long? = null,
     @Field(type = FieldType.Keyword)
@@ -41,14 +44,19 @@ class EsOppgave {
     @Field(type = FieldType.Keyword)
     val tilordnetRessurs: String? = null,
     val beskrivelse: String? = null,
+    @Field(type = FieldType.Date, format = DateFormat.date)
     val fristFerdigstillelse: LocalDate,
+    @Field(type = FieldType.Date, format = DateFormat.date)
     val aktivDato: LocalDate,
     @Field(type = FieldType.Keyword)
     val opprettetAv: String,
     @Field(type = FieldType.Keyword)
     val endretAv: String? = null,
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
     val opprettetTidspunkt: LocalDateTime,
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
     val endretTidspunkt: LocalDateTime? = null,
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
     val ferdigstiltTidspunkt: LocalDateTime? = null,
     val behandlesAvApplikasjon: String? = null,
     val journalpostkilde: String? = null,
@@ -57,6 +65,8 @@ class EsOppgave {
     @Field(type = FieldType.Keyword)
     val fnr: String? = null,
     val hjemler: List<String>? = null,
-    val statuskategori(): String
-*/
-}
+    @Field(type = FieldType.Keyword)
+    val statuskategori: Statuskategori = status.kategoriForStatus(),
+    val egenAnsatt: Boolean = false
+)
+
