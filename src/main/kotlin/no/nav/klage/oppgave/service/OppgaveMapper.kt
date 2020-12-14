@@ -2,6 +2,7 @@ package no.nav.klage.oppgave.service
 
 
 import no.nav.klage.oppgave.clients.PdlClient
+import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
 import no.nav.klage.oppgave.domain.gosys.*
 import no.nav.klage.oppgave.domain.pdl.Navn
 import no.nav.klage.oppgave.domain.view.*
@@ -14,6 +15,39 @@ class OppgaveMapper(val pdlClient: PdlClient) {
 
     fun mapOppgaveToView(oppgaveBackend: OppgaveBackend, fetchPersoner: Boolean): OppgaveView {
         return mapOppgaverToView(listOf(oppgaveBackend), fetchPersoner).single()
+    }
+
+    fun mapEsOppgaverToView(esOppgaver: List<EsOppgave>, fetchPersoner: Boolean): List<OppgaveView> {
+        val personer = mutableMapOf<String, OppgaveView.Person>()
+        if (fetchPersoner) {
+            personer.putAll(getPersoner(esOppgaver.mapNotNull { it.fnr }))
+        }
+
+        return esOppgaver.map { esOppgave ->
+            OppgaveView(
+                id = esOppgave.id.toString(),
+                person = if (fetchPersoner) {
+                    personer[esOppgave.fnr] ?: OppgaveView.Person("Mangler fnr", "Mangler navn")
+                } else {
+                    null
+                },
+                type = esOppgave.oppgavetype,
+                ytelse = esOppgave.tema,
+                hjemmel = esOppgave.hjemler?.first(),
+                frist = esOppgave.fristFerdigstillelse,
+                versjon = esOppgave.versjon.toInt()
+            )
+        }
+    }
+
+    private fun EsOppgave.toType(): String {
+        return if (behandlingstema == null) {
+            when (behandlingstype) {
+                BEHANDLINGSTYPE_KLAGE -> TYPE_KLAGE
+                BEHANDLINGSTYPE_ANKE -> TYPE_ANKE
+                else -> "ukjent"
+            }
+        } else "mangler"
     }
 
     fun mapOppgaverToView(oppgaverBackend: List<OppgaveBackend>, fetchPersoner: Boolean): List<OppgaveView> {
