@@ -53,8 +53,6 @@ management:
 
 SERVICE_USER_USERNAME: srvklage-saksbeh
 
-TENANT_ID: 966ac572-f5b7-4bbe-aa88-c76419c0f851
-
 no.nav.security.jwt:
   issuer:
     aad:
@@ -81,7 +79,7 @@ no.nav.security.jwt:
       proxy-onbehalfof:
         token-endpoint-url: https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: api://c6050231-3b9f-4173-8d1e-39b7e6e3392e/.default
+        scope: api://${PROXY_APP_CLIENT_ID}/.default
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
@@ -102,8 +100,5 @@ allowed.origins:
   https://klage-oppgave.nav.no,
   https://klage-oppgave.dev.nav.no
 
-AXSYS_URL: https://api-gw-q1.oera.no/axsys/api/v1
 MICROSOFT_GRAPH_URL: https://graph.microsoft.com/v1.0
-OPPGAVE_URL: https://api-gw-q1.oera.no/oppgave/api/v1/oppgaver
 UNLEASH_URL: https://unleash.nais.io/api/
-KLAGEPROXY_URL: https://klage-fss-proxy.dev-fss-pub.nais.io

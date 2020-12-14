@@ -3,6 +3,7 @@ externalHosts:
   - login.microsoftonline.com
   - hooks.slack.com
   - unleash.nais.io
+  - klage-fss-proxy.prod-fss-pub.nais.io
 springProfile: prod-gcp
 tenant: nav.no
 db_tier: db-custom-4-15360

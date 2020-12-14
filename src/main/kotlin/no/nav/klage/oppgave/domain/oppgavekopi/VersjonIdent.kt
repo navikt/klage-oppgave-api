@@ -4,34 +4,32 @@ import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
-@Table(name = "ident", schema = "oppgave")
-class Ident(
+@Table(name = "versjonident", schema = "oppgave")
+class VersjonIdent(
     @Id
     @Column(name = "id")
     @SequenceGenerator(
-        name = "ident_seq",
-        sequenceName = "oppgave.ident_seq",
+        name = "versjonident_seq",
+        sequenceName = "oppgave.versjonident_seq",
         allocationSize = 1
     )
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ident_seq")
-    val id: Long? = null,
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "versjonident_seq")
+    var id: Long?,
     @Enumerated(EnumType.STRING)
     @Column(name = "TYPE")
-    val identType: IdentType,
+    var identType: IdentType,
     @Column(name = "verdi")
-    val verdi: String,
+    var verdi: String,
     @Column(name = "folkeregisterident")
-    val folkeregisterident: String? = null,
+    var folkeregisterident: String? = null,
     @Column(name = "registrert_dato")
-    val registrertDato: LocalDate? = null
-
-
+    var registrertDato: LocalDate? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Ident
+        other as VersjonIdent
 
         if (identType != other.identType) return false
         if (verdi != other.verdi) return false
@@ -50,6 +48,6 @@ class Ident(
     }
 
     override fun toString(): String {
-        return "Ident(id=$id, identType=$identType, verdi='$verdi', folkeregisterident=$folkeregisterident, registrertDato=$registrertDato)"
+        return "VersjonIdent(id=$id, identType=$identType, verdi='$verdi', folkeregisterident=$folkeregisterident, registrertDato=$registrertDato)"
     }
 }

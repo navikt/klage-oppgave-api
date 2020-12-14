@@ -3,3 +3,10 @@ SECURITY_TOKEN_SERVICE_REST_URL: https://api-gw.oera.no/security-token-service
 PDL_BASE_URL: https://api-gw.oera.no/pdl-api/graphql
 
 NORG2_API_V1_URL: https://api-gw.oera.no/norg2/api/v1
+PROXY_APP_CLIENT_ID: 981be1fb-1379-465f-bddc-7563197aed84
+
+KLAGEPROXY_URL: https://klage-fss-proxy.prod-fss-pub.nais.io
+
+OPPGAVE_URL: https://api-gw.oera.no/oppgave/api/v1/oppgaver
+
+AXSYS_URL: https://api-gw.oera.no/axsys/api/v1

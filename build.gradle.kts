@@ -35,7 +35,8 @@ repositories {
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.4.10"
     id("org.springframework.boot") version "2.3.4.RELEASE"
-    id("org.jetbrains.kotlin.plugin.spring") version "1.4.10"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.4.21"
+    id("org.jetbrains.kotlin.plugin.jpa") version "1.4.21"
     idea
 }
 
@@ -51,6 +52,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     implementation("org.springframework.cloud:spring-cloud-starter-sleuth:$springSleuthVersion")
     implementation("io.springfox:springfox-boot-starter:$springFoxVersion")

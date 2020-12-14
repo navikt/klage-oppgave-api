@@ -5,12 +5,14 @@ import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
-@Table(name = "oppgave", schema = "oppgave")
-class OppgaveKopi(
+@Table(name = "oppgaveversjon", schema = "oppgave")
+@IdClass(OppgaveKopiVersjonId::class)
+class OppgaveKopiVersjon(
 
     @Id
     @Column(name = "id")
     val id: Long,
+    @Id
     @Column(name = "versjon")
     val versjon: Int,
     @Column(name = "journalpostid")
@@ -65,10 +67,21 @@ class OppgaveKopi(
     val journalpostkilde: String? = null,
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "ident_id", referencedColumnName = "id")
-    val ident: Ident? = null,
+    val ident: VersjonIdent? = null,
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JoinColumn(name = "oppgave_id", referencedColumnName = "id", nullable = false)
-    val metadata: Set<Metadata> = setOf()
+    @JoinColumns(
+        JoinColumn(
+            name = "oppgave_id",
+            referencedColumnName = "id",
+            nullable = false
+        ),
+        JoinColumn(
+            name = "oppgave_versjon",
+            referencedColumnName = "versjon",
+            nullable = false
+        )
+    )
+    val metadata: Set<VersjonMetadata> = setOf()
 ) {
 
     constructor(
@@ -98,7 +111,7 @@ class OppgaveKopi(
         ferdigstiltTidspunkt: LocalDateTime? = null,
         behandlesAvApplikasjon: String? = null,
         journalpostkilde: String? = null,
-        ident: Ident? = null,
+        ident: VersjonIdent? = null,
         metadata: Map<MetadataNoekkel, String>
     ) : this(
         id = id,
@@ -128,7 +141,7 @@ class OppgaveKopi(
         behandlesAvApplikasjon = behandlesAvApplikasjon,
         journalpostkilde = journalpostkilde,
         ident = ident,
-        metadata = metadata.map { Metadata(noekkel = it.key, verdi = it.value) }.toSet()
+        metadata = metadata.map { VersjonMetadata(noekkel = it.key, verdi = it.value) }.toSet()
     )
 
     fun statuskategori(): Statuskategori = status.kategoriForStatus()
@@ -137,72 +150,26 @@ class OppgaveKopi(
         return metadata.map { it.noekkel to it.verdi }.toMap()
     }
 
-    fun toVersjon(): OppgaveKopiVersjon =
-        OppgaveKopiVersjon(
-            id = this.id,
-            versjon = versjon,
-            journalpostId = journalpostId,
-            saksreferanse = saksreferanse,
-            mappeId = mappeId,
-            status = status,
-            tildeltEnhetsnr = tildeltEnhetsnr,
-            opprettetAvEnhetsnr = opprettetAvEnhetsnr,
-            endretAvEnhetsnr = endretAvEnhetsnr,
-            tema = tema,
-            temagruppe = temagruppe,
-            behandlingstema = behandlingstema,
-            oppgavetype = oppgavetype,
-            behandlingstype = behandlingstype,
-            prioritet = prioritet,
-            tilordnetRessurs = tilordnetRessurs,
-            beskrivelse = beskrivelse,
-            fristFerdigstillelse = fristFerdigstillelse,
-            aktivDato = aktivDato,
-            opprettetAv = opprettetAv,
-            endretAv = endretAv,
-            opprettetTidspunkt = opprettetTidspunkt,
-            endretTidspunkt = endretTidspunkt,
-            ferdigstiltTidspunkt = ferdigstiltTidspunkt,
-            behandlesAvApplikasjon = behandlesAvApplikasjon,
-            journalpostkilde = journalpostkilde,
-            ident = if (ident == null) {
-                null
-            } else {
-                VersjonIdent(
-                    id = null,
-                    identType = ident.identType,
-                    verdi = ident.verdi,
-                    folkeregisterident = ident.folkeregisterident,
-                    registrertDato = ident.registrertDato
-                )
-            },
-            metadata = metadata.map {
-                VersjonMetadata(
-                    id = null,
-                    noekkel = it.noekkel,
-                    verdi = it.verdi
-                )
-            }.toSet()
-        )
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as OppgaveKopi
+        other as OppgaveKopiVersjon
 
         if (id != other.id) return false
+        if (versjon != other.versjon) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return id.hashCode()
+        var result = id.hashCode()
+        result = 31 * result + versjon
+        return result
     }
 
     override fun toString(): String {
-        return "OppgaveKopi(id=$id, versjon=$versjon, journalpostId=$journalpostId, saksreferanse=$saksreferanse, mappeId=$mappeId, status=$status, tildeltEnhetsnr='$tildeltEnhetsnr', opprettetAvEnhetsnr=$opprettetAvEnhetsnr, endretAvEnhetsnr=$endretAvEnhetsnr, tema='$tema', temagruppe=$temagruppe, behandlingstema=$behandlingstema, oppgavetype='$oppgavetype', behandlingstype=$behandlingstype, prioritet=$prioritet, tilordnetRessurs=$tilordnetRessurs, beskrivelse=$beskrivelse, fristFerdigstillelse=$fristFerdigstillelse, aktivDato=$aktivDato, opprettetAv='$opprettetAv', endretAv=$endretAv, opprettetTidspunkt=$opprettetTidspunkt, endretTidspunkt=$endretTidspunkt, ferdigstiltTidspunkt=$ferdigstiltTidspunkt, behandlesAvApplikasjon=$behandlesAvApplikasjon, journalpostkilde=$journalpostkilde, ident=$ident, metadata=$metadata)"
+        return "OppgaveKopiVersjon(id=$id, versjon=$versjon, journalpostId=$journalpostId, saksreferanse=$saksreferanse, mappeId=$mappeId, status=$status, tildeltEnhetsnr='$tildeltEnhetsnr', opprettetAvEnhetsnr=$opprettetAvEnhetsnr, endretAvEnhetsnr=$endretAvEnhetsnr, tema='$tema', temagruppe=$temagruppe, behandlingstema=$behandlingstema, oppgavetype='$oppgavetype', behandlingstype=$behandlingstype, prioritet=$prioritet, tilordnetRessurs=$tilordnetRessurs, beskrivelse=$beskrivelse, fristFerdigstillelse=$fristFerdigstillelse, aktivDato=$aktivDato, opprettetAv='$opprettetAv', endretAv=$endretAv, opprettetTidspunkt=$opprettetTidspunkt, endretTidspunkt=$endretTidspunkt, ferdigstiltTidspunkt=$ferdigstiltTidspunkt, behandlesAvApplikasjon=$behandlesAvApplikasjon, journalpostkilde=$journalpostkilde, ident=$ident, metadata=$metadata)"
     }
-
 
 }

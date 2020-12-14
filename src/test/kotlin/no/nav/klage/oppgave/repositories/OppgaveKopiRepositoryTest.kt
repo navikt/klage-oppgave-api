@@ -1,12 +1,10 @@
 package no.nav.klage.oppgave.repositories
 
-import no.nav.klage.oppgave.config.OppgaveKopiRepositoryConfiguration
 import no.nav.klage.oppgave.domain.oppgavekopi.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.context.annotation.Import
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
@@ -14,11 +12,13 @@ import java.time.LocalDateTime
 
 @ActiveProfiles("local")
 @DataJpaTest
-@Import(OppgaveKopiRepositoryConfiguration::class)
 class OppgaveKopiRepositoryTest {
 
     @Autowired
     lateinit var oppgaveKopiRepository: OppgaveKopiRepository
+
+    @Autowired
+    lateinit var oppgaveKopiVersjonRepository: OppgaveKopiVersjonRepository
 
     @Autowired
     lateinit var jdbcTemplate: JdbcTemplate
@@ -38,7 +38,10 @@ class OppgaveKopiRepositoryTest {
             opprettetAv = "H149290",
             opprettetTidspunkt = LocalDateTime.now()
         )
-        oppgaveKopiRepository.lagreOppgaveKopi(oppgaveKopi)
+        oppgaveKopiRepository.save(oppgaveKopi)
+        oppgaveKopiVersjonRepository.save(oppgaveKopi.toVersjon())
+        oppgaveKopiRepository.flush()
+        oppgaveKopiVersjonRepository.flush()
 
         val oppgaveCount = jdbcTemplate.queryForObject(
             "SELECT count(*) FROM oppgave.oppgave",
@@ -69,9 +72,18 @@ class OppgaveKopiRepositoryTest {
             aktivDato = LocalDate.now(),
             opprettetAv = "H149290",
             opprettetTidspunkt = LocalDateTime.now(),
-            ident = Ident(IdentType.AKTOERID, "12345", null, null)
+            ident = Ident(
+                id = null,
+                identType = IdentType.AKTOERID,
+                verdi = "12345",
+                folkeregisterident = null,
+                registrertDato = null
+            )
         )
-        oppgaveKopiRepository.lagreOppgaveKopi(oppgaveKopi)
+        oppgaveKopiRepository.save(oppgaveKopi)
+        oppgaveKopiVersjonRepository.save(oppgaveKopi.toVersjon())
+        oppgaveKopiRepository.flush()
+        oppgaveKopiVersjonRepository.flush()
 
         val identCount = jdbcTemplate.queryForObject(
             "SELECT count(*) FROM oppgave.ident",
@@ -95,9 +107,17 @@ class OppgaveKopiRepositoryTest {
             aktivDato = LocalDate.now(),
             opprettetAv = "H149290",
             opprettetTidspunkt = LocalDateTime.now(),
-            metadata = mapOf(MetadataNoekkel.HJEMMEL to "8-25")
+            metadata = setOf(
+                no.nav.klage.oppgave.domain.oppgavekopi.Metadata(
+                    noekkel = MetadataNoekkel.HJEMMEL,
+                    verdi = "8-25"
+                )
+            )
         )
-        oppgaveKopiRepository.lagreOppgaveKopi(oppgaveKopi)
+        oppgaveKopiRepository.save(oppgaveKopi)
+        oppgaveKopiVersjonRepository.save(oppgaveKopi.toVersjon())
+        oppgaveKopiRepository.flush()
+        oppgaveKopiVersjonRepository.flush()
 
         val metadataCount = jdbcTemplate.queryForObject(
             "SELECT count(*) FROM oppgave.metadata",
