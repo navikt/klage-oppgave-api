@@ -1,4 +1,4 @@
-package no.nav.klage.oppgave.domain
+package no.nav.klage.oppgave.clients.azure
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 

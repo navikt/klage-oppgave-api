@@ -1,9 +1,9 @@
 package no.nav.klage.oppgave.service
 
+import no.nav.klage.oppgave.api.view.TYPE_ANKE
+import no.nav.klage.oppgave.api.view.TYPE_KLAGE
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
-import no.nav.klage.oppgave.domain.view.TYPE_ANKE
-import no.nav.klage.oppgave.domain.view.TYPE_KLAGE
 import no.nav.klage.oppgave.util.getLogger
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder

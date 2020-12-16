@@ -1,12 +1,11 @@
-package no.nav.klage.oppgave.clients
+package no.nav.klage.oppgave.clients.gosys
 
 import brave.Tracer
+import no.nav.klage.oppgave.api.view.TYPE_ANKE
+import no.nav.klage.oppgave.api.view.TYPE_KLAGE
+import no.nav.klage.oppgave.api.view.YTELSE_FOR
+import no.nav.klage.oppgave.api.view.YTELSE_SYK
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
-import no.nav.klage.oppgave.domain.gosys.*
-import no.nav.klage.oppgave.domain.view.TYPE_ANKE
-import no.nav.klage.oppgave.domain.view.TYPE_KLAGE
-import no.nav.klage.oppgave.domain.view.YTELSE_FOR
-import no.nav.klage.oppgave.domain.view.YTELSE_SYK
 import no.nav.klage.oppgave.exceptions.OppgaveNotFoundException
 import no.nav.klage.oppgave.service.TokenService
 import no.nav.klage.oppgave.util.getLogger

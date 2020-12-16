@@ -1,7 +1,5 @@
-package no.nav.klage.oppgave.clients
+package no.nav.klage.oppgave.clients.pdl
 
-import no.nav.klage.oppgave.domain.pdl.HentPersonResponse
-import no.nav.klage.oppgave.domain.pdl.hentPersonQuery
 import no.nav.klage.oppgave.service.TokenService
 import org.springframework.http.HttpHeaders
 import org.springframework.retry.annotation.Retryable

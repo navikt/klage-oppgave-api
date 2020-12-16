@@ -1,6 +1,5 @@
 package no.nav.klage.oppgave.repositories
 
-import no.nav.klage.oppgave.clients.MicrosoftGraphClient
 import no.nav.klage.oppgave.service.TokenService
 import org.springframework.stereotype.Service
 

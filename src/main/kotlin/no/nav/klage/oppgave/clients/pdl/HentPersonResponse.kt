@@ -1,4 +1,4 @@
-package no.nav.klage.oppgave.domain.pdl
+package no.nav.klage.oppgave.clients.pdl
 
 
 data class HentPersonResponse(val data: HentPersonBolk?, val errors: List<PdlError>? = null)

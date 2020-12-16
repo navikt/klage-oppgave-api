@@ -3,17 +3,13 @@ package no.nav.klage.oppgave.api
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
+import no.nav.klage.oppgave.api.mapper.OppgaverQueryParamsMapper
+import no.nav.klage.oppgave.api.view.*
 import no.nav.klage.oppgave.config.SecurityConfiguration.Companion.ISSUER_AAD
-import no.nav.klage.oppgave.domain.OppgaverQueryParams
-import no.nav.klage.oppgave.domain.Saksbehandlerfradeling
-import no.nav.klage.oppgave.domain.Saksbehandlertildeling
-import no.nav.klage.oppgave.domain.view.Oppgave
-import no.nav.klage.oppgave.domain.view.OppgaverRespons
 import no.nav.klage.oppgave.exceptions.NotMatchingUserException
 import no.nav.klage.oppgave.exceptions.OppgaveIdWrongFormatException
 import no.nav.klage.oppgave.exceptions.OppgaveVersjonWrongFormatException
 import no.nav.klage.oppgave.repositories.InnloggetSaksbehandlerRepository
-import no.nav.klage.oppgave.service.OppgaveService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -24,7 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 @Api(tags = ["klage-oppgave-api"])
 @ProtectedWithClaims(issuer = ISSUER_AAD)
 class OppgaveController(
-    private val oppgaveService: OppgaveService,
+    private val oppgaveFacade: OppgaveFacade,
     private val oppgaverQueryParamsMapper: OppgaverQueryParamsMapper,
     private val innloggetSaksbehandlerRepository: InnloggetSaksbehandlerRepository
 ) {
@@ -46,7 +42,7 @@ class OppgaveController(
     ): OppgaverRespons {
         logger.debug("Params: {}", queryParams)
         validateNavIdent(navIdent)
-        return oppgaveService.searchOppgaver(
+        return oppgaveFacade.searchOppgaver(
             oppgaverQueryParamsMapper.toSearchCriteria(navIdent, queryParams)
         )
     }
@@ -60,7 +56,7 @@ class OppgaveController(
         @RequestBody saksbehandlertildeling: Saksbehandlertildeling
     ): ResponseEntity<Void> {
         logger.debug("assignSaksbehandler is requested for oppgave: {}", oppgaveId)
-        oppgaveService.assignOppgave(
+        oppgaveFacade.assignOppgave(
             oppgaveId.toLongOrException(),
             saksbehandlertildeling.navIdent,
             saksbehandlertildeling.oppgaveversjon.toIntOrException()
@@ -81,7 +77,7 @@ class OppgaveController(
         @RequestBody saksbehandlerfradeling: Saksbehandlerfradeling
     ): ResponseEntity<Void> {
         logger.debug("unassignSaksbehandler is requested for oppgave: {}", oppgaveId)
-        oppgaveService.assignOppgave(
+        oppgaveFacade.assignOppgave(
             oppgaveId.toLongOrException(),
             null,
             saksbehandlerfradeling.oppgaveversjon.toIntOrException()
@@ -99,7 +95,7 @@ class OppgaveController(
         @PathVariable("id") oppgaveId: String
     ): Oppgave {
         logger.debug("getOppgave is requested: {}", oppgaveId)
-        return oppgaveService.getOppgave(oppgaveId.toLongOrException())
+        return oppgaveFacade.getOppgave(oppgaveId.toLongOrException())
     }
 
     private fun String?.toLongOrException() =
@@ -132,5 +128,5 @@ class OppgaveController(
 //        return ResponseEntity.ok().location(uri).body(oppgave)
 //    }
 //
-    
+
 }

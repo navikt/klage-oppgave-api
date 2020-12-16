@@ -1,8 +1,9 @@
 package no.nav.klage.oppgave.clients
 
+import no.nav.klage.oppgave.clients.norg2.Norg2Client
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class Norg2ClientTest {
 

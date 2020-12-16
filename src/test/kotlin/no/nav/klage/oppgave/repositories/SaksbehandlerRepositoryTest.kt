@@ -1,9 +1,8 @@
 package no.nav.klage.oppgave.repositories
 
-import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.klage.oppgave.clients.KlageProxyClient
+import no.nav.klage.oppgave.clients.fssproxy.KlageProxyClient
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

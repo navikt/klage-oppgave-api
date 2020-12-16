@@ -1,32 +1,22 @@
 package no.nav.klage.oppgave.service
 
-import no.nav.klage.oppgave.clients.OppgaveClient
+import no.nav.klage.oppgave.clients.gosys.Oppgave
+import no.nav.klage.oppgave.clients.gosys.OppgaveClient
+import no.nav.klage.oppgave.clients.gosys.OppgaveResponse
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
-import no.nav.klage.oppgave.domain.view.OppgaverRespons
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.stereotype.Service
-import no.nav.klage.oppgave.domain.view.Oppgave as OppgaveView
 
 @Service
-class OppgaveService(
-    val oppgaveClient: OppgaveClient,
-    val oppgaveMapper: OppgaveMapper
-) {
+class OppgaveService(val oppgaveClient: OppgaveClient) {
 
     companion object {
         @Suppress("JAVA_CLASS_ON_COMPANION")
         private val logger = getLogger(javaClass.enclosingClass)
     }
 
-    fun searchOppgaver(oppgaverSearchCriteria: OppgaverSearchCriteria): OppgaverRespons {
-        val oppgaveResponse = oppgaveClient.getOneSearchPage(oppgaverSearchCriteria)
-        return OppgaverRespons(
-            antallTreffTotalt = oppgaveResponse.antallTreffTotalt,
-            oppgaver = oppgaveMapper.mapOppgaverToView(
-                oppgaveResponse.oppgaver,
-                oppgaverSearchCriteria.isProjectionUtvidet()
-            )
-        )
+    fun searchOppgaver(oppgaverSearchCriteria: OppgaverSearchCriteria): OppgaveResponse {
+        return oppgaveClient.getOneSearchPage(oppgaverSearchCriteria)
     }
 
     fun assignOppgave(oppgaveId: Long, saksbehandlerIdent: String?, oppgaveVersjon: Int?) {
@@ -46,9 +36,8 @@ class OppgaveService(
         oppgaveClient.putOppgave(oppgaveId, endreOppgave)
     }
 
-    fun getOppgave(oppgaveId: Long): OppgaveView {
-        val oppgaveBackend = oppgaveClient.getOppgave(oppgaveId)
-        return oppgaveMapper.mapOppgaveToView(oppgaveBackend, true)
+    fun getOppgave(oppgaveId: Long): Oppgave {
+        return oppgaveClient.getOppgave(oppgaveId)
     }
 
 

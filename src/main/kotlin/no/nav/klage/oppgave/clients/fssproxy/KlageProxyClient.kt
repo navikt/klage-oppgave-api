@@ -1,4 +1,4 @@
-package no.nav.klage.oppgave.clients
+package no.nav.klage.oppgave.clients.fssproxy
 
 import no.nav.klage.oppgave.config.CacheWithRedisConfiguration.Companion.ROLLER_CACHE
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService

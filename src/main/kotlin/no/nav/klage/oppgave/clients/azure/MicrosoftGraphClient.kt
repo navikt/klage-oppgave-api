@@ -1,7 +1,5 @@
-package no.nav.klage.oppgave.clients
+package no.nav.klage.oppgave.clients.azure
 
-import no.nav.klage.oppgave.domain.MicrosoftGraphIdentResponse
-import no.nav.klage.oppgave.domain.MicrosoftGraphNameResponse
 import no.nav.klage.oppgave.service.TokenService
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.retry.annotation.Retryable

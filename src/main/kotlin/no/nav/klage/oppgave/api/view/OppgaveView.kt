@@ -1,4 +1,4 @@
-package no.nav.klage.oppgave.domain.view
+package no.nav.klage.oppgave.api.view
 
 import java.time.LocalDate
 

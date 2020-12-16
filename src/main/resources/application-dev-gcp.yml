@@ -6,6 +6,8 @@ NORG2_API_V1_URL: https://api-gw-q1.oera.no/norg2/api/v1
 
 PROXY_APP_CLIENT_ID: c6050231-3b9f-4173-8d1e-39b7e6e3392e
 
+OPPGAVE_APP_CLIENT_ID: bef7cd4d-e65e-41f8-a743-b643e81f2aea
+
 KLAGEPROXY_URL: https://klage-fss-proxy.dev-fss-pub.nais.io
 
 OPPGAVE_URL: https://api-gw-q1.oera.no/oppgave/api/v1/oppgaver

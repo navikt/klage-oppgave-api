@@ -5,7 +5,10 @@ PDL_BASE_URL: https://api-gw.oera.no/pdl-api/graphql
 NORG2_API_V1_URL: https://api-gw.oera.no/norg2/api/v1
 PROXY_APP_CLIENT_ID: 981be1fb-1379-465f-bddc-7563197aed84
 
+OPPGAVE_APP_CLIENT_ID: 50346823-61a0-49e7-ad89-ea2b1a0e90f8
+
 KLAGEPROXY_URL: https://klage-fss-proxy.prod-fss-pub.nais.io
+
 
 OPPGAVE_URL: https://api-gw.oera.no/oppgave/api/v1/oppgaver
 

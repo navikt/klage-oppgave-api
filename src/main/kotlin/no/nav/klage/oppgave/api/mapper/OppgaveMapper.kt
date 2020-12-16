@@ -1,14 +1,13 @@
-package no.nav.klage.oppgave.service
+package no.nav.klage.oppgave.api.mapper
 
-
-import no.nav.klage.oppgave.clients.PdlClient
+import no.nav.klage.oppgave.api.view.*
+import no.nav.klage.oppgave.clients.gosys.*
+import no.nav.klage.oppgave.clients.pdl.Navn
+import no.nav.klage.oppgave.clients.pdl.PdlClient
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
-import no.nav.klage.oppgave.domain.gosys.*
-import no.nav.klage.oppgave.domain.pdl.Navn
-import no.nav.klage.oppgave.domain.view.*
 import org.springframework.stereotype.Service
-import no.nav.klage.oppgave.domain.gosys.Oppgave as OppgaveBackend
-import no.nav.klage.oppgave.domain.view.Oppgave as OppgaveView
+import no.nav.klage.oppgave.api.view.Oppgave as OppgaveView
+import no.nav.klage.oppgave.clients.gosys.Oppgave as OppgaveBackend
 
 @Service
 class OppgaveMapper(val pdlClient: PdlClient) {
@@ -35,7 +34,7 @@ class OppgaveMapper(val pdlClient: PdlClient) {
                 ytelse = esOppgave.tema,
                 hjemmel = esOppgave.hjemler?.first(),
                 frist = esOppgave.fristFerdigstillelse,
-                versjon = esOppgave.versjon.toInt()
+                versjon = esOppgave.versjon!!.toInt()
             )
         }
     }

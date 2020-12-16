@@ -3,9 +3,9 @@ package no.nav.klage.oppgave.api
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
+import no.nav.klage.oppgave.api.view.Enhet
+import no.nav.klage.oppgave.clients.axsys.Tilganger
 import no.nav.klage.oppgave.config.SecurityConfiguration
-import no.nav.klage.oppgave.domain.Tilganger
-import no.nav.klage.oppgave.domain.view.Enhet
 import no.nav.klage.oppgave.service.SaksbehandlerService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims

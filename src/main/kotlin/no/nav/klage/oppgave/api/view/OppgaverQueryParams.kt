@@ -1,4 +1,4 @@
-package no.nav.klage.oppgave.domain
+package no.nav.klage.oppgave.api.view
 
 data class OppgaverQueryParams(
     var typer: List<String> = emptyList(),

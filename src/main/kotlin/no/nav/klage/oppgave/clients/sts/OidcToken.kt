@@ -1,4 +1,4 @@
-package no.nav.klage.oppgave.domain
+package no.nav.klage.oppgave.clients.sts
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime

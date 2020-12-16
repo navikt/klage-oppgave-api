@@ -1,8 +1,8 @@
 package no.nav.klage.oppgave.repositories
 
-import no.nav.klage.oppgave.clients.AxsysClient
-import no.nav.klage.oppgave.clients.KlageProxyClient
-import no.nav.klage.oppgave.clients.MicrosoftGraphClient
+import no.nav.klage.oppgave.clients.axsys.AxsysClient
+import no.nav.klage.oppgave.clients.azure.MicrosoftGraphClient
+import no.nav.klage.oppgave.clients.fssproxy.KlageProxyClient
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.stereotype.Service
 import kotlin.system.measureTimeMillis

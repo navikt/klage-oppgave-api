@@ -1,6 +1,5 @@
-package no.nav.klage.oppgave.clients
+package no.nav.klage.oppgave.clients.sts
 
-import no.nav.klage.oppgave.domain.OidcToken
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component

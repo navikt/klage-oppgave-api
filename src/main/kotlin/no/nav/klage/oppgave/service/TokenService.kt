@@ -1,6 +1,6 @@
 package no.nav.klage.oppgave.service
 
-import no.nav.klage.oppgave.clients.StsClient
+import no.nav.klage.oppgave.clients.sts.StsClient
 import no.nav.klage.oppgave.config.SecurityConfiguration
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
@@ -41,6 +41,6 @@ class TokenService(
     fun getIdent(): String =
         tokenValidationContextHolder.tokenValidationContext.getJwtToken(SecurityConfiguration.ISSUER_AAD)
             .jwtTokenClaims?.get("NAVident")?.toString()
-        ?: throw RuntimeException("Ident not found in token")
+            ?: throw RuntimeException("Ident not found in token")
 
 }

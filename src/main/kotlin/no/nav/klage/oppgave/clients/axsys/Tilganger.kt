@@ -1,4 +1,4 @@
-package no.nav.klage.oppgave.domain
+package no.nav.klage.oppgave.clients.axsys
 
 data class Tilganger(val enheter: List<Enhet>)
 

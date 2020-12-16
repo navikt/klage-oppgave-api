@@ -1,4 +1,4 @@
-package no.nav.klage.oppgave.domain.norg2
+package no.nav.klage.oppgave.clients.norg2
 
 data class EnhetResponse(
     val antallRessurser: Int,

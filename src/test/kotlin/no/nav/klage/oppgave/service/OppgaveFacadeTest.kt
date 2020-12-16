@@ -2,29 +2,29 @@ package no.nav.klage.oppgave.service
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.klage.oppgave.clients.OppgaveClient
-import no.nav.klage.oppgave.clients.PdlClient
+import no.nav.klage.oppgave.api.OppgaveFacade
+import no.nav.klage.oppgave.api.mapper.OppgaveMapper
+import no.nav.klage.oppgave.api.view.HJEMMEL
+import no.nav.klage.oppgave.api.view.TYPE_ANKE
+import no.nav.klage.oppgave.api.view.TYPE_KLAGE
+import no.nav.klage.oppgave.clients.gosys.*
+import no.nav.klage.oppgave.clients.pdl.*
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
-import no.nav.klage.oppgave.domain.gosys.*
-import no.nav.klage.oppgave.domain.pdl.*
-import no.nav.klage.oppgave.domain.view.HJEMMEL
-import no.nav.klage.oppgave.domain.view.TYPE_ANKE
-import no.nav.klage.oppgave.domain.view.TYPE_KLAGE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class OppgaveServiceTest {
+internal class OppgaveFacadeTest {
 
     @Test
     fun `type is klage`() {
-        val oppgaveService = oppgaveServiceWithType(BEHANDLINGSTYPE_KLAGE)
-        assertThat(oppgaveService.searchOppgaver(mockk(relaxed = true)).oppgaver.first().type).isEqualTo(TYPE_KLAGE)
+        val oppgaveFacade = oppgaveFacadeWithType(BEHANDLINGSTYPE_KLAGE)
+        assertThat(oppgaveFacade.searchOppgaver(mockk(relaxed = true)).oppgaver.first().type).isEqualTo(TYPE_KLAGE)
     }
 
     @Test
     fun `type is anke`() {
-        val oppgaveService = oppgaveServiceWithType(BEHANDLINGSTYPE_ANKE)
+        val oppgaveService = oppgaveFacadeWithType(BEHANDLINGSTYPE_ANKE)
         assertThat(oppgaveService.searchOppgaver(mockk(relaxed = true)).oppgaver.first().type).isEqualTo(
             TYPE_ANKE
         )
@@ -32,7 +32,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `unknown type`() {
-        val oppgaveService = oppgaveServiceWithType("somethingelse")
+        val oppgaveService = oppgaveFacadeWithType("somethingelse")
         assertThat(oppgaveService.searchOppgaver(mockk(relaxed = true)).oppgaver.first().type).isEqualTo("ukjent")
     }
 
@@ -45,7 +45,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `missing hjemmel does not fail`() {
-        val oppgaveService = oppgaveServiceWithType("something")
+        val oppgaveService = oppgaveFacadeWithType("something")
 
         assertThat(oppgaveService.searchOppgaver(mockk(relaxed = true)).oppgaver.first().hjemmel).isEqualTo("mangler")
     }
@@ -53,14 +53,16 @@ internal class OppgaveServiceTest {
     @Test
     fun `fnr is mapped correctly`() {
         val fnr = "12345678910"
-        val oppgaveClient = mockk<OppgaveClient>()
-        every { oppgaveClient.getOneSearchPage(any()) } returns getOppgaveResponseWithIdenter(fnr)
+        val oppgaveClientMock = mockk<OppgaveClient>()
+        every { oppgaveClientMock.getOneSearchPage(any()) } returns getOppgaveResponseWithIdenter(fnr)
 
         val pdlClientMock = mockk<PdlClient>()
         every { pdlClientMock.getPersonInfo(listOf(fnr)) } returns getHentPersonResponse()
 
-        val oppgaveService = OppgaveService(
-            oppgaveClient,
+        val oppgaveFacade = OppgaveFacade(
+            OppgaveService(
+                oppgaveClientMock
+            ),
             OppgaveMapper(pdlClientMock)
         )
 
@@ -68,7 +70,7 @@ internal class OppgaveServiceTest {
         every { oppgaverSearchCriteriaMock.isProjectionUtvidet() } returns true
 
         assertThat(
-            oppgaveService.searchOppgaver(oppgaverSearchCriteriaMock).oppgaver.first().person?.fnr
+            oppgaveFacade.searchOppgaver(oppgaverSearchCriteriaMock).oppgaver.first().person?.fnr
         ).isEqualTo(fnr)
     }
 
@@ -96,29 +98,33 @@ internal class OppgaveServiceTest {
         )
     }
 
-    private fun oppgaveServiceWithHjemmel(hjemmel: String): OppgaveService {
+    private fun oppgaveServiceWithHjemmel(hjemmel: String): OppgaveFacade {
         val oppgaveClientMock = mockk<OppgaveClient>()
         every { oppgaveClientMock.getOneSearchPage(any()) } returns getOppgaveResponseWithHjemmel(hjemmel)
 
         val pdlClientMock = mockk<PdlClient>()
         every { pdlClientMock.getPersonInfo(any()) } returns getHentPersonResponse()
 
-        val oppgaveService = OppgaveService(
-            oppgaveClientMock,
+        val oppgaveFacade = OppgaveFacade(
+            OppgaveService(
+                oppgaveClientMock
+            ),
             OppgaveMapper(pdlClientMock)
         )
-        return oppgaveService
+        return oppgaveFacade
     }
 
-    private fun oppgaveServiceWithType(type: String): OppgaveService {
+    private fun oppgaveFacadeWithType(type: String): OppgaveFacade {
         val oppgaveClientMock = mockk<OppgaveClient>()
         every { oppgaveClientMock.getOneSearchPage(any()) } returns getOppgaveResponseWithType(type)
 
         val pdlClientMock = mockk<PdlClient>()
         every { pdlClientMock.getPersonInfo(any()) } returns getHentPersonResponse()
 
-        return OppgaveService(
-            oppgaveClientMock,
+        return OppgaveFacade(
+            OppgaveService(
+                oppgaveClientMock
+            ),
             OppgaveMapper(pdlClientMock)
         )
     }

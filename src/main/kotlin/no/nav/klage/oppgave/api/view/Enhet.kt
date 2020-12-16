@@ -1,4 +1,4 @@
-package no.nav.klage.oppgave.domain.view
+package no.nav.klage.oppgave.api.view
 
 data class Enhet(
     val id: String,

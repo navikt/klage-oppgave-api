@@ -2,7 +2,6 @@ package no.nav.klage.oppgave.service.unleash
 
 import no.finn.unleash.strategy.Strategy
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 
 @Component
@@ -20,6 +19,7 @@ class ByClusterStrategy(@Value("\${nais.cluster.name}") val currentCluster: Stri
     private fun getEnabledClusters(parameters: Map<String, String>?) =
         parameters?.get(PARAM)?.split(',')
 
-    private fun isCurrentClusterEnabled(cluster: String): Boolean =
-        currentCluster == cluster
+    private fun isCurrentClusterEnabled(cluster: String): Boolean {
+        return currentCluster == cluster
+    }
 }

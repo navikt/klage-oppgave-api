@@ -17,7 +17,7 @@ data class EsOppgave(
     val id: Long,
     //Må være Long? for å bli Long på JVMen (isf long), og det krever Spring DataES..
     @Version
-    val versjon: Long,
+    val versjon: Long?,
     val journalpostId: String? = null,
     val saksreferanse: String? = null,
     val mappeId: Long? = null,
