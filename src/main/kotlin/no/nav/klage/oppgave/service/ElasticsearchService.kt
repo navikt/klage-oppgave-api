@@ -4,6 +4,8 @@ import no.nav.klage.oppgave.api.view.TYPE_ANKE
 import no.nav.klage.oppgave.api.view.TYPE_KLAGE
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
+import no.nav.klage.oppgave.domain.oppgavekopi.OppgaveKopi
+import no.nav.klage.oppgave.repositories.OppgaveKopiRepository
 import no.nav.klage.oppgave.util.getLogger
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder
@@ -12,6 +14,8 @@ import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.core.io.ClassPathResource
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate
@@ -20,9 +24,14 @@ import org.springframework.data.elasticsearch.core.document.Document
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.data.elasticsearch.core.query.Query
+import org.springframework.transaction.annotation.Transactional
 import java.time.format.DateTimeFormatter
 
-class ElasticsearchService(val esTemplate: ElasticsearchRestTemplate) :
+
+open class ElasticsearchService(
+    val esTemplate: ElasticsearchRestTemplate,
+    val oppgaveRepository: OppgaveKopiRepository
+) :
     ApplicationListener<ContextRefreshedEvent> {
 
     companion object {
@@ -33,20 +42,36 @@ class ElasticsearchService(val esTemplate: ElasticsearchRestTemplate) :
     override fun onApplicationEvent(event: ContextRefreshedEvent) {
         val indexOps = esTemplate.indexOps(IndexCoordinates.of("oppgavekopier"))
         if (!indexOps.exists()) {
-            indexOps.create(settings)
-            indexOps.putMapping(mapping)
+            indexOps.create(readFromfile("settings.json"))
+            indexOps.putMapping(readFromfile("mapping.json"))
         }
     }
 
-    fun oppgaveSearch(criteria: OppgaverSearchCriteria): List<EsOppgave> {
+    private fun readFromfile(filename: String): Document {
+        val text: String =
+            ClassPathResource("elasticsearch/${filename}").inputStream.bufferedReader(Charsets.UTF_8).readText()
+        return Document.parse(text)
+    }
+
+    @Transactional(readOnly = true)
+    open fun populateES() {
+        var page: Pageable = PageRequest.of(0, 100)
+        do {
+            val oppgavePage: Page<OppgaveKopi> = oppgaveRepository.findAll(page)
+            esTemplate.save(oppgavePage.content)
+            page = oppgavePage.nextOrLastPageable()
+        } while (oppgavePage.hasNext())
+    }
+
+    open fun oppgaveSearch(criteria: OppgaverSearchCriteria): SearchHits<EsOppgave> {
         val query: Query = NativeSearchQueryBuilder()
-            //.withPageable(toPageable(criteria))
+            .withPageable(toPageable(criteria))
             .withSort(SortBuilders.fieldSort("fristFerdigstillelse").order(mapOrder(criteria.order)))
             .withQuery(criteria.toEsQuery())
             .build()
         val searchHits: SearchHits<EsOppgave> = esTemplate.search(query, EsOppgave::class.java)
         println("ANTALL TREFF: ${searchHits.totalHits}")
-        return searchHits.searchHits.map { it.content }
+        return searchHits
     }
 
     private fun mapOrder(order: OppgaverSearchCriteria.Order?): SortOrder {
@@ -146,97 +171,6 @@ class ElasticsearchService(val esTemplate: ElasticsearchRestTemplate) :
         logger.info("Making search request with query {}", baseQuery.toString())
         return baseQuery
     }
-
-    val settings = Document.parse(
-        """
-        {
-          "index": {
-            "refresh_interval": "1s",
-            "number_of_shards": "3",
-            "number_of_replicas": "2"
-          }
-        }        
-        """.trimIndent()
-    )
-
-    val mapping = Document.parse(
-        """
-        {
-          "properties": {
-            "status": {
-              "type": "keyword"
-            },
-            "tildeltEnhetsnr": {
-              "type": "keyword"
-            },
-            "opprettetAvEnhetsnr": {
-              "type": "keyword"
-            },
-            "endretAvEnhetsnr": {
-              "type": "keyword"
-            },
-            "tema": {
-              "type": "keyword"
-            },
-            "temagruppe": {
-              "type": "keyword"
-            },
-            "behandlingstema": {
-              "type": "keyword"
-            },
-            "oppgavetype": {
-              "type": "keyword"
-            },
-            "behandlingstype": {
-              "type": "keyword"
-            },
-            "prioritet": {
-              "type": "keyword"
-            },
-            "tilordnetRessurs": {
-              "type": "keyword"
-            },
-            "fristFerdigstillelse": {
-              "type": "date",
-              "format": "date"
-            },
-            "aktivDato": {
-              "type": "date",
-              "format": "date"
-            },
-            "opprettetAv": {
-              "type": "keyword"
-            },
-            "endretAv": {
-              "type": "keyword"
-            },
-            "opprettetTidspunkt": {
-              "type": "date",
-              "format": "date_time"
-            },
-            "endretTidspunkt": {
-              "type": "date",
-              "format": "date_time"
-            },
-            "ferdigstiltTidspunkt": {
-              "type": "date",
-              "format": "date_time"
-            },
-            "aktoerId": {
-              "type": "keyword"
-            },
-            "fnr": {
-              "type": "keyword"
-            },
-            "statuskategori": {
-              "type": "keyword"
-            }
-          }
-        }
-        """.trimIndent()
-    )
-
-
 }
 
 

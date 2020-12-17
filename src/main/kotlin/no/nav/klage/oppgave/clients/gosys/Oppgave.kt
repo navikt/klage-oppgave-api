@@ -1,6 +1,7 @@
 package no.nav.klage.oppgave.clients.gosys
 
 import java.time.LocalDate
+import java.util.*
 
 const val BEHANDLINGSTYPE_KLAGE = "ae0058"
 const val BEHANDLINGSTYPE_ANKE = "ae0046"
@@ -14,8 +15,9 @@ data class OppgaveResponse(
 )
 
 data class Oppgave(
+
     val id: Long,
-    val tildeltEnhetsnr: String? = null,
+    val tildeltEnhetsnr: String,
     val endretAvEnhetsnr: String? = null,
     val opprettetAvEnhetsnr: String? = null,
     val journalpostId: String? = null,
@@ -32,20 +34,20 @@ data class Oppgave(
     val temagruppe: String? = null,
     val tema: String,
     val behandlingstema: String? = null,
-    val oppgavetype: String? = null,
+    val oppgavetype: String,
     val behandlingstype: String? = null,
     val versjon: Int,
     val mappeId: Long? = null,
-    val opprettetAv: String? = null,
+    val opprettetAv: String,
     val endretAv: String? = null,
-    val prioritet: Prioritet? = null,
-    val status: Status? = null,
+    val prioritet: Prioritet,
+    val status: Status,
     val metadata: Map<String, String>? = null,
     val fristFerdigstillelse: LocalDate?,
-    val aktivDato: String? = null,
-    val opprettetTidspunkt: String? = null,
-    val ferdigstiltTidspunkt: String? = null,
-    val endretTidspunkt: String? = null
+    val aktivDato: LocalDate,
+    val opprettetTidspunkt: Date,
+    val ferdigstiltTidspunkt: Date? = null,
+    val endretTidspunkt: Date? = null
 ) {
     fun toEndreOppgave() = EndreOppgave(
         id = id,
@@ -95,15 +97,15 @@ data class EndreOppgave(
     val temagruppe: String? = null,
     val tema: String,
     val behandlingstema: String? = null,
-    val oppgavetype: String? = null,
+    val oppgavetype: String,
     val behandlingstype: String? = null,
-    var versjon: Int? = null,
+    var versjon: Int,
     val mappeId: Long? = null,
-    val prioritet: Prioritet? = null,
-    val status: Status? = null,
+    val prioritet: Prioritet,
+    val status: Status,
     var metadata: MutableMap<String, String>? = null,
     val fristFerdigstillelse: LocalDate?,
-    val aktivDato: String? = null
+    val aktivDato: LocalDate
 )
 
 data class Ident(
@@ -120,9 +122,19 @@ enum class Prioritet {
 }
 
 enum class Status {
-    OPPRETTET, AAPNET, UNDER_BEHANDLING, FERDIGSTILT, FEILREGISTRERT
+    OPPRETTET, AAPNET, UNDER_BEHANDLING, FERDIGSTILT, FEILREGISTRERT;
+
+    fun statuskategori(): Statuskategori {
+        return when (this) {
+            AAPNET, OPPRETTET, UNDER_BEHANDLING -> Statuskategori.AAPEN
+            FEILREGISTRERT, FERDIGSTILT -> Statuskategori.AVSLUTTET
+        }
+    }
 }
 
+enum class Statuskategori {
+    AAPEN, AVSLUTTET
+}
 
 val hjemler = listOf(
     "8-1",

@@ -1,9 +1,11 @@
 package no.nav.klage.oppgave.service
 
+import com.ninjasquad.springmockk.MockkBean
 import no.nav.klage.oppgave.config.ElasticsearchServiceConfiguration
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
 import no.nav.klage.oppgave.domain.elasticsearch.Prioritet
 import no.nav.klage.oppgave.domain.elasticsearch.Status
+import no.nav.klage.oppgave.repositories.OppgaveKopiRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.elasticsearch.ElasticsearchStatusException
@@ -42,6 +44,9 @@ import java.time.LocalDateTime
 )
 class ElasticsearchIndexingTest {
 
+    @MockkBean(relaxed = true)
+    private lateinit var oppgaveKopiRepository: OppgaveKopiRepository
+    
     companion object {
         @Container
         @JvmField
@@ -60,7 +65,7 @@ class ElasticsearchIndexingTest {
             }
         }
     }
-    
+
     @Autowired
     lateinit var esTemplate: ElasticsearchRestTemplate
 
@@ -171,7 +176,9 @@ class ElasticsearchIndexingTest {
             aktivDato = LocalDate.now(),
             opprettetAv = "H149290",
             opprettetTidspunkt = LocalDateTime.now(),
-            beskrivelse = beskrivelse
+            beskrivelse = beskrivelse,
+            type = "KLAGE",
+            ytelse = "SYK"
         )
     }
 }

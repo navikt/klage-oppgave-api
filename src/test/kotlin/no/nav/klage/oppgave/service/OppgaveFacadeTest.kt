@@ -3,7 +3,7 @@ package no.nav.klage.oppgave.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.klage.oppgave.api.OppgaveFacade
-import no.nav.klage.oppgave.api.mapper.OppgaveMapper
+import no.nav.klage.oppgave.api.mapper.OppgaveViewMapper
 import no.nav.klage.oppgave.api.view.HJEMMEL
 import no.nav.klage.oppgave.api.view.TYPE_ANKE
 import no.nav.klage.oppgave.api.view.TYPE_KLAGE
@@ -13,6 +13,7 @@ import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 
 internal class OppgaveFacadeTest {
 
@@ -63,7 +64,9 @@ internal class OppgaveFacadeTest {
             OppgaveService(
                 oppgaveClientMock
             ),
-            OppgaveMapper(pdlClientMock)
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            OppgaveViewMapper(pdlClientMock)
         )
 
         val oppgaverSearchCriteriaMock = mockk<OppgaverSearchCriteria>(relaxed = true)
@@ -109,7 +112,9 @@ internal class OppgaveFacadeTest {
             OppgaveService(
                 oppgaveClientMock
             ),
-            OppgaveMapper(pdlClientMock)
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            OppgaveViewMapper(pdlClientMock)
         )
         return oppgaveFacade
     }
@@ -125,7 +130,9 @@ internal class OppgaveFacadeTest {
             OppgaveService(
                 oppgaveClientMock
             ),
-            OppgaveMapper(pdlClientMock)
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            OppgaveViewMapper(pdlClientMock)
         )
     }
 
@@ -137,7 +144,14 @@ internal class OppgaveFacadeTest {
                 behandlingstype = type,
                 fristFerdigstillelse = LocalDate.now(),
                 tema = "SYK",
-                versjon = 0
+                versjon = 0,
+                aktivDato = LocalDate.now(),
+                oppgavetype = "ae0058",
+                opprettetAv = "H149390",
+                opprettetTidspunkt = Date(),
+                prioritet = Prioritet.NORM,
+                status = Status.OPPRETTET,
+                tildeltEnhetsnr = "4209"
             )
         )
     )
@@ -150,7 +164,14 @@ internal class OppgaveFacadeTest {
                 fristFerdigstillelse = LocalDate.now(),
                 tema = "SYK",
                 metadata = mapOf(HJEMMEL to hjemmel),
-                versjon = 0
+                versjon = 0,
+                aktivDato = LocalDate.now(),
+                oppgavetype = "ae0058",
+                opprettetAv = "H149390",
+                opprettetTidspunkt = Date(),
+                prioritet = Prioritet.NORM,
+                status = Status.OPPRETTET,
+                tildeltEnhetsnr = "4209"
             )
         )
     )
@@ -172,7 +193,14 @@ internal class OppgaveFacadeTest {
                         gruppe = Gruppe.FOLKEREGISTERIDENT
                     )
                 ),
-                versjon = 0
+                versjon = 0,
+                aktivDato = LocalDate.now(),
+                oppgavetype = "ae0058",
+                opprettetAv = "H149390",
+                opprettetTidspunkt = Date(),
+                prioritet = Prioritet.NORM,
+                status = Status.OPPRETTET,
+                tildeltEnhetsnr = "4209"
             )
         )
     )

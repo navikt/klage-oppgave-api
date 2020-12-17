@@ -12,14 +12,16 @@ import java.time.LocalDateTime
 
 @Document(indexName = "oppgavekopier", shards = 3, replicas = 2, versionType = VersionType.EXTERNAL)
 data class EsOppgave(
-
     @Id
     val id: Long,
     //Må være Long? for å bli Long på JVMen (isf long), og det krever Spring DataES..
     @Version
     val versjon: Long?,
+    @Field(type = FieldType.Long)
     val journalpostId: String? = null,
+    @Field(type = FieldType.Keyword)
     val saksreferanse: String? = null,
+    @Field(type = FieldType.Keyword)
     val mappeId: Long? = null,
     @Field(type = FieldType.Keyword)
     val status: Status,
@@ -43,9 +45,10 @@ data class EsOppgave(
     val prioritet: Prioritet,
     @Field(type = FieldType.Keyword)
     val tilordnetRessurs: String? = null,
+    @Field(type = FieldType.Text)
     val beskrivelse: String? = null,
     @Field(type = FieldType.Date, format = DateFormat.date)
-    val fristFerdigstillelse: LocalDate,
+    val fristFerdigstillelse: LocalDate?,
     @Field(type = FieldType.Date, format = DateFormat.date)
     val aktivDato: LocalDate,
     @Field(type = FieldType.Keyword)
@@ -58,15 +61,23 @@ data class EsOppgave(
     val endretTidspunkt: LocalDateTime? = null,
     @Field(type = FieldType.Date, format = DateFormat.date_time)
     val ferdigstiltTidspunkt: LocalDateTime? = null,
+    @Field(type = FieldType.Text)
     val behandlesAvApplikasjon: String? = null,
+    @Field(type = FieldType.Keyword)
     val journalpostkilde: String? = null,
     @Field(type = FieldType.Keyword)
     val aktoerId: String? = null,
     @Field(type = FieldType.Keyword)
     val fnr: String? = null,
+    @Field(type = FieldType.Keyword)
     val hjemler: List<String>? = null,
     @Field(type = FieldType.Keyword)
     val statuskategori: Statuskategori = status.kategoriForStatus(),
-    val egenAnsatt: Boolean = false
+    @Field(type = FieldType.Boolean)
+    val egenAnsatt: Boolean = false,
+    @Field(type = FieldType.Keyword)
+    val type: String,
+    @Field(type = FieldType.Keyword)
+    val ytelse: String
 )
 

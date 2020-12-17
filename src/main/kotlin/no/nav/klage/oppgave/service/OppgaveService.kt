@@ -19,7 +19,7 @@ class OppgaveService(val oppgaveClient: OppgaveClient) {
         return oppgaveClient.getOneSearchPage(oppgaverSearchCriteria)
     }
 
-    fun assignOppgave(oppgaveId: Long, saksbehandlerIdent: String?, oppgaveVersjon: Int?) {
+    fun assignOppgave(oppgaveId: Long, saksbehandlerIdent: String?, oppgaveVersjon: Int) {
         val endreOppgave = oppgaveClient.getOppgave(oppgaveId).toEndreOppgave()
         logger.info(
             "Endrer tilordnetRessurs for oppgave {} fra {} til {}, versjon er {}",

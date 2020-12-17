@@ -9,7 +9,7 @@ const val YTELSE_SYK = "Sykepenger"
 const val YTELSE_FOR = "Foreldrepenger"
 
 data class OppgaverRespons(
-    val antallTreffTotalt: Int,
+    val antallTreffTotalt: Long,
     val oppgaver: List<Oppgave>
 )
 

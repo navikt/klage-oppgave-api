@@ -1,11 +1,13 @@
 package no.nav.klage.oppgave.service
 
+import com.ninjasquad.springmockk.MockkBean
 import no.nav.klage.oppgave.config.ElasticsearchServiceConfiguration
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
 import no.nav.klage.oppgave.domain.elasticsearch.Prioritet
 import no.nav.klage.oppgave.domain.elasticsearch.Status
 import no.nav.klage.oppgave.domain.elasticsearch.Statuskategori
+import no.nav.klage.oppgave.repositories.OppgaveKopiRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.index.query.QueryBuilders
@@ -41,6 +43,9 @@ import java.time.LocalDateTime
     classes = [ElasticsearchServiceConfiguration::class]
 )
 class ElasticsearchServiceTest {
+
+    @MockkBean(relaxed = true)
+    private lateinit var oppgaveKopiRepository: OppgaveKopiRepository
 
     companion object {
         @Container
@@ -102,7 +107,9 @@ class ElasticsearchServiceTest {
             opprettetAv = "H149290",
             opprettetTidspunkt = LocalDateTime.of(2020, 12, 1, 20, 15),
             beskrivelse = "beskrivelse",
-            statuskategori = Statuskategori.AAPEN
+            statuskategori = Statuskategori.AAPEN,
+            type = "KLAGE",
+            ytelse = "SYK"
         )
         val oppgave2 = EsOppgave(
             id = 1002L,
@@ -118,7 +125,9 @@ class ElasticsearchServiceTest {
             opprettetAv = "H149290",
             opprettetTidspunkt = LocalDateTime.of(2019, 12, 1, 20, 15),
             beskrivelse = "beskrivelse",
-            statuskategori = Statuskategori.AAPEN
+            statuskategori = Statuskategori.AAPEN,
+            type = "KLAGE",
+            ytelse = "SYK"
         )
         esTemplate.save(oppgave1)
         esTemplate.save(oppgave2)
@@ -136,7 +145,13 @@ class ElasticsearchServiceTest {
     @Order(4)
     fun `oppgave can be searched for by tema`() {
         val oppgaver: List<EsOppgave> =
-            service.oppgaveSearch(OppgaverSearchCriteria(ytelser = listOf("Sykepenger"), offset = 0, limit = 10))
+            service.oppgaveSearch(
+                OppgaverSearchCriteria(
+                    ytelser = listOf("Sykepenger"),
+                    offset = 0,
+                    limit = 10
+                )
+            ).searchHits.map { it.content }
         assertThat(oppgaver.size).isEqualTo(1L)
         assertThat(oppgaver.first().id).isEqualTo(1001L)
     }
@@ -145,7 +160,13 @@ class ElasticsearchServiceTest {
     @Order(5)
     fun `oppgave can be searched for by frist`() {
         val oppgaver: List<EsOppgave> =
-            service.oppgaveSearch(OppgaverSearchCriteria(fristFom = LocalDate.of(2020, 12, 1), offset = 0, limit = 10))
+            service.oppgaveSearch(
+                OppgaverSearchCriteria(
+                    fristFom = LocalDate.of(2020, 12, 1),
+                    offset = 0,
+                    limit = 10
+                )
+            ).searchHits.map { it.content }
         assertThat(oppgaver.size).isEqualTo(1L)
         assertThat(oppgaver.first().id).isEqualTo(1001L)
     }

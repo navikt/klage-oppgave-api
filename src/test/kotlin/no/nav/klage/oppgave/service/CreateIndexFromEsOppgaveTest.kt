@@ -1,15 +1,13 @@
 package no.nav.klage.oppgave.service
 
+
 import no.nav.klage.oppgave.config.ElasticsearchConfiguration
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
 import org.apache.http.util.EntityUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.client.Request
 import org.elasticsearch.client.RestHighLevelClient
-import org.junit.jupiter.api.MethodOrderer
-import org.junit.jupiter.api.Order
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestMethodOrder
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.util.TestPropertyValues
@@ -30,7 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
     initializers = [CreateIndexFromEsOppgaveTest.Companion.Initializer::class],
     classes = [ElasticsearchConfiguration::class]
 )
-//@Disabled("kan brukes for å generere settings og mapping, for så å lagre som fil. Må da endre i ElasticsearchService")
+@Disabled("kan brukes for å generere settings og mapping, for så å lagre som fil. Må da endre i ElasticsearchService")
 class CreateIndexFromEsOppgaveTest {
 
     companion object {

@@ -1,0 +1,102 @@
+{
+  "properties": {
+    "journalpostId": {
+      "type": "long"
+    },
+    "saksreferanse": {
+      "type": "keyword"
+    },
+    "mappeId": {
+      "type": "keyword"
+    },
+    "status": {
+      "type": "keyword"
+    },
+    "tildeltEnhetsnr": {
+      "type": "keyword"
+    },
+    "opprettetAvEnhetsnr": {
+      "type": "keyword"
+    },
+    "endretAvEnhetsnr": {
+      "type": "keyword"
+    },
+    "tema": {
+      "type": "keyword"
+    },
+    "temagruppe": {
+      "type": "keyword"
+    },
+    "behandlingstema": {
+      "type": "keyword"
+    },
+    "oppgavetype": {
+      "type": "keyword"
+    },
+    "behandlingstype": {
+      "type": "keyword"
+    },
+    "prioritet": {
+      "type": "keyword"
+    },
+    "tilordnetRessurs": {
+      "type": "keyword"
+    },
+    "beskrivelse": {
+      "type": "text"
+    },
+    "fristFerdigstillelse": {
+      "type": "date",
+      "format": "date"
+    },
+    "aktivDato": {
+      "type": "date",
+      "format": "date"
+    },
+    "opprettetAv": {
+      "type": "keyword"
+    },
+    "endretAv": {
+      "type": "keyword"
+    },
+    "opprettetTidspunkt": {
+      "type": "date",
+      "format": "date_time"
+    },
+    "endretTidspunkt": {
+      "type": "date",
+      "format": "date_time"
+    },
+    "ferdigstiltTidspunkt": {
+      "type": "date",
+      "format": "date_time"
+    },
+    "behandlesAvApplikasjon": {
+      "type": "text"
+    },
+    "journalpostkilde": {
+      "type": "keyword"
+    },
+    "aktoerId": {
+      "type": "keyword"
+    },
+    "fnr": {
+      "type": "keyword"
+    },
+    "hjemler": {
+      "type": "keyword"
+    },
+    "statuskategori": {
+      "type": "keyword"
+    },
+    "egenAnsatt": {
+      "type": "boolean"
+    },
+    "type": {
+      "type": "keyword"
+    },
+    "ytelse": {
+      "type": "keyword"
+    }
+  }
+}

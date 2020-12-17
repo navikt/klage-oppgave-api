@@ -46,7 +46,7 @@ class OppgaveKopi(
     @Column(name = "beskrivelse")
     val beskrivelse: String? = null,
     @Column(name = "frist_ferdigstillelse")
-    val fristFerdigstillelse: LocalDate,
+    val fristFerdigstillelse: LocalDate?,
     @Column(name = "aktiv_dato")
     val aktivDato: LocalDate,
     @Column(name = "opprettet_av")
@@ -89,7 +89,7 @@ class OppgaveKopi(
         prioritet: Prioritet,
         tilordnetRessurs: String? = null,
         beskrivelse: String? = null,
-        fristFerdigstillelse: LocalDate,
+        fristFerdigstillelse: LocalDate?,
         aktivDato: LocalDate,
         opprettetAv: String,
         endretAv: String? = null,
