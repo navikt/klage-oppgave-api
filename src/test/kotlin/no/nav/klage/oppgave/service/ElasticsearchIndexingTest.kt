@@ -46,7 +46,7 @@ class ElasticsearchIndexingTest {
 
     @MockkBean(relaxed = true)
     private lateinit var oppgaveKopiRepository: OppgaveKopiRepository
-    
+
     companion object {
         @Container
         @JvmField
@@ -166,7 +166,7 @@ class ElasticsearchIndexingTest {
     private fun oppgaveWith(id: Long, versjon: Long, beskrivelse: String): EsOppgave {
         return EsOppgave(
             id = id,
-            versjon = versjon,
+            version = versjon,
             tema = "tema",
             status = Status.OPPRETTET,
             tildeltEnhetsnr = "4219",

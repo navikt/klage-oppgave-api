@@ -1,5 +1,6 @@
 package no.nav.klage.oppgave.domain.elasticsearch
 
+import no.nav.klage.oppgave.domain.OppgaveListVisning
 import org.elasticsearch.index.VersionType
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
@@ -13,10 +14,10 @@ import java.time.LocalDateTime
 @Document(indexName = "oppgavekopier", shards = 3, replicas = 2, versionType = VersionType.EXTERNAL)
 data class EsOppgave(
     @Id
-    val id: Long,
+    override val id: Long,
     //Må være Long? for å bli Long på JVMen (isf long), og det krever Spring DataES..
     @Version
-    val versjon: Long?,
+    val version: Long?,
     @Field(type = FieldType.Long)
     val journalpostId: String? = null,
     @Field(type = FieldType.Keyword)
@@ -26,7 +27,7 @@ data class EsOppgave(
     @Field(type = FieldType.Keyword)
     val status: Status,
     @Field(type = FieldType.Keyword)
-    val tildeltEnhetsnr: String,
+    override val tildeltEnhetsnr: String,
     @Field(type = FieldType.Keyword)
     val opprettetAvEnhetsnr: String? = null,
     @Field(type = FieldType.Keyword)
@@ -44,11 +45,11 @@ data class EsOppgave(
     @Field(type = FieldType.Keyword)
     val prioritet: Prioritet,
     @Field(type = FieldType.Keyword)
-    val tilordnetRessurs: String? = null,
+    override val tilordnetRessurs: String? = null,
     @Field(type = FieldType.Text)
-    val beskrivelse: String? = null,
+    override val beskrivelse: String? = null,
     @Field(type = FieldType.Date, format = DateFormat.date)
-    val fristFerdigstillelse: LocalDate?,
+    override val fristFerdigstillelse: LocalDate?,
     @Field(type = FieldType.Date, format = DateFormat.date)
     val aktivDato: LocalDate,
     @Field(type = FieldType.Keyword)
@@ -68,16 +69,24 @@ data class EsOppgave(
     @Field(type = FieldType.Keyword)
     val aktoerId: String? = null,
     @Field(type = FieldType.Keyword)
-    val fnr: String? = null,
+    override val fnr: String? = null,
     @Field(type = FieldType.Keyword)
-    val hjemler: List<String>? = null,
+    override val hjemler: List<String>? = null,
     @Field(type = FieldType.Keyword)
     val statuskategori: Statuskategori = status.kategoriForStatus(),
     @Field(type = FieldType.Boolean)
     val egenAnsatt: Boolean = false,
     @Field(type = FieldType.Keyword)
-    val type: String,
+    override val type: String,
     @Field(type = FieldType.Keyword)
-    val ytelse: String
-)
+    override val ytelse: String
+) : OppgaveListVisning {
+    override val versjon: Int
+        get() = version!!.toInt()
+
+    override val statusString: String
+        get() = status.name
+    override val viktigsteHjemmel: String
+        get() = hjemler?.firstOrNull() ?: "mangler"
+}
 

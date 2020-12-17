@@ -1,5 +1,7 @@
 package no.nav.klage.oppgave.clients.gosys
 
+import no.nav.klage.oppgave.api.view.*
+import no.nav.klage.oppgave.domain.OppgaveListVisning
 import java.time.LocalDate
 import java.util.*
 
@@ -16,8 +18,8 @@ data class OppgaveResponse(
 
 data class Oppgave(
 
-    val id: Long,
-    val tildeltEnhetsnr: String,
+    override val id: Long,
+    override val tildeltEnhetsnr: String,
     val endretAvEnhetsnr: String? = null,
     val opprettetAvEnhetsnr: String? = null,
     val journalpostId: String? = null,
@@ -29,26 +31,26 @@ data class Oppgave(
     val aktoerId: String? = null,
     val identer: List<Ident>? = null,
     val orgnr: String? = null,
-    val tilordnetRessurs: String? = null,
-    val beskrivelse: String? = null,
+    override val tilordnetRessurs: String? = null,
+    override val beskrivelse: String? = null,
     val temagruppe: String? = null,
     val tema: String,
     val behandlingstema: String? = null,
     val oppgavetype: String,
     val behandlingstype: String? = null,
-    val versjon: Int,
+    override val versjon: Int,
     val mappeId: Long? = null,
     val opprettetAv: String,
     val endretAv: String? = null,
     val prioritet: Prioritet,
     val status: Status,
     val metadata: Map<String, String>? = null,
-    val fristFerdigstillelse: LocalDate?,
+    override val fristFerdigstillelse: LocalDate?,
     val aktivDato: LocalDate,
     val opprettetTidspunkt: Date,
     val ferdigstiltTidspunkt: Date? = null,
     val endretTidspunkt: Date? = null
-) {
+) : OppgaveListVisning {
     fun toEndreOppgave() = EndreOppgave(
         id = id,
         tildeltEnhetsnr = tildeltEnhetsnr,
@@ -77,6 +79,35 @@ data class Oppgave(
         aktivDato = aktivDato
     )
 
+    override val statusString: String
+        get() = status.name
+    
+    override val fnr: String?
+        get() = identer?.find { i -> i.gruppe == Gruppe.FOLKEREGISTERIDENT }?.ident
+
+    override val hjemler: List<String>?
+        get() = listOf(viktigsteHjemmel)
+
+    override val type: String
+        get() = if (behandlingstema == null) {
+            when (behandlingstype) {
+                BEHANDLINGSTYPE_KLAGE -> TYPE_KLAGE
+                BEHANDLINGSTYPE_ANKE -> TYPE_ANKE
+                else -> "ukjent"
+            }
+        } else {
+            "mangler"
+        }
+
+    override val ytelse: String
+        get() = when (tema) {
+            TEMA_SYK -> YTELSE_SYK
+            TEMA_FOR -> YTELSE_FOR
+            else -> tema
+        }
+
+    override val viktigsteHjemmel: String
+        get() = metadata?.get(HJEMMEL) ?: "mangler"
 }
 
 // De feltene som skal kunne endres må gjøres mutable/defineres som var isf val

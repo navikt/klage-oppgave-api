@@ -1,5 +1,6 @@
-package no.nav.klage.oppgave.domain.oppgavekopi
+package no.nav.klage.oppgave.domain.oppgavekopi.helper
 
+import no.nav.klage.oppgave.domain.oppgavekopi.Status
 import javax.persistence.AttributeConverter
 import javax.persistence.Converter
 

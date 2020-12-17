@@ -95,7 +95,7 @@ class ElasticsearchServiceTest {
 
         val oppgave1 = EsOppgave(
             id = 1001L,
-            versjon = 1L,
+            version = 1L,
             tema = "Sykepenger",
             status = Status.OPPRETTET,
             tildeltEnhetsnr = "4219",
@@ -113,7 +113,7 @@ class ElasticsearchServiceTest {
         )
         val oppgave2 = EsOppgave(
             id = 1002L,
-            versjon = 1L,
+            version = 1L,
             tema = "Foreldrepenger",
             status = Status.AAPNET,
             tildeltEnhetsnr = "4220",

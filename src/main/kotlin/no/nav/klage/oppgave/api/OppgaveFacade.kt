@@ -4,8 +4,6 @@ import no.finn.unleash.Unleash
 import no.nav.klage.oppgave.api.mapper.OppgaveViewMapper
 import no.nav.klage.oppgave.api.view.Oppgave
 import no.nav.klage.oppgave.api.view.OppgaverRespons
-import no.nav.klage.oppgave.domain.EsOppgaveListVisningAdapter
-import no.nav.klage.oppgave.domain.GosysOppgaveListVisningAdapter
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.service.ElasticsearchService
 import no.nav.klage.oppgave.service.OppgaveService
@@ -25,7 +23,7 @@ class OppgaveFacade(
             return OppgaverRespons(
                 antallTreffTotalt = esResponse.totalHits,
                 oppgaver = oppgaveViewMapper.mapOppgaverToView(
-                    esResponse.searchHits.map { it.content }.map { EsOppgaveListVisningAdapter(it) },
+                    esResponse.searchHits.map { it.content },
                     oppgaverSearchCriteria.isProjectionUtvidet()
                 )
             )
@@ -34,7 +32,7 @@ class OppgaveFacade(
             return OppgaverRespons(
                 antallTreffTotalt = oppgaveResponse.antallTreffTotalt.toLong(),
                 oppgaver = oppgaveViewMapper.mapOppgaverToView(
-                    oppgaveResponse.oppgaver.map { GosysOppgaveListVisningAdapter(it) },
+                    oppgaveResponse.oppgaver,
                     oppgaverSearchCriteria.isProjectionUtvidet()
                 )
             )
@@ -47,7 +45,7 @@ class OppgaveFacade(
 
     fun getOppgave(oppgaveId: Long): Oppgave {
         val oppgaveBackend = oppgaveService.getOppgave(oppgaveId)
-        return oppgaveViewMapper.mapOppgaveToView(GosysOppgaveListVisningAdapter(oppgaveBackend), true)
+        return oppgaveViewMapper.mapOppgaveToView(oppgaveBackend, true)
     }
 
 }

@@ -1,5 +1,6 @@
 package no.nav.klage.oppgave.domain.oppgavekopi
 
+import no.nav.klage.oppgave.domain.oppgavekopi.helper.StatusConverter
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.persistence.*

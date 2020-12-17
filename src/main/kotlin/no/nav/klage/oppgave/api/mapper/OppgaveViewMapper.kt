@@ -16,22 +16,22 @@ class OppgaveViewMapper(val pdlClient: PdlClient) {
     fun mapOppgaverToView(oppgaverBackend: List<OppgaveListVisning>, fetchPersoner: Boolean): List<OppgaveView> {
         val personer = mutableMapOf<String, OppgaveView.Person>()
         if (fetchPersoner) {
-            personer.putAll(getPersoner(oppgaverBackend.mapNotNull { it.fnr() }))
+            personer.putAll(getPersoner(oppgaverBackend.mapNotNull { it.fnr }))
         }
 
         return oppgaverBackend.map { oppgaveBackend ->
             OppgaveView(
-                id = oppgaveBackend.id().toString(),
+                id = oppgaveBackend.id.toString(),
                 person = if (fetchPersoner) {
-                    oppgaveBackend.fnr()?.let { personer[it] } ?: OppgaveView.Person("Mangler fnr", "Mangler navn")
+                    oppgaveBackend.fnr?.let { personer[it] } ?: OppgaveView.Person("Mangler fnr", "Mangler navn")
                 } else {
                     null
                 },
-                type = oppgaveBackend.type(),
-                ytelse = oppgaveBackend.ytelse(),
-                hjemmel = oppgaveBackend.viktigsteHjemmel(),
-                frist = oppgaveBackend.fristFerdigstillelse(),
-                versjon = oppgaveBackend.versjon()
+                type = oppgaveBackend.type,
+                ytelse = oppgaveBackend.ytelse,
+                hjemmel = oppgaveBackend.viktigsteHjemmel,
+                frist = oppgaveBackend.fristFerdigstillelse,
+                versjon = oppgaveBackend.versjon
             )
         }
     }
