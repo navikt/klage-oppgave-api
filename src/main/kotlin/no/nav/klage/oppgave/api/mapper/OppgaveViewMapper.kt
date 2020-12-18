@@ -1,29 +1,38 @@
 package no.nav.klage.oppgave.api.mapper
 
-import no.nav.klage.oppgave.clients.pdl.Navn
+import no.nav.klage.oppgave.clients.gosys.Oppgave
+import no.nav.klage.oppgave.clients.pdl.HentPersonBolkResult
 import no.nav.klage.oppgave.clients.pdl.PdlClient
 import no.nav.klage.oppgave.domain.OppgaveListVisning
+import no.nav.klage.oppgave.util.getLogger
+import no.nav.klage.oppgave.util.getSecureLogger
 import org.springframework.stereotype.Service
 import no.nav.klage.oppgave.api.view.Oppgave as OppgaveView
 
 @Service
 class OppgaveViewMapper(val pdlClient: PdlClient) {
 
-    fun mapOppgaveToView(oppgaveBackend: OppgaveListVisning, fetchPersoner: Boolean): OppgaveView {
+    companion object {
+        @Suppress("JAVA_CLASS_ON_COMPANION")
+        private val logger = getLogger(javaClass.enclosingClass)
+        private val secureLogger = getSecureLogger()
+    }
+
+    fun mapOppgaveToView(oppgaveBackend: Oppgave, fetchPersoner: Boolean): OppgaveView {
         return mapOppgaverToView(listOf(oppgaveBackend), fetchPersoner).single()
     }
 
     fun mapOppgaverToView(oppgaverBackend: List<OppgaveListVisning>, fetchPersoner: Boolean): List<OppgaveView> {
         val personer = mutableMapOf<String, OppgaveView.Person>()
         if (fetchPersoner) {
-            personer.putAll(getPersoner(oppgaverBackend.mapNotNull { it.fnr }))
+            personer.putAll(getPersoner(getFnr(oppgaverBackend)))
         }
 
         return oppgaverBackend.map { oppgaveBackend ->
             OppgaveView(
                 id = oppgaveBackend.id.toString(),
                 person = if (fetchPersoner) {
-                    oppgaveBackend.fnr?.let { personer[it] } ?: OppgaveView.Person("Mangler fnr", "Mangler navn")
+                    personer[oppgaveBackend.fnr] ?: OppgaveView.Person("Mangler fnr", "Mangler navn")
                 } else {
                     null
                 },
@@ -36,15 +45,25 @@ class OppgaveViewMapper(val pdlClient: PdlClient) {
         }
     }
 
+    private fun getFnr(oppgaver: List<OppgaveListVisning>) =
+        oppgaver.mapNotNull { it.fnr }
+
     private fun getPersoner(fnrList: List<String>): Map<String, OppgaveView.Person> {
-        val people = pdlClient.getPersonInfo(fnrList).data?.hentPersonBolk
-        val fnrToPerson: Map<String, no.nav.klage.oppgave.api.view.Oppgave.Person> = people?.map {
-            val fnr = it.folkeregisteridentifikator.first().identifikasjonsnummer
+        logger.debug("getPersoner is called with {} fnr", fnrList.size)
+        secureLogger.debug("getPersoner with fnr: {}", fnrList)
+
+        val people = pdlClient.getPersonInfo(fnrList).data?.hentPersonBolk ?: emptyList()
+
+        logger.debug("pdl returned {} people", people.size)
+        secureLogger.debug("pdl returned {}", people)
+
+        val fnrToPerson: Map<String, no.nav.klage.oppgave.api.view.Oppgave.Person> = people.map {
+            val fnr = it.ident
             fnr to OppgaveView.Person(
                 fnr = fnr,
-                navn = it.navn.firstOrNull()?.toName() ?: "Mangler navn"
+                navn = it.person.navn.firstOrNull()?.toName() ?: "mangler navn"
             )
-        }?.toMap() ?: emptyMap()
+        }.toMap()
         return fnrList.map {
             if (fnrToPerson.containsKey(it)) {
                 Pair(it, fnrToPerson.getValue(it))
@@ -54,6 +73,5 @@ class OppgaveViewMapper(val pdlClient: PdlClient) {
         }.toMap()
     }
 
-
-    private fun Navn.toName() = "$fornavn $etternavn"
+    private fun HentPersonBolkResult.Person.Navn.toName() = "$fornavn $etternavn"
 }

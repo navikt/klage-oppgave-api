@@ -8,7 +8,10 @@ import no.nav.klage.oppgave.api.view.HJEMMEL
 import no.nav.klage.oppgave.api.view.TYPE_ANKE
 import no.nav.klage.oppgave.api.view.TYPE_KLAGE
 import no.nav.klage.oppgave.clients.gosys.*
-import no.nav.klage.oppgave.clients.pdl.*
+import no.nav.klage.oppgave.clients.pdl.HentPersonBolk
+import no.nav.klage.oppgave.clients.pdl.HentPersonBolkResult
+import no.nav.klage.oppgave.clients.pdl.HentPersonResponse
+import no.nav.klage.oppgave.clients.pdl.PdlClient
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -81,20 +84,16 @@ internal class OppgaveFacadeTest {
         return HentPersonResponse(
             data = HentPersonBolk(
                 listOf(
-                    Person(
-                        navn = listOf(
-                            Navn(
-                                fornavn = "Test",
-                                etternavn = "Person"
+                    HentPersonBolkResult(
+                        HentPersonBolkResult.Person(
+                            navn = listOf(
+                                HentPersonBolkResult.Person.Navn(
+                                    fornavn = "Test",
+                                    etternavn = "Person"
+                                )
                             )
                         ),
-                        folkeregisteridentifikator = listOf(
-                            Folkeregisteridentifikator(
-                                identifikasjonsnummer = "12345678910",
-                                type = "FNR",
-                                status = ""
-                            )
-                        )
+                        ident = "12345678910"
                     )
                 )
             )
