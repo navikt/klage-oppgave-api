@@ -1,11 +1,9 @@
 package no.nav.klage.oppgave.service
 
-import com.ninjasquad.springmockk.MockkBean
 import no.nav.klage.oppgave.config.ElasticsearchServiceConfiguration
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
 import no.nav.klage.oppgave.domain.elasticsearch.Prioritet
 import no.nav.klage.oppgave.domain.elasticsearch.Status
-import no.nav.klage.oppgave.repositories.OppgaveKopiRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.elasticsearch.ElasticsearchStatusException
@@ -43,9 +41,6 @@ import java.time.LocalDateTime
     classes = [ElasticsearchServiceConfiguration::class]
 )
 class ElasticsearchIndexingTest {
-
-    @MockkBean(relaxed = true)
-    private lateinit var oppgaveKopiRepository: OppgaveKopiRepository
 
     companion object {
         @Container

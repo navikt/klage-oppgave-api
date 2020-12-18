@@ -1,11 +1,9 @@
-package no.nav.klage.oppgave.service
+package no.nav.klage.oppgave.repositories
 
 import no.nav.klage.oppgave.api.view.TYPE_ANKE
 import no.nav.klage.oppgave.api.view.TYPE_KLAGE
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
-import no.nav.klage.oppgave.domain.oppgavekopi.OppgaveKopi
-import no.nav.klage.oppgave.repositories.OppgaveKopiRepository
 import no.nav.klage.oppgave.util.getLogger
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder
@@ -15,7 +13,6 @@ import org.elasticsearch.search.sort.SortOrder
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.core.io.ClassPathResource
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate
@@ -24,14 +21,10 @@ import org.springframework.data.elasticsearch.core.document.Document
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.data.elasticsearch.core.query.Query
-import org.springframework.transaction.annotation.Transactional
 import java.time.format.DateTimeFormatter
 
 
-open class ElasticsearchService(
-    val esTemplate: ElasticsearchRestTemplate,
-    val oppgaveRepository: OppgaveKopiRepository
-) :
+open class ElasticsearchRepository(val esTemplate: ElasticsearchRestTemplate) :
     ApplicationListener<ContextRefreshedEvent> {
 
     companion object {
@@ -53,17 +46,15 @@ open class ElasticsearchService(
         return Document.parse(text)
     }
 
-    @Transactional(readOnly = true)
-    open fun populateES() {
-        var page: Pageable = PageRequest.of(0, 100)
-        do {
-            val oppgavePage: Page<OppgaveKopi> = oppgaveRepository.findAll(page)
-            esTemplate.save(oppgavePage.content)
-            page = oppgavePage.nextOrLastPageable()
-        } while (oppgavePage.hasNext())
+    fun save(oppgaver: List<EsOppgave>) {
+        esTemplate.save(oppgaver)
     }
 
-    open fun oppgaveSearch(criteria: OppgaverSearchCriteria): SearchHits<EsOppgave> {
+    fun save(oppgave: EsOppgave) {
+        esTemplate.save(oppgave)
+    }
+
+    open fun findByCriteria(criteria: OppgaverSearchCriteria): SearchHits<EsOppgave> {
         val query: Query = NativeSearchQueryBuilder()
             .withPageable(toPageable(criteria))
             .withSort(SortBuilders.fieldSort("fristFerdigstillelse").order(mapOrder(criteria.order)))

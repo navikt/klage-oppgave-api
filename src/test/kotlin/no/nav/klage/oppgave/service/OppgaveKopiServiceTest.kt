@@ -1,6 +1,8 @@
 package no.nav.klage.oppgave.service
 
+import com.ninjasquad.springmockk.MockkBean
 import no.nav.klage.oppgave.domain.oppgavekopi.*
+import no.nav.klage.oppgave.repositories.ElasticsearchRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,6 +16,9 @@ import java.time.LocalDateTime
 @DataJpaTest
 @Import(OppgaveKopiService::class)
 class OppgaveKopiServiceTest {
+    
+    @MockkBean(relaxed = true)
+    lateinit var elasticsearchRepository: ElasticsearchRepository
 
     @Autowired
     lateinit var oppgaveKopiService: OppgaveKopiService

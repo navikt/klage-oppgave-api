@@ -1,13 +1,12 @@
 package no.nav.klage.oppgave.service
 
-import com.ninjasquad.springmockk.MockkBean
 import no.nav.klage.oppgave.config.ElasticsearchServiceConfiguration
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.domain.elasticsearch.EsOppgave
 import no.nav.klage.oppgave.domain.elasticsearch.Prioritet
 import no.nav.klage.oppgave.domain.elasticsearch.Status
 import no.nav.klage.oppgave.domain.elasticsearch.Statuskategori
-import no.nav.klage.oppgave.repositories.OppgaveKopiRepository
+import no.nav.klage.oppgave.repositories.ElasticsearchRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.index.query.QueryBuilders
@@ -39,13 +38,10 @@ import java.time.LocalDateTime
 @Testcontainers
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(
-    initializers = [ElasticsearchServiceTest.Companion.Initializer::class],
+    initializers = [ElasticsearchRepositoryTest.Companion.Initializer::class],
     classes = [ElasticsearchServiceConfiguration::class]
 )
-class ElasticsearchServiceTest {
-
-    @MockkBean(relaxed = true)
-    private lateinit var oppgaveKopiRepository: OppgaveKopiRepository
+class ElasticsearchRepositoryTest {
 
     companion object {
         @Container
@@ -67,7 +63,7 @@ class ElasticsearchServiceTest {
     }
 
     @Autowired
-    lateinit var service: ElasticsearchService
+    lateinit var repository: ElasticsearchRepository
 
     @Autowired
     lateinit var esTemplate: ElasticsearchRestTemplate
@@ -145,7 +141,7 @@ class ElasticsearchServiceTest {
     @Order(4)
     fun `oppgave can be searched for by tema`() {
         val oppgaver: List<EsOppgave> =
-            service.oppgaveSearch(
+            repository.findByCriteria(
                 OppgaverSearchCriteria(
                     ytelser = listOf("Sykepenger"),
                     offset = 0,
@@ -160,7 +156,7 @@ class ElasticsearchServiceTest {
     @Order(5)
     fun `oppgave can be searched for by frist`() {
         val oppgaver: List<EsOppgave> =
-            service.oppgaveSearch(
+            repository.findByCriteria(
                 OppgaverSearchCriteria(
                     fristFom = LocalDate.of(2020, 12, 1),
                     offset = 0,

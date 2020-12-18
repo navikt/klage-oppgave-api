@@ -5,21 +5,21 @@ import no.nav.klage.oppgave.api.mapper.OppgaveViewMapper
 import no.nav.klage.oppgave.api.view.Oppgave
 import no.nav.klage.oppgave.api.view.OppgaverRespons
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
-import no.nav.klage.oppgave.service.ElasticsearchService
+import no.nav.klage.oppgave.repositories.ElasticsearchRepository
 import no.nav.klage.oppgave.service.OppgaveService
 import org.springframework.stereotype.Service
 
 @Service
 class OppgaveFacade(
     val oppgaveService: OppgaveService,
-    val elasticsearchService: ElasticsearchService,
+    val elasticsearchRepository: ElasticsearchRepository,
     val unleash: Unleash,
     val oppgaveViewMapper: OppgaveViewMapper
 ) {
 
     fun searchOppgaver(oppgaverSearchCriteria: OppgaverSearchCriteria): OppgaverRespons {
         if (unleash.isEnabled("klage.sokMedES")) {
-            val esResponse = elasticsearchService.oppgaveSearch(oppgaverSearchCriteria)
+            val esResponse = elasticsearchRepository.findByCriteria(oppgaverSearchCriteria)
             return OppgaverRespons(
                 antallTreffTotalt = esResponse.totalHits,
                 oppgaver = oppgaveViewMapper.mapOppgaverToView(
