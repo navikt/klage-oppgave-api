@@ -38,6 +38,15 @@ class OppgaveKopiService(
         } while (oppgavePage.hasNext())
     }
 
+    @Transactional(readOnly = true)
+    fun indexOppgaveKopie(oppgaveKopiId: Long) {
+        val oppgave = oppgaveKopiRepository.findById(oppgaveKopiId)
+        oppgave.ifPresent {
+            elasticsearchRepository.save(it.toEsOppgave())
+        }
+    }
+
+
     private fun indexOppgaveKopi(oppgaveKopi: OppgaveKopi) {
         try {
             elasticsearchRepository.save(oppgaveKopi.toEsOppgave())
