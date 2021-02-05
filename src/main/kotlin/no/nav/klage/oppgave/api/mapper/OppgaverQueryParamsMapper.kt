@@ -42,7 +42,7 @@ class OppgaverQueryParamsMapper(private val saksbehandlerRepository: Saksbehandl
             fristFom = LocalDate.MIN,
             fristTom = LocalDate.now().minusDays(1),
             offset = 0,
-            limit = 0,
+            limit = 1,
             erTildeltSaksbehandler = false,
             enhetsnr = validateAndGetEnhetId(navIdent, oppgaverQueryParams.enhetId)
         )
