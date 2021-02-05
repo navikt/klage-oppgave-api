@@ -3,6 +3,7 @@ package no.nav.klage.oppgave.api
 import no.finn.unleash.Unleash
 import no.nav.klage.oppgave.api.internal.OppgaveKopiAPIModel
 import no.nav.klage.oppgave.api.mapper.OppgaveMapper
+import no.nav.klage.oppgave.api.view.AntallUtgaatteFristerResponse
 import no.nav.klage.oppgave.api.view.OppgaverRespons
 import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.repositories.ElasticsearchRepository
@@ -68,4 +69,7 @@ class OppgaveFacade(
             }
         }
     }
+
+    fun countUtgaatteFrister(searchCriteria: OppgaverSearchCriteria): AntallUtgaatteFristerResponse =
+        AntallUtgaatteFristerResponse(antall = oppgaveService.searchOppgaver(searchCriteria).antallTreffTotalt)
 }

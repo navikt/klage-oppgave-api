@@ -1,11 +1,13 @@
 package no.nav.klage.oppgave.api.mapper
 
 import no.nav.klage.oppgave.api.view.OppgaverQueryParams
+import no.nav.klage.oppgave.api.view.UtgaatteFristerQueryParams
 import no.nav.klage.oppgave.domain.*
 import no.nav.klage.oppgave.exceptions.NotOwnEnhetException
 import no.nav.klage.oppgave.repositories.SaksbehandlerRepository
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class OppgaverQueryParamsMapper(private val saksbehandlerRepository: SaksbehandlerRepository) {
@@ -31,6 +33,19 @@ class OppgaverQueryParamsMapper(private val saksbehandlerRepository: Saksbehandl
         projection = oppgaverQueryParams.projeksjon?.let { OppgaverSearchCriteria.Projection.valueOf(it.name) },
         enhetsnr = validateAndGetEnhetId(navIdent, oppgaverQueryParams.enhetId)
     )
+
+    fun toFristCountSearchCriteria(navIdent: String, oppgaverQueryParams: UtgaatteFristerQueryParams) =
+        OppgaverSearchCriteria(
+            typer = oppgaverQueryParams.typer,
+            temaer = oppgaverQueryParams.temaer.toTemaCode(),
+            hjemler = oppgaverQueryParams.hjemler,
+            fristFom = LocalDate.MIN,
+            fristTom = LocalDate.now().minusDays(1),
+            offset = 0,
+            limit = 0,
+            erTildeltSaksbehandler = false,
+            enhetsnr = validateAndGetEnhetId(navIdent, oppgaverQueryParams.enhetId)
+        )
 
     private fun validateAndGetEnhetId(navIdent: String, enhetId: String): String {
         val tilgangerForSaksbehandler = saksbehandlerRepository.getTilgangerForSaksbehandler(navIdent)

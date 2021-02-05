@@ -4,10 +4,7 @@ import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import no.nav.klage.oppgave.api.mapper.OppgaverQueryParamsMapper
-import no.nav.klage.oppgave.api.view.OppgaverQueryParams
-import no.nav.klage.oppgave.api.view.OppgaverRespons
-import no.nav.klage.oppgave.api.view.Saksbehandlerfradeling
-import no.nav.klage.oppgave.api.view.Saksbehandlertildeling
+import no.nav.klage.oppgave.api.view.*
 import no.nav.klage.oppgave.config.SecurityConfiguration.Companion.ISSUER_AAD
 import no.nav.klage.oppgave.exceptions.NotMatchingUserException
 import no.nav.klage.oppgave.exceptions.OppgaveIdWrongFormatException
@@ -90,6 +87,23 @@ class OppgaveController(
             .fromMethodName(OppgaveController::class.java, "getOppgave", navIdent, oppgaveId)
             .buildAndExpand(oppgaveId).toUri()
         return ResponseEntity.noContent().location(uri).build()
+    }
+
+    @ApiOperation(
+        value = "Hent antall utgåtte frister",
+        notes = "Teller opp alle oppgaver der fristen gått ut."
+    )
+    @GetMapping("/ansatte/{navIdent}/antallutgaattefrister", produces = ["application/json"])
+    fun getAntallUtgaatteFrister(
+        @ApiParam(value = "NavIdent til en ansatt")
+        @PathVariable navIdent: String,
+        queryParams: UtgaatteFristerQueryParams
+    ): AntallUtgaatteFristerResponse {
+        logger.debug("Params: {}", queryParams)
+        validateNavIdent(navIdent)
+        return oppgaveFacade.countUtgaatteFrister(
+            oppgaverQueryParamsMapper.toFristCountSearchCriteria(navIdent, queryParams)
+        )
     }
 
     private fun String?.toLongOrException() =

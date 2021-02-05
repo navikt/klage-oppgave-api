@@ -21,3 +21,10 @@ data class OppgaverQueryParams(
         UTVIDET
     }
 }
+
+data class UtgaatteFristerQueryParams(
+    var typer: List<String> = emptyList(),
+    var temaer: List<String> = emptyList(),
+    var hjemler: List<String> = emptyList(),
+    val enhetId: String
+)
