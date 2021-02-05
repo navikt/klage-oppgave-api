@@ -39,7 +39,7 @@ class OppgaverQueryParamsMapper(private val saksbehandlerRepository: Saksbehandl
             typer = oppgaverQueryParams.typer,
             temaer = oppgaverQueryParams.temaer.toTemaCode(),
             hjemler = oppgaverQueryParams.hjemler,
-            fristFom = LocalDate.MIN,
+            fristFom = LocalDate.now().minusYears(15),
             fristTom = LocalDate.now().minusDays(1),
             offset = 0,
             limit = 1,
