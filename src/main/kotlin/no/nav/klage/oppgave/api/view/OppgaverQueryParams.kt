@@ -1,5 +1,7 @@
 package no.nav.klage.oppgave.api.view
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
 data class OppgaverQueryParams(
     var typer: List<String> = emptyList(),
     var temaer: List<String> = emptyList(),
@@ -22,6 +24,7 @@ data class OppgaverQueryParams(
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class UtgaatteFristerQueryParams(
     var typer: List<String> = emptyList(),
     var temaer: List<String> = emptyList(),
