@@ -30,7 +30,15 @@ class OppgaveStatistikkService(
     }
 
     fun klagerOverFrist(searchCriteria: OppgaverSearchCriteria): Int {
-        return oppgaveClient.getOppgaveCount(searchCriteria)
+        return oppgaveClient.getOppgaveCount(
+            searchCriteria.copy(
+                fristFom = LocalDate.now().minusYears(15),
+                fristTom = LocalDate.now().minusDays(1),
+                offset = 0,
+                limit = 1,
+                erTildeltSaksbehandler = false
+            )
+        )
     }
 
     fun klagerInnsendtIPeriode(numberOfDays: Int): Int {

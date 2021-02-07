@@ -7,7 +7,6 @@ import no.nav.klage.oppgave.exceptions.NotOwnEnhetException
 import no.nav.klage.oppgave.repositories.SaksbehandlerRepository
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class OppgaverQueryParamsMapper(private val saksbehandlerRepository: SaksbehandlerRepository) {
@@ -39,11 +38,6 @@ class OppgaverQueryParamsMapper(private val saksbehandlerRepository: Saksbehandl
             typer = oppgaverQueryParams.typer,
             temaer = oppgaverQueryParams.temaer.toTemaCode(),
             hjemler = oppgaverQueryParams.hjemler,
-            fristFom = LocalDate.now().minusYears(15),
-            fristTom = LocalDate.now().minusDays(1),
-            offset = 0,
-            limit = 1,
-            erTildeltSaksbehandler = false,
             enhetsnr = validateAndGetEnhetId(navIdent, oppgaverQueryParams.enhetId)
         )
 

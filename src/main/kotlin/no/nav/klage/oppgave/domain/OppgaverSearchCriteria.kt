@@ -17,8 +17,8 @@ data class OppgaverSearchCriteria(
     val fristTom: LocalDate? = null,
 
     val order: Order? = null,
-    val offset: Int,
-    val limit: Int,
+    val offset: Int = 0,
+    val limit: Int = 10,
     val erTildeltSaksbehandler: Boolean? = null,
     val saksbehandler: String? = null,
     val enhetsnr: String? = null,
