@@ -9,6 +9,7 @@ import no.nav.klage.oppgave.domain.OppgaverSearchCriteria
 import no.nav.klage.oppgave.repositories.ElasticsearchRepository
 import no.nav.klage.oppgave.service.OppgaveKopiService
 import no.nav.klage.oppgave.service.OppgaveService
+import no.nav.klage.oppgave.service.OppgaveStatistikkService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.klage.oppgave.util.getSecureLogger
 import org.springframework.stereotype.Service
@@ -19,6 +20,7 @@ class OppgaveFacade(
     private val oppgaveMapper: OppgaveMapper,
     private val oppgaveKopiService: OppgaveKopiService,
     private val elasticsearchRepository: ElasticsearchRepository,
+    private val oppgaveStatistikkService: OppgaveStatistikkService,
     private val unleash: Unleash
 ) {
 
@@ -71,5 +73,5 @@ class OppgaveFacade(
     }
 
     fun countUtgaatteFrister(searchCriteria: OppgaverSearchCriteria): AntallUtgaatteFristerResponse =
-        AntallUtgaatteFristerResponse(antall = oppgaveService.searchOppgaver(searchCriteria).antallTreffTotalt)
+        AntallUtgaatteFristerResponse(antall = oppgaveStatistikkService.klagerOverFrist(searchCriteria))
 }

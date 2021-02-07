@@ -29,15 +29,7 @@ class OppgaveStatistikkService(
         return oppgaveClient.getOppgaveCount(searchCriteria)
     }
 
-    fun klagerOverFrist(): Int {
-        val searchCriteria = OppgaverSearchCriteria(
-            typer = listOf("Klage"),
-            temaer = listOf("SYK"),
-            statuskategori = OppgaverSearchCriteria.Statuskategori.AAPEN,
-            fristFom = LocalDate.now().plusDays(1),
-            offset = 0,
-            limit = 1
-        )
+    fun klagerOverFrist(searchCriteria: OppgaverSearchCriteria): Int {
         return oppgaveClient.getOppgaveCount(searchCriteria)
     }
 
