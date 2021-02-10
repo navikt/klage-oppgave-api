@@ -12,7 +12,7 @@ class Kvalitetsvurdering(
     val id: UUID = UUID.randomUUID(),
     @Column(name = "grunn_id")
     @Convert(converter = GrunnConverter::class)
-    val grunn: Grunn? = null,
+    var grunn: Grunn? = null,
     @Column(name = "eoes_id")
     @Convert(converter = EoesConverter::class)
     val eoes: Eoes? = null,
@@ -30,9 +30,9 @@ class Kvalitetsvurdering(
     @Column(name = "mottaker_enhet")
     val mottakerEnhet: String? = null,
     @Column(name = "created")
-    val created: LocalDateTime,
+    val created: LocalDateTime = LocalDateTime.now(),
     @Column(name = "modified")
-    val modified: LocalDateTime
+    val modified: LocalDateTime = LocalDateTime.now()
 ) {
     override fun toString(): String {
         return "Tilbakemelding(id=$id, " +

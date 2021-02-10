@@ -2,6 +2,8 @@ package no.nav.klage.oppgave.api
 
 import no.nav.klage.oppgave.api.mapper.KlagebehandlingMapper
 import no.nav.klage.oppgave.api.view.KlagebehandlingView
+import no.nav.klage.oppgave.api.view.KvalitetsvurderingView
+import no.nav.klage.oppgave.domain.kodeverk.Grunn
 import no.nav.klage.oppgave.service.KlagebehandlingService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.klage.oppgave.util.getSecureLogger
@@ -23,9 +25,19 @@ class KlagebehandlingFacade(
 
     fun getKlagebehandling(oppgaveId: Long): KlagebehandlingView {
         return klagebehandlingMapper.mapKlagebehandlingToKlagebehandlingView(
-            klagebehandlingService.getKlagebehandlingByOppgaveId(
-                oppgaveId
-            )
+            klagebehandlingService.getKlagebehandlingByOppgaveId(oppgaveId)
+        )
+    }
+
+    fun getKvalitetsvurdering(oppgaveId: Long): KvalitetsvurderingView {
+        return klagebehandlingMapper.mapKlagebehandlingToKvalitetsvurderingView(
+            klagebehandlingService.getKlagebehandlingByOppgaveId(oppgaveId)
+        )
+    }
+
+    fun setKvalitetsvurderingGrunn(oppgaveId: Long, grunn: Grunn): KvalitetsvurderingView {
+        return klagebehandlingMapper.mapKlagebehandlingToKvalitetsvurderingView(
+            klagebehandlingService.setKvalitetsvurderingGrunn(oppgaveId, grunn)
         )
     }
 }

@@ -43,7 +43,7 @@ class Klagebehandling(
     val vedtak: Vedtak? = null,
     @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "kvalitetsvurdering_id", nullable = true)
-    val kvalitetsvurdering: Kvalitetsvurdering? = null,
+    var kvalitetsvurdering: Kvalitetsvurdering? = null,
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "klagebehandling_id", referencedColumnName = "id", nullable = false)
     val hjemler: MutableList<Hjemmel> = mutableListOf(),
@@ -80,5 +80,12 @@ class Klagebehandling(
 
     override fun hashCode(): Int {
         return id.hashCode()
+    }
+
+    fun getOrCreateKvalitetsvurdering(): Kvalitetsvurdering {
+        if (kvalitetsvurdering == null) {
+            kvalitetsvurdering = Kvalitetsvurdering()
+        }
+        return kvalitetsvurdering!!
     }
 }

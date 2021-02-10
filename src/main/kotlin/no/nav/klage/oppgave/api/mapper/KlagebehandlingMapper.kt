@@ -2,6 +2,7 @@ package no.nav.klage.oppgave.api.mapper
 
 
 import no.nav.klage.oppgave.api.view.KlagebehandlingView
+import no.nav.klage.oppgave.api.view.KvalitetsvurderingView
 import no.nav.klage.oppgave.domain.klage.Hjemmel
 import no.nav.klage.oppgave.domain.klage.Klagebehandling
 import no.nav.klage.oppgave.service.OppgaveKopiService
@@ -21,7 +22,7 @@ class KlagebehandlingMapper(
     }
 
     fun mapKlagebehandlingToKlagebehandlingView(klagebehandling: Klagebehandling): KlagebehandlingView {
-        
+
         return KlagebehandlingView(
             id = klagebehandling.id,
             klageInnsendtdato = klagebehandling.innsendt,
@@ -52,5 +53,16 @@ class KlagebehandlingMapper(
                 original = it.original
             )
         }
+    }
+
+    fun mapKlagebehandlingToKvalitetsvurderingView(klagebehandling: Klagebehandling): KvalitetsvurderingView {
+        return KvalitetsvurderingView(
+            grunn = klagebehandling.kvalitetsvurdering?.grunn?.id,
+            eoes = klagebehandling.kvalitetsvurdering?.eoes?.id,
+            raadfoertMedLege = klagebehandling.kvalitetsvurdering?.raadfoertMedLege?.id,
+            internVurdering = klagebehandling.kvalitetsvurdering?.internVurdering,
+            sendTilbakemelding = klagebehandling.kvalitetsvurdering?.sendTilbakemelding,
+            tilbakemelding = klagebehandling.kvalitetsvurdering?.tilbakemelding
+        )
     }
 }
