@@ -15,9 +15,9 @@ class Vedtak(
     @Convert(converter = UtfallConverter::class)
     val utfall: Utfall,
     @Column(name = "modified")
-    val modified: LocalDateTime,
+    val modified: LocalDateTime = LocalDateTime.now(),
     @Column(name = "created")
-    val created: LocalDateTime
+    val created: LocalDateTime = LocalDateTime.now()
 ) {
     override fun toString(): String {
         return "Vedtak(id=$id, " +

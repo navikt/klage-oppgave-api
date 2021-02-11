@@ -48,7 +48,7 @@ class KlagebehandlingService(
     fun connectOppgaveKopiToKlagebehandling(oppgaveKopierOrdererByVersion: List<OppgaveKopiVersjon>) {
         val nyesteVersjon = oppgaveKopierOrdererByVersion.first()
         val klagesak = fetchKlagesakForOppgaveKopi(nyesteVersjon.id)
-        //TODO: Oppdatere mottak selv om Oppgavebehandling har blitt laget tidligere? Hvor avslutter man oppgaven, hos oss eller i Gosys?
+        //TODO: Oppdatere mottak selv om Klagebehandling har blitt laget tidligere? Hvor avslutter man oppgaven, hos oss eller i Gosys?
         if (klagesak == null && nyesteVersjon.tildeltEnhetsnr.startsWith(klageinstansPrefix)) {
             requireNotNull(nyesteVersjon.ident)
             requireNotNull(nyesteVersjon.behandlingstype)

@@ -50,7 +50,7 @@ enum class Tema(val id: String, val navn: String, val beskrivelse: String) {
     SER("SER", "Serviceklager", "Serviceklager"),
     SIK("SIK", "Sikkerhetstiltak", "Sikkerhetstiltak"),
     STO("STO", "Regnskap/utbetaling", "Regnskap/utbetaling"),
-    SUP("SUP", "	Supplerende stønad", "	Supplerende stønad"),
+    SUP("SUP", "Supplerende stønad", "	Supplerende stønad"),
     SYK("SYK", "Sykepenger", "Sykepenger"),
     SYM("SYM", "Sykmeldinger", "Sykmeldinger"),
     TIL("TIL", "Tiltak", "Tiltak"),
