@@ -2,16 +2,10 @@ package no.nav.klage.oppgave.service
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
-class OverfoeringParserTest {
+class OverfoeringsdataParserServiceTest {
 
-    private val newCommentRegex =
-        Regex("""\-\-\-\s(\d\d\.\d\d\.\d\d\d\d)\s\d\d\:\d\d\s[^(]*\s\(([^,]*)\,\s(\d{4})\)\s\-\-\-""")
-
-    private val enhetOverfoeringRegex =
-        Regex(""".*?fra\senhet\s(\d{4})\stil\s(42\d\d).*?(?=${'$'})""")
+    private val service = OverfoeringsdataParserService()
 
     private val beskrivelseMedKunOverfoeringer =
         """
@@ -92,26 +86,9 @@ class OverfoeringParserTest {
     @Test
     fun `beskrivelse med kun overfoeringer parsed correctly`() {
 
-        val iterator = beskrivelseMedKunOverfoeringer.lineSequence().iterator()
-        var saksbehandlerWhoMadeTheChange: String? = null
-        var enhetOfsaksbehandlerWhoMadeTheChange: String? = null
-        var datoForOverfoering: LocalDate? = null
-        var enhetOverfoertFra: String? = null
-        var enhetOverfoertTil: String? = null
-
-        while (iterator.hasNext() && (saksbehandlerWhoMadeTheChange == null || enhetOfsaksbehandlerWhoMadeTheChange == null || enhetOverfoertFra == null || enhetOverfoertTil == null || datoForOverfoering == null)) {
-            val line = iterator.next()
-            if (newCommentRegex.containsMatchIn(line)) {
-                val values = newCommentRegex.find(line)?.groupValues!!
-                datoForOverfoering = LocalDate.parse(values[1], DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-                saksbehandlerWhoMadeTheChange = values[2]
-                enhetOfsaksbehandlerWhoMadeTheChange = values[3]
-            } else if (enhetOverfoeringRegex.containsMatchIn(line)) {
-                val values = enhetOverfoeringRegex.find(line)?.groupValues!!
-                enhetOverfoertFra = values[1]
-                enhetOverfoertTil = values[2]
-            }
-        }
+        val (saksbehandlerWhoMadeTheChange, enhetOfsaksbehandlerWhoMadeTheChange, datoForOverfoering, enhetOverfoertFra, enhetOverfoertTil) = service.parseBeskrivelse(
+            beskrivelseMedKunOverfoeringer
+        )!!
 
         assertThat(saksbehandlerWhoMadeTheChange).isEqualTo("A142467")
         assertThat(enhetOfsaksbehandlerWhoMadeTheChange).isEqualTo("4474")
@@ -124,26 +101,9 @@ class OverfoeringParserTest {
     @Test
     fun `beskrivelse med litt av hvert parsed correctly`() {
 
-        val iterator = beskrivelseMedLittAvHvert.lineSequence().iterator()
-        var saksbehandlerWhoMadeTheChange: String? = null
-        var enhetOfsaksbehandlerWhoMadeTheChange: String? = null
-        var datoForOverfoering: LocalDate? = null
-        var enhetOverfoertFra: String? = null
-        var enhetOverfoertTil: String? = null
-
-        while (iterator.hasNext() && (saksbehandlerWhoMadeTheChange == null || enhetOfsaksbehandlerWhoMadeTheChange == null || enhetOverfoertFra == null || enhetOverfoertTil == null || datoForOverfoering == null)) {
-            val line = iterator.next()
-            if (newCommentRegex.containsMatchIn(line)) {
-                val values = newCommentRegex.find(line)?.groupValues!!
-                datoForOverfoering = LocalDate.parse(values[1], DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-                saksbehandlerWhoMadeTheChange = values[2]
-                enhetOfsaksbehandlerWhoMadeTheChange = values[3]
-            } else if (enhetOverfoeringRegex.containsMatchIn(line)) {
-                val values = enhetOverfoeringRegex.find(line)?.groupValues!!
-                enhetOverfoertFra = values[1]
-                enhetOverfoertTil = values[2]
-            }
-        }
+        val (saksbehandlerWhoMadeTheChange, enhetOfsaksbehandlerWhoMadeTheChange, datoForOverfoering, enhetOverfoertFra, enhetOverfoertTil) = service.parseBeskrivelse(
+            beskrivelseMedLittAvHvert
+        )!!
 
         assertThat(saksbehandlerWhoMadeTheChange).isEqualTo("M139074")
         assertThat(enhetOfsaksbehandlerWhoMadeTheChange).isEqualTo("4416")
