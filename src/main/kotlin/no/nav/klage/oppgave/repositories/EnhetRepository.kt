@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class EnhetRepository(
-    private val saksbehandlerRepository: SaksbehandlerRepository,
     private val axsysClient: AxsysClient
 ) {
 
@@ -14,16 +13,11 @@ class EnhetRepository(
     }
 
     fun getLedereIEnhet(enhetId: String): List<String> {
-        return axsysClient.getSaksbehandlereIEnhet(enhetId)
-            .filter { saksbehandlerRepository.erLeder(it.appIdent) }
-            .map { it.appIdent }
+        TODO()
     }
 
     fun getFagansvarligeIEnhet(enhetId: String): List<String> {
-        return axsysClient.getSaksbehandlereIEnhet(enhetId)
-            .filter { saksbehandlerRepository.erFagansvarlig(it.appIdent) }
-            .map { it.appIdent }
+        TODO()
     }
-
 
 }
