@@ -17,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 class OppgaveKopiService(
     private val oppgaveKopiRepository: OppgaveKopiRepository,
     private val oppgaveKopiVersjonRepository: OppgaveKopiVersjonRepository,
-    private val klagebehandlingService: KlagebehandlingService
+    private val klagebehandlingService: KlagebehandlingService,
+    private val endringService: EndringService
 ) {
 
     companion object {
@@ -30,6 +31,11 @@ class OppgaveKopiService(
      */
     fun saveOppgaveKopi(oppgaveKopi: OppgaveKopi): List<Pair<Klagebehandling, Mottak>> {
         logger.debug("Received oppgavekopi with id ${oppgaveKopi.id} and versjon ${oppgaveKopi.versjon} for storing")
+        //check if version is already stored
+        if (oppgaveKopiVersjonRepository.existsById(OppgaveKopiVersjonId(oppgaveKopi.id, oppgaveKopi.versjon))) {
+            logger.debug("Oppgavekopiversjon with id ${oppgaveKopi.id} and versjon ${oppgaveKopi.versjon} stored before, won't overwrite")
+            return listOf()
+        }
         if (oppgaveKopiRepository.existsById(oppgaveKopi.id)) {
             val existingOppgaveKopi = oppgaveKopiRepository.getOne(oppgaveKopi.id)
             if (existingOppgaveKopi.versjon < oppgaveKopi.versjon) {
@@ -44,14 +50,10 @@ class OppgaveKopiService(
             oppgaveKopiRepository.save(oppgaveKopi)
         }
 
-        //check if version is already stored
-        if (oppgaveKopiVersjonRepository.existsById(OppgaveKopiVersjonId(oppgaveKopi.id, oppgaveKopi.versjon))) {
-            logger.debug("Oppgavekopiversjon with id ${oppgaveKopi.id} and versjon ${oppgaveKopi.versjon} stored before, won't overwrite")
-        } else {
-            oppgaveKopiVersjonRepository.saveAndFlush(oppgaveKopi.toVersjon())
-        }
+        oppgaveKopiVersjonRepository.saveAndFlush(oppgaveKopi.toVersjon())
 
         val alleVersjoner = oppgaveKopiVersjonRepository.findByIdOrderByVersjonDesc(oppgaveKopi.id)
+        endringService.checkForEndring(alleVersjoner)
         return klagebehandlingService.connectOppgaveKopiToKlagebehandling(alleVersjoner)
     }
 
