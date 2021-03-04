@@ -45,6 +45,12 @@ class SaksbehandlerRepository(
         return saksbehandlerNameCache
     }
 
+    fun erFagansvarlig(ident: String): Boolean = TODO()
+
+    fun erLeder(ident: String): Boolean = TODO()
+
+    fun erSaksbehandler(ident: String): Boolean = TODO()
+
     private fun Tilganger.mapToInterntDomene(): EnheterMedLovligeTemaer =
         EnheterMedLovligeTemaer(this.enheter.map { enhet ->
             EnhetMedLovligeTemaer(
