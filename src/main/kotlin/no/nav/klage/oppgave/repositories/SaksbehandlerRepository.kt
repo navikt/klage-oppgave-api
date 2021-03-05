@@ -3,7 +3,6 @@ package no.nav.klage.oppgave.repositories
 import no.nav.klage.oppgave.clients.axsys.AxsysClient
 import no.nav.klage.oppgave.clients.axsys.Tilganger
 import no.nav.klage.oppgave.clients.azure.MicrosoftGraphClient
-import no.nav.klage.oppgave.clients.fssproxy.KlageProxyClient
 import no.nav.klage.oppgave.domain.EnhetMedLovligeTemaer
 import no.nav.klage.oppgave.domain.EnheterMedLovligeTemaer
 import no.nav.klage.oppgave.domain.kodeverk.Tema
@@ -14,8 +13,7 @@ import kotlin.system.measureTimeMillis
 @Service
 class SaksbehandlerRepository(
     private val client: MicrosoftGraphClient,
-    private val axsysClient: AxsysClient,
-    private val klageProxyClient: KlageProxyClient
+    private val axsysClient: AxsysClient
 ) {
 
     companion object {
@@ -71,8 +69,7 @@ class SaksbehandlerRepository(
 
     fun kanBehandleEgenAnsatt(ident: String): Boolean = getRoller(ident).hasRole(ROLE_ONPREM_KLAGE_EGEN_ANSATT)
 
-    //NB! Returnerer navn på gruppene, ikke objectId'er
-    private fun getRoller(ident: String): List<String> = klageProxyClient.getRoller(ident)
+    private fun getRoller(ident: String): List<String> = TODO()
 
     private fun List<String>.hasRole(role: String) = any { it.contains(role) }
 

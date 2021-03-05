@@ -41,7 +41,7 @@ class SaksbehandlerController(private val saksbehandlerService: SaksbehandlerSer
             Enhet(
                 id = enhet.enhetId,
                 navn = enhet.navn,
-                lovligeTemaer = enhet.temaer.map { tema -> tema.navn }
+                lovligeTemaer = enhet.temaer.map { tema -> tema.id }
             )
         }
 }
