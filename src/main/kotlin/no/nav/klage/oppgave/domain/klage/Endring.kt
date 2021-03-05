@@ -1,5 +1,6 @@
 package no.nav.klage.oppgave.domain.klage
 
+import no.nav.klage.oppgave.api.view.EndringView
 import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.Column
@@ -22,7 +23,15 @@ class Endring(
     val datoLest: LocalDateTime? = null,
     @Column(name = "created")
     val created: LocalDateTime = LocalDateTime.now()
-)
+) {
+    fun toEndringView() = EndringView(
+        id = this.id,
+        saksbehandler = this.saksbehandler,
+        type = this.type,
+        melding = this.melding,
+        created = this.created
+    )
+}
 
 enum class Endringstype {
     FEIL, VARSEL

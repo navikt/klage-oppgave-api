@@ -3,9 +3,11 @@ package no.nav.klage.oppgave.api
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
+import no.nav.klage.oppgave.api.view.EndringView
 import no.nav.klage.oppgave.api.view.Enhet
 import no.nav.klage.oppgave.config.SecurityConfiguration
 import no.nav.klage.oppgave.domain.EnheterMedLovligeTemaer
+import no.nav.klage.oppgave.service.EndringService
 import no.nav.klage.oppgave.service.SaksbehandlerService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -16,7 +18,10 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @Api(tags = ["klage-oppgave-api"])
 @ProtectedWithClaims(issuer = SecurityConfiguration.ISSUER_AAD)
-class SaksbehandlerController(private val saksbehandlerService: SaksbehandlerService) {
+class SaksbehandlerController(
+    private val saksbehandlerService: SaksbehandlerService,
+    private val endringService: EndringService
+) {
 
     companion object {
         @Suppress("JAVA_CLASS_ON_COMPANION")
@@ -34,6 +39,19 @@ class SaksbehandlerController(private val saksbehandlerService: SaksbehandlerSer
     ): List<Enhet> {
         logger.debug("getEnheter is requested by $navIdent")
         return saksbehandlerService.getTilgangerForSaksbehandler().toEnheter()
+    }
+
+    @ApiOperation(
+        value = "Hent endringer på klager som er gjort i gosys og syncet inn",
+        notes = "Hent endringer på klager som er gjort i gosys og syncet inn"
+    )
+    @GetMapping("/ansatte/{navIdent}/endringer", produces = ["application/json"])
+    fun getEndringer(
+        @ApiParam("")
+        @PathVariable navIdent: String
+    ): List<EndringView> {
+        logger.debug("getEndringer is requested by $navIdent")
+        return endringService.getEndringerNotReadBySaksbehandler(navIdent).map { it.toEndringView() }
     }
 
     private fun EnheterMedLovligeTemaer.toEnheter() =

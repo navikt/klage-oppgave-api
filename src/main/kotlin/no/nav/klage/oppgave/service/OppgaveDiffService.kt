@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service
 class OppgaveDiffService(
     private val tokenService: TokenService
 ) {
-    // TODO dette er ikke en smart måte å diffe på, men det er en POC for å vise tankegang :)
-    // TODO bør også ha en kobling til klagebehandling
     fun diff(nyeste: OppgaveKopiVersjon, nestNyeste: OppgaveKopiVersjon): List<Endring> {
         val endringsliste = mutableListOf<Endring>()
         if (nyeste harEndretSaksbehandlerFra nestNyeste) {
