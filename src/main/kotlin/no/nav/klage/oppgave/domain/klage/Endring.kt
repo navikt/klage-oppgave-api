@@ -13,9 +13,9 @@ class Endring(
     @Id
     val id: UUID = UUID.randomUUID(),
     @Column(name = "saksbehandler")
-    val saksbehadler: String,
+    val saksbehandler: String,
     @Column(name = "type")
-    val type: String,
+    val type: Endringstype,
     @Column(name = "melding")
     val melding: String,
     @Column(name = "dato_lest")
@@ -23,3 +23,7 @@ class Endring(
     @Column(name = "created")
     val created: LocalDateTime = LocalDateTime.now()
 )
+
+enum class Endringstype {
+    FEIL, VARSEL
+}

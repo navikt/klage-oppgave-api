@@ -7,5 +7,5 @@ import java.util.*
 
 @Repository
 interface EndringRepository : JpaRepository<Endring, UUID> {
-    fun findBySaksbehadlerAndDatoLestIsNull(saksbehandler: String): List<Endring>
+    fun findBySaksbehandlerAndDatoLestIsNull(saksbehandler: String): List<Endring>
 }
