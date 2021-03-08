@@ -52,12 +52,15 @@ spring:
         enabled: false
   jpa:
     open-in-view: false
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
 
 server:
   port: 7081
   error:
     whitelabel:
       enabled: false
+  shutdown: graceful
 
 management:
   health:
@@ -106,6 +109,14 @@ no.nav.security.jwt:
         token-endpoint-url: https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: api://${SAF_APP_CLIENT_ID}/.default
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      axsys-onbehalfof:
+        token-endpoint-url: https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: api://${AXSYS_CLUSTER}.${AXSYS_NAMESPACE}.${AXSYS_APP}/.default
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}

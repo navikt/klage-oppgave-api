@@ -63,7 +63,8 @@ enum class Tema(val id: String, val navn: String, val beskrivelse: String) {
     UKJ("UKJ", "Ukjent", "Ukjent"),
     VEN("VEN", "Ventelønn", "Ventelønn"),
     YRA("YRA", "Yrkesrettet attføring", "Yrkesrettet attføring"),
-    YRK("YRK", "Yrkesskade / Menerstatning", "Yrkesskade / Menerstatning");
+    YRK("YRK", "Yrkesskade / Menerstatning", "Yrkesskade / Menerstatning"),
+    GOS("GOS", "Gosys", "Er ikke egentlig et tema, men returneres fra Axsys likevel");
 
     override fun toString(): String {
         return "Tema(id=$id, " +

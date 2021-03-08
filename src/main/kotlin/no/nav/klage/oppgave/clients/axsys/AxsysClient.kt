@@ -1,8 +1,8 @@
 package no.nav.klage.oppgave.clients.axsys
 
 import brave.Tracer
-import no.nav.klage.oppgave.config.CacheWithRedisConfiguration.Companion.SAKSBEHANDLERE_I_ENHET_CACHE
-import no.nav.klage.oppgave.config.CacheWithRedisConfiguration.Companion.TILGANGER_CACHE
+import no.nav.klage.oppgave.config.CacheWithJCacheConfiguration.Companion.SAKSBEHANDLERE_I_ENHET_CACHE
+import no.nav.klage.oppgave.config.CacheWithJCacheConfiguration.Companion.TILGANGER_CACHE
 import no.nav.klage.oppgave.domain.klage.KLAGEENHET_PREFIX
 import no.nav.klage.oppgave.service.TokenService
 import no.nav.klage.oppgave.util.getLogger
@@ -43,7 +43,7 @@ class AxsysClient(
                         .queryParam("inkluderAlleEnheter", "true")
                         .build(navIdent)
                 }
-                .header("Authorization", "Bearer ${tokenService.getStsSystembrukerToken()}")
+                .header("Authorization", "Bearer ${tokenService.getSaksbehandlerAccessTokenWithAxsysScope()}")
                 .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
                 .header("Nav-Consumer-Id", applicationName)
 

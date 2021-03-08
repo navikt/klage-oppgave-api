@@ -35,6 +35,12 @@ class TokenService(
         return response.accessToken
     }
 
+    fun getSaksbehandlerAccessTokenWithAxsysScope(): String {
+        val clientProperties = clientConfigurationProperties.registration["axsys-onbehalfof"]
+        val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
+        return response.accessToken
+    }
+
     fun getSaksbehandlerAccessTokenWithOppgaveScope(): String {
         val clientProperties = clientConfigurationProperties.registration["oppgave-onbehalfof"]
         val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
@@ -67,5 +73,5 @@ class TokenService(
     fun getRollerFromToken(): List<String> =
         tokenValidationContextHolder.tokenValidationContext.getJwtToken(SecurityConfiguration.ISSUER_AAD)
             .jwtTokenClaims?.getAsList("groups").orEmpty().toList()
-    
+
 }

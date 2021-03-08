@@ -10,6 +10,9 @@ OPPGAVE_APP_CLIENT_ID: 50346823-61a0-49e7-ad89-ea2b1a0e90f8
 OPPGAVE_URL: https://api-gw.oera.no/oppgave/api/v1/oppgaver
 
 AXSYS_URL: https://api-gw.oera.no/axsys/api/v2
+AXSYS_CLUSTER: prod-fss
+AXSYS_NAMESPACE: org
+AXSYS_APP: axsys
 
 KAFKA_BOOTSTRAP_SERVERS: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
 KAFKA_SCHEMA_REGISTRY_URL: https://kafka-schema-registry.nais.adeo.no/

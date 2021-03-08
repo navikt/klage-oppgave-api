@@ -1,6 +1,6 @@
 package no.nav.klage.oppgave.clients.norg2
 
-import no.nav.klage.oppgave.config.CacheWithRedisConfiguration.Companion.ENHET_CACHE
+import no.nav.klage.oppgave.config.CacheWithJCacheConfiguration.Companion.ENHET_CACHE
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
