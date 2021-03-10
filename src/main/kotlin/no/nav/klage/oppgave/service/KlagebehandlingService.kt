@@ -58,6 +58,14 @@ class KlagebehandlingService(
         return klagebehandling
     }
 
+    fun getKlagebehandlingForOppgaveId(oppgaveId: Long) =
+        fetchMottakForOppgaveKopi(oppgaveId).mapNotNull {
+            klagebehandlingRepository.findByMottakId(it.id)
+        }.filter {
+            it.avsluttet == null
+        }
+
+
     fun connectOppgaveKopiToKlagebehandling(oppgaveKopierOrdererByVersion: List<OppgaveKopiVersjon>): List<Pair<Klagebehandling, Mottak>> {
         val lastVersjon = oppgaveKopierOrdererByVersion.first()
 
