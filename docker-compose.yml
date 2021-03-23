@@ -11,7 +11,7 @@ services:
 #    environment:
 #      SPRING_PROFILES_ACTIVE: local
   kabal-db:
-    container_name: klage-oppgave-db
+    container_name: kabal-db
     image: library/postgres:12
     environment:
       POSTGRES_USER: klage
@@ -24,7 +24,7 @@ services:
       interval: 3s
       timeout: 5s
       retries: 5
-  klage-oppgave-es:
+  kabal-es:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
     restart: always
     environment:
