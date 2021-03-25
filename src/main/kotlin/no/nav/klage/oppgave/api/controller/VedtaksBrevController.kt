@@ -27,7 +27,7 @@ class VedtaksBrevController(
     }
 
     @GetMapping
-    fun getVedtaksBrevByKlagebehandlingId(
+    fun getVedtaksBrev(
         @RequestParam klagebehandlingId: UUID?,
         @RequestParam brevId: UUID?
     ): List<VedtaksBrevView> {

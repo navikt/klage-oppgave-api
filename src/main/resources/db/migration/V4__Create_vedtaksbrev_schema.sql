@@ -13,7 +13,7 @@ CREATE TABLE klage.brevelement
 (
     id                 UUID,
     brev_id            UUID NOT NULL,
-    key                TEXT NOT NULL,
+    key                VARCHAR NOT NULL,
     display_text       TEXT,
     content            TEXT,
     element_input_type TEXT,
