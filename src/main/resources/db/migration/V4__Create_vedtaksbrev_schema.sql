@@ -11,15 +11,14 @@ CREATE TABLE klage.vedtaksbrev
 
 CREATE TABLE klage.brevelement
 (
-    id                 UUID,
+    id                 UUID PRIMARY KEY ,
     brev_id            UUID NOT NULL,
     key                VARCHAR NOT NULL,
     display_text       TEXT,
     content            TEXT,
     element_input_type TEXT,
 
-    CONSTRAINT unique_element_id UNIQUE (id),
-    CONSTRAINT pk_brevelement PRIMARY KEY (brev_id, key),
+    CONSTRAINT unique_element_brev_id_key UNIQUE (brev_id, key),
     CONSTRAINT fk_brevelement_brev_id FOREIGN KEY (brev_id) REFERENCES klage.vedtaksbrev (id)
 );
 
