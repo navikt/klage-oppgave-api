@@ -1,5 +1,7 @@
 package no.nav.klage.oppgave.api.controller
 
+import no.nav.klage.oppgave.api.view.Adresse
+import no.nav.klage.oppgave.api.view.Adressetype
 import no.nav.klage.oppgave.api.view.OversendtKlage
 import no.nav.klage.oppgave.domain.kodeverk.Kilde
 import no.nav.klage.oppgave.domain.kodeverk.Sakstype
@@ -69,7 +71,8 @@ class UnprotectedTestOversendelseController(
                 oversendelsesbrevJournalpostId = null,
                 brukersKlageJournalpostId = null,
                 frist = dato.plusDays(100),
-                kilde = Kilde.OPPGAVE
+                kilde = Kilde.OPPGAVE,
+                mottakerAdresse = null
             )
         )
     }
@@ -94,7 +97,8 @@ class UnprotectedTestOversendelseController(
                 oversendelsesbrevJournalpostId = null,
                 brukersKlageJournalpostId = null,
                 frist = LocalDate.of(2021, 8, 2),
-                kilde = Kilde.OPPGAVE
+                kilde = Kilde.OPPGAVE,
+                mottakerAdresse = null
             ),
             OversendtKlage(
                 uuid = UUID.randomUUID(),
@@ -113,7 +117,8 @@ class UnprotectedTestOversendelseController(
                 oversendelsesbrevJournalpostId = null,
                 brukersKlageJournalpostId = null,
                 frist = LocalDate.of(2021, 8, 3),
-                kilde = Kilde.OPPGAVE
+                kilde = Kilde.OPPGAVE,
+                mottakerAdresse = null
             ),
             OversendtKlage(
                 uuid = UUID.randomUUID(),
@@ -132,7 +137,8 @@ class UnprotectedTestOversendelseController(
                 oversendelsesbrevJournalpostId = null,
                 brukersKlageJournalpostId = null,
                 frist = LocalDate.of(2021, 8, 4),
-                kilde = Kilde.OPPGAVE
+                kilde = Kilde.OPPGAVE,
+                mottakerAdresse = null
             ),
             OversendtKlage(
                 uuid = UUID.randomUUID(),
@@ -151,7 +157,8 @@ class UnprotectedTestOversendelseController(
                 oversendelsesbrevJournalpostId = null,
                 brukersKlageJournalpostId = null,
                 frist = LocalDate.of(2021, 8, 5),
-                kilde = Kilde.OPPGAVE
+                kilde = Kilde.OPPGAVE,
+                mottakerAdresse = null
             ),
             OversendtKlage(
                 uuid = UUID.randomUUID(),
@@ -170,7 +177,16 @@ class UnprotectedTestOversendelseController(
                 oversendelsesbrevJournalpostId = null,
                 brukersKlageJournalpostId = null,
                 frist = LocalDate.of(2021, 8, 6),
-                kilde = Kilde.OPPGAVE
+                kilde = Kilde.OPPGAVE,
+                mottakerAdresse = Adresse(
+                    adressetype = Adressetype.NORSK,
+                    adresselinje1 = null,
+                    adresselinje2 = "Husveien 1",
+                    adresselinje3 = "0001 Oslo",
+                    postnummer = "0001",
+                    poststed = "Oslo",
+                    land = "NO"
+                )
             )
         )
         klager.forEach {
