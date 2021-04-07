@@ -7,8 +7,12 @@ import no.nav.klage.oppgave.domain.kodeverk.Tema
 import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDate
 import java.util.*
+import javax.validation.Constraint
+import javax.validation.ConstraintValidator
+import javax.validation.ConstraintValidatorContext
 import javax.validation.constraints.Past
 import javax.validation.constraints.Pattern
+import kotlin.reflect.KClass
 
 //TODO: Det er en del felter som må være nullable fra Oppgave, men som vi burde kunne kreve at er satt fra moderne løsninger. Hvordan løse det?
 data class OversendtKlage(
@@ -31,7 +35,9 @@ data class OversendtKlage(
     val oversendelsesbrevJournalpostId: String?,
     val brukersKlageJournalpostId: String?,
     val frist: LocalDate?,
-    val kilde: Kilde
+    val kilde: Kilde,
+    @field:MottakerAdresse
+    val mottakerAdresse: Adresse?
 ) {
 
     //TODO: Orgnr/virksomhetsnr?
@@ -59,4 +65,57 @@ data class OversendtKlage(
         fristFraFoersteinstans = frist,
         kilde = kilde
     )
+}
+
+data class Adresse(
+    val adressetype: Adressetype,
+    val adresselinje1: String?,
+    val adresselinje2: String,
+    val adresselinje3: String,
+    val postnummer: String?,
+    val poststed: String?,
+    val land: String
+)
+
+@Target(AnnotationTarget.FIELD)
+@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
+@Constraint(validatedBy = [AdresseValidator::class])
+@MustBeDocumented
+annotation class MottakerAdresse(
+    val message: String = "Ugyldig adresse, sjekk skjema for detaljert beskrivelse av gyldig adresse.",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Any>> = []
+)
+
+class AdresseValidator : ConstraintValidator<MottakerAdresse, Adresse> {
+    override fun isValid(value: Adresse?, context: ConstraintValidatorContext?): Boolean {
+        if (value == null) {
+            return true
+        }
+        if (value.adressetype == Adressetype.NORSK) {
+            if (value.postnummer == null) {
+                return false
+            } else if (value.postnummer.toIntOrNull() == null) {
+                return false
+            }
+            if (value.poststed == null) {
+                return false
+            }
+        } else if (value.adressetype == Adressetype.UTENLANDSK) {
+            if (value.adresselinje1 == null) {
+                return false
+            }
+        } else {
+            return false
+        }
+        if (value.land.length != 2) {
+            return false
+        }
+        return true
+    }
+
+}
+
+enum class Adressetype(val distribusjonType: String) {
+    NORSK("norskPostadresse"), UTENLANDSK("utenlandskPostadresse")
 }
