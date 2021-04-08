@@ -140,8 +140,6 @@
       "description": "En alternativ mottakeradresse for bruker. Hvis tom brukes adresse fra dok-dist",
       "required": [
         "adressetype",
-        "adresselinje2",
-        "adresselinje3",
         "land"
       ],
       "properties": {

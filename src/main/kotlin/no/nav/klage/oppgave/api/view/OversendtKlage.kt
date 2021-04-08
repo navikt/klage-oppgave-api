@@ -70,8 +70,8 @@ data class OversendtKlage(
 data class Adresse(
     val adressetype: Adressetype,
     val adresselinje1: String?,
-    val adresselinje2: String,
-    val adresselinje3: String,
+    val adresselinje2: String?,
+    val adresselinje3: String?,
     val postnummer: String?,
     val poststed: String?,
     val land: String
