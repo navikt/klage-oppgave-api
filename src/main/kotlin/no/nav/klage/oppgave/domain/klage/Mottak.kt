@@ -59,6 +59,9 @@ class Mottak(
     @Column(name = "kilde")
     @Enumerated(EnumType.STRING)
     val kilde: Kilde,
+    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "klagebehandling_id", referencedColumnName = "id", nullable = false)
+    val mottakAdresser: MutableSet<MottakAdresse> = mutableSetOf(),
 ) {
 
     fun hjemler(): List<String> = hjemmelListe?.split(",") ?: emptyList()

@@ -1,6 +1,7 @@
 package no.nav.klage.oppgave.api.view
 
 import no.nav.klage.oppgave.domain.klage.Mottak
+import no.nav.klage.oppgave.domain.klage.MottakAdresse
 import no.nav.klage.oppgave.domain.kodeverk.Kilde
 import no.nav.klage.oppgave.domain.kodeverk.Sakstype
 import no.nav.klage.oppgave.domain.kodeverk.Tema
@@ -37,7 +38,7 @@ data class OversendtKlage(
     val frist: LocalDate?,
     val kilde: Kilde,
     @field:MottakerAdresse
-    val mottakerAdresse: Adresse?
+    val mottakerAdresser: List<OversendtAdresse>?
 ) {
 
     //TODO: Orgnr/virksomhetsnr?
@@ -63,11 +64,12 @@ data class OversendtKlage(
         mottattNavDato = mottattFoersteinstans,
         oversendtKaDato = LocalDate.now(),
         fristFraFoersteinstans = frist,
-        kilde = kilde
+        kilde = kilde,
+        mottakAdresser = mottakerAdresser?.map { it.toMottakAdresse() }?.toMutableSet() ?: mutableSetOf()
     )
 }
 
-data class Adresse(
+data class OversendtAdresse(
     val adressetype: Adressetype,
     val adresselinje1: String?,
     val adresselinje2: String?,
@@ -75,7 +77,17 @@ data class Adresse(
     val postnummer: String?,
     val poststed: String?,
     val land: String
-)
+) {
+    fun toMottakAdresse() = MottakAdresse(
+        adressetype = adressetype,
+        adresselinje1 = adresselinje1,
+        adresselinje2 = adresselinje2,
+        adresselinje3 = adresselinje3,
+        postnummer = postnummer,
+        poststed = poststed,
+        land = land
+    )
+}
 
 @Target(AnnotationTarget.FIELD)
 @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
@@ -87,8 +99,8 @@ annotation class MottakerAdresse(
     val payload: Array<KClass<out Any>> = []
 )
 
-class AdresseValidator : ConstraintValidator<MottakerAdresse, Adresse> {
-    override fun isValid(value: Adresse?, context: ConstraintValidatorContext?): Boolean {
+class AdresseValidator : ConstraintValidator<MottakerAdresse, OversendtAdresse> {
+    override fun isValid(value: OversendtAdresse?, context: ConstraintValidatorContext?): Boolean {
         if (value == null) {
             return true
         }

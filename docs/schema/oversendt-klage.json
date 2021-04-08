@@ -133,61 +133,65 @@
       "type": "string",
       "description": "Vedtaksløsning der klagen først ble behandlet."
     },
-    "mottakerAdresse": {
-      "$id": "#OversendtKlage/mottakerAdresse",
-      "title": "Mottakeradresse",
-      "type": "object",
-      "description": "En alternativ mottakeradresse for bruker. Hvis tom brukes adresse fra dok-dist",
-      "required": [
-        "adressetype",
-        "land"
-      ],
-      "properties": {
-        "adressetype": {
-          "$id": "#OversendtKlage/mottakerAdresse/adressetype",
-          "title": "Adressetype",
-          "type": "string",
-          "description": "Adressetype, enten NORSK eller UTENLANDSK, brukes av dok-dist",
-          "enum": [
-            "NORSK",
-            "UTENLANDSK"
-          ]
-        },
-        "adresselinje1": {
-          "$id": "#OversendtKlage/mottakerAdresse/adresselinje1",
-          "title": "Adresselinje1",
-          "type": "string",
-          "description": "Adresselinje 1 som er påkrevd dersom type er utenlandsk"
-        },
-        "adresselinje2": {
-          "$id": "#OversendtKlage/mottakerAdresse/adresselinje2",
-          "title": "Adresselinje2",
-          "type": "string",
-          "description": "Adresselinje 2"
-        },
-        "adresselinje3": {
-          "$id": "#OversendtKlage/mottakerAdresse/adresselinje3",
-          "title": "Adresselinje3",
-          "type": "string",
-          "description": "Adresselinje 3"
-        },
-        "postnummer": {
-          "$id": "#OversendtKlage/mottakerAdresse/postnummer",
-          "title": "Postnummer",
-          "type": "string",
-          "description": "Postnummer er påkrevd hvis type er NORSK"
-        },
-        "poststed": {
-          "$id": "#OversendtKlage/mottakerAdresse/poststed",
-          "title": "Postnummer",
-          "type": "string",
-          "description": "Postnummer er påkrevd hvis type er NORSK"
-        },
-        "land": {
-          "$id": "#OversendtKlage/mottakerAdresse/land",
-          "title": "Land",
-          "type": "string",
-          "description": "Landkode på form iso3166-1 alfa-2"
+    "mottakerAdresser": {
+      "$id": "#OversendtKlage/mottakerAdresser",
+      "title": "Mottakeradresser",
+      "type": "array",
+      "description": "Alternative mottakeradresser for bruker. Hvis tom brukes adresse fra dok-dist",
+      "items": {
+        "$id": "#OversendtKlage/mottakerAdresser/item",
+        "type": "object",
+        "required": [
+          "adressetype",
+          "land"
+        ],
+        "properties": {
+          "adressetype": {
+            "$id": "#OversendtKlage/mottakerAdresse/adressetype",
+            "title": "Adressetype",
+            "type": "string",
+            "description": "Adressetype, enten NORSK eller UTENLANDSK, brukes av dok-dist",
+            "enum": [
+              "NORSK",
+              "UTENLANDSK"
+            ]
+          },
+          "adresselinje1": {
+            "$id": "#OversendtKlage/mottakerAdresse/adresselinje1",
+            "title": "Adresselinje1",
+            "type": "string",
+            "description": "Adresselinje 1 som er påkrevd dersom type er utenlandsk"
+          },
+          "adresselinje2": {
+            "$id": "#OversendtKlage/mottakerAdresse/adresselinje2",
+            "title": "Adresselinje2",
+            "type": "string",
+            "description": "Adresselinje 2"
+          },
+          "adresselinje3": {
+            "$id": "#OversendtKlage/mottakerAdresse/adresselinje3",
+            "title": "Adresselinje3",
+            "type": "string",
+            "description": "Adresselinje 3"
+          },
+          "postnummer": {
+            "$id": "#OversendtKlage/mottakerAdresse/postnummer",
+            "title": "Postnummer",
+            "type": "string",
+            "description": "Postnummer er påkrevd hvis type er NORSK"
+          },
+          "poststed": {
+            "$id": "#OversendtKlage/mottakerAdresse/poststed",
+            "title": "Postnummer",
+            "type": "string",
+            "description": "Postnummer er påkrevd hvis type er NORSK"
+          },
+          "land": {
+            "$id": "#OversendtKlage/mottakerAdresse/land",
+            "title": "Land",
+            "type": "string",
+            "description": "Landkode på form iso3166-1 alfa-2"
+          }
         }
       }
     }

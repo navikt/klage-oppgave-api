@@ -40,15 +40,17 @@ Eksempel
     "brukersKlageJournalpostId": "578654",
     "frist": "2021-12-12",
     "kilde": "SPEIL",
-    "mottakerAdresse": {
-        "adressetype": "NORSK/UTENLANDSK",
-        "adresselinje1": "Påkrevd hvis adresse er utenlandsk",
-        "adresselinje2": "Adresselinje 2",
-        "adresselinje3": "Adresselinje 3",
-        "postnummer": "Påkrevd hvis adresse er norsk",
-        "poststed": "Påkrevd hvis adresse er norsk",
-        "land": "iso3166-1 alfa-2"
-    }
+    "mottakerAdresser": [
+        {
+            "adressetype": "NORSK/UTENLANDSK",
+            "adresselinje1": "Påkrevd hvis adresse er utenlandsk",
+            "adresselinje2": "Adresselinje 2",
+            "adresselinje3": "Adresselinje 3",
+            "postnummer": "Påkrevd hvis adresse er norsk",
+            "poststed": "Påkrevd hvis adresse er norsk",
+            "land": "iso3166-1 alfa-2"
+        }
+    ]
 }
 ````
 
