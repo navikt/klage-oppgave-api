@@ -67,6 +67,7 @@ dependencies {
 
     implementation("org.springframework.cloud:spring-cloud-starter-sleuth:$springSleuthVersion")
     implementation("org.springdoc:springdoc-openapi-ui:1.5.7")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.5.7")
 
     implementation("org.projectreactor:reactor-spring:1.0.1.RELEASE")
 
