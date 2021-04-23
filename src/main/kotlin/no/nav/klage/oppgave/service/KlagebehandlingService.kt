@@ -300,7 +300,7 @@ class KlagebehandlingService(
                 tildeltSaksbehandlerident = null,
                 tildeltEnhet = mottak.oversendtKaEnhet,
                 mottakId = mottak.id,
-                vedtak = mutableSetOf(),
+                vedtak = mutableSetOf(Vedtak()),
                 kvalitetsvurdering = null,
                 hjemler = mottak.hjemmelListe.mapNotNull { mapMottakHjemmel(it) }.toMutableSet(),
                 saksdokumenter = createSaksdokumenter(mottak),
@@ -418,10 +418,12 @@ class KlagebehandlingService(
         val klage = klagebehandlingRepository.findById(klagebehandlingId).orElseThrow()
         val vedtak = klage.vedtak.find { it.id == vedtakId }
         require(vedtak != null) { "Fant ikke vedtak på klage" }
+        require(vedtak.utfall != null) { "Utfall på vedtak må være satt" }
+        val utfall = vedtak.utfall!!
         val vedtakFattet = KlagevedtakFattet(
             kildeReferanse = klage.referanseId ?: "UKJENT", // TODO1: Riktig?
             kilde = klage.kilde,
-            utfall = vedtak.utfall,
+            utfall = utfall,
             vedtaksbrevReferanse = "TODO2",
             sakReferanse = "TODO3",
             kabalReferanse = "TODO4" // Human readable?

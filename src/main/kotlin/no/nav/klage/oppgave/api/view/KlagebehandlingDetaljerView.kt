@@ -1,6 +1,5 @@
 package no.nav.klage.oppgave.api.view
 
-import no.nav.klage.oppgave.clients.pdl.graphql.PdlPerson
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -36,5 +35,6 @@ data class KlagebehandlingDetaljerView(
     val internVurdering: String?,
     val sendTilbakemelding: Boolean?,
     val tilbakemelding: String?,
-    val klagebehandlingVersjon: Long
+    val klagebehandlingVersjon: Long,
+    val vedtak: List<VedtakView>
 )

@@ -2,9 +2,11 @@ package no.nav.klage.oppgave.domain.klage
 
 import no.nav.klage.oppgave.domain.kodeverk.*
 import no.nav.klage.oppgave.events.KlagebehandlingEndretEvent
+import no.nav.klage.oppgave.exceptions.VedtakNotFoundException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 object KlagebehandlingAggregatFunctions {
 
@@ -331,6 +333,27 @@ object KlagebehandlingAggregatFunctions {
         return KlagebehandlingEndretEvent(klagebehandling = this, endringslogginnslag = listOfNotNull(endringslogg))
     }
 
+    fun Klagebehandling.setUtfallInVedtak(
+        vedtakId: UUID,
+        nyVerdi: Utfall,
+        saksbehandlerident: String
+    ): KlagebehandlingEndretEvent? {
+        val vedtak = getVedtakFromKlagebehandling(this, vedtakId)
+        val gammelVerdi = vedtak.utfall
+        val tidspunkt = LocalDateTime.now()
+        vedtak.utfall = nyVerdi
+        vedtak.modified = tidspunkt
+        val endringslogg =
+            endringslogg(
+                saksbehandlerident,
+                Felt.TILDELT_SAKSBEHANDLERIDENT,
+                gammelVerdi.toString(),
+                nyVerdi.toString(),
+                tidspunkt
+            )
+        return KlagebehandlingEndretEvent(klagebehandling = this, endringslogginnslag = listOfNotNull(endringslogg))
+    }
+
     fun Klagebehandling.addSaksdokument(
         saksdokument: Saksdokument,
         saksbehandlerident: String
@@ -388,4 +411,9 @@ object KlagebehandlingAggregatFunctions {
         )
     }
 
+    private fun getVedtakFromKlagebehandling(klagebehandling: Klagebehandling, vedtakId: UUID): Vedtak {
+        return klagebehandling.vedtak.firstOrNull() {
+            it.id == vedtakId
+        } ?: throw VedtakNotFoundException("Vedtak med id $vedtakId ikke funnet")
+    }
 }

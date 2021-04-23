@@ -15,7 +15,7 @@ class Vedtak(
     val id: UUID = UUID.randomUUID(),
     @Column(name = "utfall_id")
     @Convert(converter = UtfallConverter::class)
-    val utfall: Utfall,
+    var utfall: Utfall? = null,
     @ElementCollection(targetClass = Hjemmel::class, fetch = FetchType.EAGER)
     @CollectionTable(
         name = "vedtak_hjemmel",
@@ -24,7 +24,7 @@ class Vedtak(
     )
     @Convert(converter = HjemmelConverter::class)
     @Column(name = "id")
-    val hjemler: MutableSet<Hjemmel> = mutableSetOf(),
+    var hjemler: MutableSet<Hjemmel> = mutableSetOf(),
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinTable(
         name = "brevmottaker",
@@ -32,11 +32,13 @@ class Vedtak(
         joinColumns = [JoinColumn(name = "vedtak_id", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "mottaker_part_id", referencedColumnName = "id")]
     )
-    val brevmottakere: MutableSet<PartId> = mutableSetOf(),
+    var brevmottakere: MutableSet<PartId> = mutableSetOf(),
     @Column(name = "modified")
-    val modified: LocalDateTime = LocalDateTime.now(),
+    var modified: LocalDateTime = LocalDateTime.now(),
     @Column(name = "created")
-    val created: LocalDateTime = LocalDateTime.now()
+    val created: LocalDateTime = LocalDateTime.now(),
+    @Column(name = "journalpost_id")
+    var journalpostId: String? = null
 ) {
     override fun toString(): String {
         return "Vedtak(id=$id, " +
