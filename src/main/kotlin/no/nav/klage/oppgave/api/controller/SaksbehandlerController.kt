@@ -1,20 +1,20 @@
 package no.nav.klage.oppgave.api.controller
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.klage.oppgave.api.view.Enhet
 import no.nav.klage.oppgave.config.SecurityConfiguration
 import no.nav.klage.oppgave.domain.EnheterMedLovligeTemaer
 import no.nav.klage.oppgave.service.SaksbehandlerService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.data.repository.query.Param
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@Api(tags = ["kabal-api"])
+@Tag(name = "kabal-api")
 @ProtectedWithClaims(issuer = SecurityConfiguration.ISSUER_AAD)
 class SaksbehandlerController(private val saksbehandlerService: SaksbehandlerService) {
 
@@ -23,13 +23,13 @@ class SaksbehandlerController(private val saksbehandlerService: SaksbehandlerSer
         private val logger = getLogger(javaClass.enclosingClass)
     }
 
-    @ApiOperation(
-        value = "Hent klageenheter for en ansatt",
-        notes = "Henter alle klageenheter som saksbehandler er knyttet til."
+    @Operation(
+        summary = "Hent klageenheter for en ansatt",
+        description = "Henter alle klageenheter som saksbehandler er knyttet til."
     )
     @GetMapping("/ansatte/{navIdent}/enheter", produces = ["application/json"])
     fun getEnheter(
-        @ApiParam(value = "NavIdent til en ansatt")
+        @Param(value = "NavIdent til en ansatt")
         @PathVariable navIdent: String
     ): List<Enhet> {
         logger.debug("getEnheter is requested by $navIdent")

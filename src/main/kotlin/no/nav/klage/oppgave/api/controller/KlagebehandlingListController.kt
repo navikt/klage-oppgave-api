@@ -1,8 +1,7 @@
 package no.nav.klage.oppgave.api.controller
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.klage.oppgave.api.mapper.KlagebehandlingMapper
 import no.nav.klage.oppgave.api.mapper.KlagebehandlingerQueryParamsMapper
 import no.nav.klage.oppgave.api.view.*
@@ -15,13 +14,14 @@ import no.nav.klage.oppgave.service.ElasticsearchService
 import no.nav.klage.oppgave.service.KlagebehandlingService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.data.repository.query.Param
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 import java.util.*
 
 @RestController
-@Api(tags = ["kabal-api"])
+@Tag(name = "kabal-api")
 @ProtectedWithClaims(issuer = ISSUER_AAD)
 class KlagebehandlingListController(
     private val klagebehandlingService: KlagebehandlingService,
@@ -36,13 +36,13 @@ class KlagebehandlingListController(
         private val logger = getLogger(javaClass.enclosingClass)
     }
 
-    @ApiOperation(
-        value = "Hent oppgaver for en ansatt",
-        notes = "Henter alle oppgaver som saksbehandler har tilgang til."
+    @Operation(
+        summary = "Hent oppgaver for en ansatt",
+        description = "Henter alle oppgaver som saksbehandler har tilgang til."
     )
     @GetMapping("/ansatte/{navIdent}/klagebehandlinger", produces = ["application/json"])
     fun getOppgaver(
-        @ApiParam(value = "NavIdent til en ansatt")
+        @Param(value = "NavIdent til en ansatt")
         @PathVariable navIdent: String,
         queryParams: KlagebehandlingerQueryParams
     ): KlagebehandlingerListRespons {
@@ -62,9 +62,9 @@ class KlagebehandlingListController(
 
     @PostMapping("/ansatte/{navIdent}/klagebehandlinger/{id}/saksbehandlertildeling")
     fun assignSaksbehandler(
-        @ApiParam(value = "NavIdent til en ansatt")
+        @Param(value = "NavIdent til en ansatt")
         @PathVariable navIdent: String,
-        @ApiParam(value = "Id til en klagebehandling")
+        @Param(value = "Id til en klagebehandling")
         @PathVariable("id") klagebehandlingId: String,
         @RequestBody saksbehandlertildeling: Saksbehandlertildeling
     ): ResponseEntity<Void> {
@@ -88,9 +88,9 @@ class KlagebehandlingListController(
 
     @PostMapping("/ansatte/{navIdent}/klagebehandlinger/{id}/saksbehandlerfradeling")
     fun unassignSaksbehandler(
-        @ApiParam(value = "NavIdent til en ansatt")
+        @Param(value = "NavIdent til en ansatt")
         @PathVariable navIdent: String,
-        @ApiParam(value = "Id til en klagebehandling")
+        @Param(value = "Id til en klagebehandling")
         @PathVariable("id") klagebehandlingId: String,
         @RequestBody(required = false) saksbehandlerfradeling: Saksbehandlerfradeling?
     ): ResponseEntity<Void> {
@@ -112,13 +112,13 @@ class KlagebehandlingListController(
         return ResponseEntity.noContent().location(uri).build()
     }
 
-    @ApiOperation(
-        value = "Hent antall utildelte klagebehandlinger der fristen gått ut",
-        notes = "Teller opp alle utildelte klagebehandlinger der fristen gått ut."
+    @Operation(
+        summary = "Hent antall utildelte klagebehandlinger der fristen gått ut",
+        description = "Teller opp alle utildelte klagebehandlinger der fristen gått ut."
     )
     @GetMapping("/ansatte/{navIdent}/antallklagebehandlingermedutgaattefrister", produces = ["application/json"])
     fun getAntallUtgaatteFrister(
-        @ApiParam(value = "NavIdent til en ansatt")
+        @Param(value = "NavIdent til en ansatt")
         @PathVariable navIdent: String,
         queryParams: KlagebehandlingerQueryParams
     ): AntallUtgaatteFristerResponse {

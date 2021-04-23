@@ -1,8 +1,7 @@
 package no.nav.klage.oppgave.api.controller
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.klage.oppgave.api.view.DokumentKnytning
 import no.nav.klage.oppgave.api.view.DokumentReferanserResponse
 import no.nav.klage.oppgave.api.view.DokumenterResponse
@@ -13,6 +12,7 @@ import no.nav.klage.oppgave.service.DokumentService
 import no.nav.klage.oppgave.service.KlagebehandlingService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.data.repository.query.Param
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@Api(tags = ["kabal-api"])
+@Tag(name = "kabal-api")
 @ProtectedWithClaims(issuer = ISSUER_AAD)
 class DokumentController(
     private val klagebehandlingService: KlagebehandlingService,
@@ -33,13 +33,13 @@ class DokumentController(
         private val logger = getLogger(javaClass.enclosingClass)
     }
 
-    @ApiOperation(
-        value = "Hent dokumenter for en klagebehandling",
-        notes = "Henter alle dokumenter om en person som saksbehandler har tilgang til."
+    @Operation(
+        summary = "Hent dokumenter for en klagebehandling",
+        description = "Henter alle dokumenter om en person som saksbehandler har tilgang til."
     )
     @GetMapping("/klagebehandlinger/{behandlingsid}/alledokumenter", produces = ["application/json"])
     fun fetchDokumenter(
-        @ApiParam(value = "Id til klagebehandlingen i vårt system")
+        @Param(value = "Id til klagebehandlingen i vårt system")
         @PathVariable behandlingsid: String,
         @RequestParam(required = false, name = "antall", defaultValue = "10") pageSize: Int,
         @RequestParam(required = false, name = "forrigeSide") previousPageRef: String? = null
@@ -48,26 +48,26 @@ class DokumentController(
         return klagebehandlingService.fetchDokumentlisteForKlagebehandling(klagebehandlingId, pageSize, previousPageRef)
     }
 
-    @ApiOperation(
-        value = "Hent dokumenter knyttet til en klagebehandling",
-        notes = "Henter dokumentene som saksbehandler har markert at skal knyttes til klagebehandlingen."
+    @Operation(
+        summary = "Hent dokumenter knyttet til en klagebehandling",
+        description = "Henter dokumentene som saksbehandler har markert at skal knyttes til klagebehandlingen."
     )
     @GetMapping("/klagebehandlinger/{behandlingsid}/dokumenter", produces = ["application/json"])
     fun fetchConnectedDokumenter(
-        @ApiParam(value = "Id til klagebehandlingen i vårt system")
+        @Param(value = "Id til klagebehandlingen i vårt system")
         @PathVariable behandlingsid: String
     ): DokumenterResponse {
         val klagebehandlingId = parseAndValidate(behandlingsid)
         return klagebehandlingService.fetchJournalposterConnectedToKlagebehandling(klagebehandlingId)
     }
 
-    @ApiOperation(
-        value = "Hent IDene til dokumentene knyttet til en klagebehandling",
-        notes = "Henter IDene til dokumentene som saksbehandler har markert at skal knyttes til klagebehandlingen."
+    @Operation(
+        summary = "Hent IDene til dokumentene knyttet til en klagebehandling",
+        description = "Henter IDene til dokumentene som saksbehandler har markert at skal knyttes til klagebehandlingen."
     )
     @GetMapping("/klagebehandlinger/{behandlingsid}/dokumentreferanser", produces = ["application/json"])
     fun fetchConnectedDokumentIder(
-        @ApiParam(value = "Id til klagebehandlingen i vårt system")
+        @Param(value = "Id til klagebehandlingen i vårt system")
         @PathVariable behandlingsid: String
     ): DokumentReferanserResponse {
         val klagebehandlingId = parseAndValidate(behandlingsid)
@@ -78,9 +78,9 @@ class DokumentController(
         )
     }
 
-    @ApiOperation(
-        value = "Fjerner et dokument fra en klagebehandling",
-        notes = "Sletter knytningen mellom en journalpost fra SAF og klagebehandlingen den har vært knyttet til."
+    @Operation(
+        summary = "Fjerner et dokument fra en klagebehandling",
+        description = "Sletter knytningen mellom en journalpost fra SAF og klagebehandlingen den har vært knyttet til."
     )
     @DeleteMapping(
         "/klagebehandlinger/{behandlingsId}/journalposter/{journalpostId}/dokumenter/{dokumentInfoId}",
@@ -88,7 +88,7 @@ class DokumentController(
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun disconnectDokument(
-        @ApiParam(value = "Id til klagebehandlingen i vårt system")
+        @Param(value = "Id til klagebehandlingen i vårt system")
         @PathVariable behandlingsId: String,
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String
@@ -104,14 +104,14 @@ class DokumentController(
         )
     }
 
-    @ApiOperation(
-        value = "Knytter et dokument til en klagebehandling",
-        notes = "Knytter en journalpost fra SAF til klagebehandlingen."
+    @Operation(
+        summary = "Knytter et dokument til en klagebehandling",
+        description = "Knytter en journalpost fra SAF til klagebehandlingen."
     )
     @PostMapping("/klagebehandlinger/{behandlingsid}/dokumenter", produces = ["application/json"])
     @ResponseStatus(HttpStatus.CREATED)
     fun connectDokument(
-        @ApiParam(value = "Id til klagebehandlingen i vårt system")
+        @Param(value = "Id til klagebehandlingen i vårt system")
         @PathVariable behandlingsid: String,
         @RequestBody dokumentKnytning: DokumentKnytning
     ) {
@@ -129,11 +129,11 @@ class DokumentController(
     @ResponseBody
     @GetMapping("/klagebehandlinger/{behandlingsId}/journalposter/{journalpostId}/dokumenter/{dokumentInfoId}")
     fun getArkivertDokument(
-        @ApiParam(value = "Id til klagebehandlingen i vårt system")
+        @Param(value = "Id til klagebehandlingen i vårt system")
         @PathVariable behandlingsId: String,
-        @ApiParam(value = "Id til journalpost")
+        @Param(value = "Id til journalpost")
         @PathVariable journalpostId: String,
-        @ApiParam(value = "Id til dokumentInfo")
+        @Param(value = "Id til dokumentInfo")
         @PathVariable dokumentInfoId: String
 
     ): ResponseEntity<ByteArray> {

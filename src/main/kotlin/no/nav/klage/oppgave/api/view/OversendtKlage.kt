@@ -1,7 +1,6 @@
 package no.nav.klage.oppgave.api.view
 
-import io.swagger.annotations.ApiModel
-import io.swagger.annotations.ApiModelProperty
+import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.klage.oppgave.domain.klage.*
 import no.nav.klage.oppgave.domain.kodeverk.Tema
 import no.nav.klage.oppgave.domain.kodeverk.Type
@@ -9,63 +8,63 @@ import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDate
 import javax.validation.constraints.Past
 
-@ApiModel
+@Schema
 data class OversendtKlage(
-    @ApiModelProperty(
+    @Schema(
         required = true,
         example = "OMS"
     )
     val tema: Tema,
-    @ApiModelProperty(
+    @Schema(
         required = true,
         example = "KLAGE"
     )
     val type: Type,
-    @ApiModelProperty(
+    @Schema(
         required = true
     )
     val klager: OversendtKlager,
-    @ApiModelProperty(
-        notes = "Kan settes dersom klagen gjelder en annen enn den som har levert klagen",
+    @Schema(
+        description = "Kan settes dersom klagen gjelder en annen enn den som har levert klagen",
         required = false
     )
     val sakenGjelder: OversendtSakenGjelder? = null,
-    @ApiModelProperty(
-        notes = "Saksnummer brukt til journalføring. Vi oppretter sak dersom denne er tom",
+    @Schema(
+        description = "Saksnummer brukt til journalføring. Vi oppretter sak dersom denne er tom",
         required = false
     )
     val sakReferanse: String? = null,
-    @ApiModelProperty(
-        notes = "Id som er intern for kildesystemet så vedtak fra oss knyttes riktig i kilde",
+    @Schema(
+        description = "Id som er intern for kildesystemet så vedtak fra oss knyttes riktig i kilde",
         required = true
     )
     val kildeReferanse: String,
-    @ApiModelProperty(
-        notes = "Id som rapporters på til DVH, bruker kildeReferanse hvis denne ikke er satt",
+    @Schema(
+        description = "Id som rapporters på til DVH, bruker kildeReferanse hvis denne ikke er satt",
         required = false
     )
     val dvhReferanse: String? = null,
-    @ApiModelProperty(
-        notes = "Url tilbake til kildesystem for innsyn i sak",
+    @Schema(
+        description = "Url tilbake til kildesystem for innsyn i sak",
         required = false,
         example = "https://k9-sak.adeo.no/behandling/12345678"
     )
     val innsynUrl: String?,
-    @ApiModelProperty(
-        notes = "Hjemler knyttet til klagen",
+    @Schema(
+        description = "Hjemler knyttet til klagen",
         required = true
     )
     val hjemler: List<HjemmelFraFoersteInstans>,
     val avsenderSaksbehandlerIdent: String,
     val avsenderEnhet: String,
-    @ApiModelProperty(
-        notes = "Kan settes dersom klagen skal til en spesifikk klageinstans",
+    @Schema(
+        description = "Kan settes dersom klagen skal til en spesifikk klageinstans",
         required = false,
         example = "4219"
     )
     val oversendtEnhet: String? = null,
-    @ApiModelProperty(
-        notes = "Liste med relevante journalposter til klagen. Liste kan være tom.",
+    @Schema(
+        description = "Liste med relevante journalposter til klagen. Liste kan være tom.",
         required = true
     )
     val tilknyttedeJournalposter: List<OversendtDokumentReferanse>,
@@ -73,19 +72,19 @@ data class OversendtKlage(
     @field:DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     val mottattFoersteinstans: LocalDate,
     val innsendtTilNav: LocalDate,
-    @ApiModelProperty(
-        notes = "Kan settes dersom førsteinstans ønsker å overstyre frist",
+    @Schema(
+        description = "Kan settes dersom førsteinstans ønsker å overstyre frist",
         required = false
     )
     val frist: LocalDate? = null,
-    @ApiModelProperty(
-        notes = "Legges ved melding ut fra KA på Kafka, brukes for filtrering",
+    @Schema(
+        description = "Legges ved melding ut fra KA på Kafka, brukes for filtrering",
         required = true,
         example = "K9-sak"
     )
     val kilde: String,
-    @ApiModelProperty(
-        notes = "Kommentarer fra saksbehandler i førsteinstans som ikke er med i oversendelsesbrevet klager mottar",
+    @Schema(
+        description = "Kommentarer fra saksbehandler i førsteinstans som ikke er med i oversendelsesbrevet klager mottar",
         required = false
     )
     val kommentar: String? = null
@@ -113,17 +112,17 @@ data class OversendtKlage(
 }
 
 class HjemmelFraFoersteInstans private constructor(
-    @ApiModelProperty(
+    @Schema(
         required = false,
         example = "9"
     )
     val kapittel: Int?,
-    @ApiModelProperty(
+    @Schema(
         required = false,
         example = "1"
     )
     val paragraf: Int?,
-    @ApiModelProperty(
+    @Schema(
         required = true
     )
     val lov: Lov
@@ -150,11 +149,11 @@ enum class Lov {
 }
 
 data class OversendtSakenGjelder(
-    @ApiModelProperty(
+    @Schema(
         required = true
     )
     val id: OversendtPartId,
-    @ApiModelProperty(
+    @Schema(
         required = true,
         example = "true"
     )
@@ -167,13 +166,13 @@ data class OversendtSakenGjelder(
 }
 
 data class OversendtKlager(
-    @ApiModelProperty(
+    @Schema(
         required = true
     )
     val id: OversendtPartId,
-    @ApiModelProperty(
+    @Schema(
         name = "klagersProsessfullmektig",
-        notes = "Kan settes dersom klager har en prosessfullmektig",
+        description = "Kan settes dersom klager har en prosessfullmektig",
         required = false
     )
     val klagersProsessfullmektig: OversendtProsessfullmektig? = null
@@ -185,11 +184,11 @@ data class OversendtKlager(
 }
 
 data class OversendtProsessfullmektig(
-    @ApiModelProperty(
+    @Schema(
         required = true
     )
     val id: OversendtPartId,
-    @ApiModelProperty(
+    @Schema(
         required = true,
         example = "true"
     )
@@ -202,12 +201,12 @@ data class OversendtProsessfullmektig(
 }
 
 data class OversendtPartId(
-    @ApiModelProperty(
+    @Schema(
         required = true,
         example = "PERSON / VIRKSOMHET"
     )
     val type: PartIdType,
-    @ApiModelProperty(
+    @Schema(
         required = true,
         example = "12345678910"
     )
@@ -220,12 +219,12 @@ data class OversendtPartId(
 }
 
 data class OversendtDokumentReferanse(
-    @ApiModelProperty(
+    @Schema(
         required = true,
         example = "BRUKERS_KLAGE"
     )
     val type: MottakDokumentType,
-    @ApiModelProperty(
+    @Schema(
         required = true,
         example = "830498203"
     )
