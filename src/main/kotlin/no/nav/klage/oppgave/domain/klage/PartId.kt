@@ -1,6 +1,5 @@
 package no.nav.klage.oppgave.domain.klage
 
-import io.swagger.annotations.ApiModel
 import java.util.*
 import javax.persistence.*
 

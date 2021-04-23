@@ -1,10 +1,10 @@
 package no.nav.klage.oppgave.domain.kodeverk
 
-import io.swagger.annotations.ApiModel
+import io.swagger.v3.oas.annotations.media.Schema
 import javax.persistence.AttributeConverter
 import javax.persistence.Converter
 
-@ApiModel
+@Schema
 enum class Tema(override val id: Int, override val navn: String, override val beskrivelse: String) : Kode {
 
     AAP(1, "AAP", "Arbeidsavklaringspenger"),

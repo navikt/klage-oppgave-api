@@ -1,6 +1,6 @@
 package no.nav.klage.oppgave.api.controller
 
-import io.swagger.annotations.Api
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.klage.oppgave.api.mapper.KlagebehandlingMapper
 import no.nav.klage.oppgave.api.view.*
 import no.nav.klage.oppgave.config.SecurityConfiguration
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@Api(tags = ["kabal-api"])
+@Tag(name = "kabal-api")
 @ProtectedWithClaims(issuer = SecurityConfiguration.ISSUER_AAD)
 class KvalitetsvurderingController(
     private val innloggetSaksbehandlerRepository: InnloggetSaksbehandlerRepository,
