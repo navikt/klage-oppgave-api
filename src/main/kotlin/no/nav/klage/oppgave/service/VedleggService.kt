@@ -18,10 +18,14 @@ class VedleggService(
         private val logger = getLogger(javaClass.enclosingClass)
     }
 
-    fun addVedlegg(klageBehandlingId: UUID, vedlegg: MultipartFile, finalize: Boolean, fagsak: Boolean): String {
+    fun addVedlegg(klageBehandlingId: UUID, vedlegg: MultipartFile? = null, finalize: Boolean, fagsak: Boolean): String {
         val klagebehandling = klagebehandlingService.getKlagebehandling(klageBehandlingId)
-        attachmentValidator.validateAttachment(vedlegg)
-        return joarkClient.createJournalpost(klagebehandling, vedlegg.bytes, finalize, fagsak)
+        return if (vedlegg != null) {
+            attachmentValidator.validateAttachment(vedlegg)
+            joarkClient.createJournalpost(klagebehandling, vedlegg.bytes, finalize, fagsak)
+        } else {
+            joarkClient.createJournalpost(klagebehandling, vedlegg, finalize, fagsak)
+        }
     }
 
     fun ferdigstillJournalpost(journalpostId: String): String {

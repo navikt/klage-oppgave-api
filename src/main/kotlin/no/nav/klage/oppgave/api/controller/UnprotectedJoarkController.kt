@@ -25,7 +25,7 @@ class UnprotectedJoarkController(
     @PostMapping(value = ["/klagebehandlinger/{id}/journalfoer"], consumes = ["multipart/form-data"])
     fun journalfoer(
         @PathVariable id: String,
-        @RequestParam vedlegg: MultipartFile,
+        @RequestParam vedlegg: MultipartFile? = null,
         @RequestParam finalize: Boolean,
         @RequestParam fagsak: Boolean
     ): String {
