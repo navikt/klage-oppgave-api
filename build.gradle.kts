@@ -8,10 +8,12 @@ val springSleuthVersion = "3.0.0"
 val unleashVersion = "3.3.3"
 val problemSpringWebStartVersion = "0.26.2"
 val kafkaAvroVersion = "5.5.2"
+val pdfboxVersion = "2.0.19"
 val springRetryVersion = "1.3.1"
 val springMockkVersion = "3.0.1"
 val springFoxVersion = "3.0.0"
 val testContainersVersion = "1.15.1"
+val tikaVersion = "1.24.1"
 val nimbusVersion = "8.20.1"
 val threeTenExtraVersion = "1.6.0"
 
@@ -87,6 +89,9 @@ dependencies {
     implementation("org.springframework.retry:spring-retry:$springRetryVersion")
     implementation("no.finn.unleash:unleash-client-java:$unleashVersion")
     implementation("org.zalando:problem-spring-web-starter:$problemSpringWebStartVersion")
+
+    implementation("org.apache.pdfbox:pdfbox:$pdfboxVersion")
+    implementation("org.apache.tika:tika-core:$tikaVersion")
 
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.ninja-squad:springmockk:$springMockkVersion")

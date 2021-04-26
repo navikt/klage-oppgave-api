@@ -38,3 +38,7 @@ ROLE_KLAGE_STRENGT_FORTROLIG: de92036b-c350-471c-9249-753f36acd24d
 ROLE_KLAGE_EGEN_ANSATT: 011af9b0-792d-4d2c-a2eb-9a59fc095002
 ROLE_GOSYS_OPPGAVE_BEHANDLER: a9f5ef81-4e81-42e8-b368-0273071b64b9
 ROLE_ADMIN: a9f5ef81-4e81-42e8-b368-0273071b64b9
+
+JOARK_SERVICE_URL: https://api-gw-q1.oera.no/dokarkiv/rest/journalpostapi/v1/journalpost
+
+CLAM_AV_URL: http://clamav.clamav/scan
