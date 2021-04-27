@@ -81,7 +81,7 @@ class JoarkClient(
     //TODO: Fiks oppdatering av journalpost
     fun updateJournalpost(klagebehandling: Klagebehandling, journalpostId: String, uploadedDocument: ByteArray? = null): String {
 
-        val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument)
+        val journalpost = this.createJournalpostForUpdate(klagebehandling, uploadedDocument)
 
         val journalpostResponse = joarkWebClient.put()
             .uri ("/${journalpostId}")
@@ -102,7 +102,7 @@ class JoarkClient(
 
     fun updateJournalpostSystemUser(klagebehandling: Klagebehandling, journalpostId: String, uploadedDocument: ByteArray? = null): String {
 
-        val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument)
+        val journalpost = this.createJournalpostForUpdate(klagebehandling, uploadedDocument)
 
         val journalpostResponse = joarkWebClient.put()
             .uri ("/${journalpostId}")
@@ -155,9 +155,8 @@ class JoarkClient(
         return response
     }
 
-    private fun createJournalpostObject(klagebehandling: Klagebehandling, uploadedDocument: ByteArray?, fagsak: Boolean? = false): Journalpost =
+    private fun createJournalpostForUpdate(klagebehandling: Klagebehandling, uploadedDocument: ByteArray?, fagsak: Boolean? = false): Journalpost =
         Journalpost(
-            journalposttype = JournalpostType.UTGAAENDE,
             tema = klagebehandling.tema,
             behandlingstema = BEHANDLINGSTEMA_KLAGE_KLAGEINSTANS,
             avsenderMottaker = createAvsenderMottager(klagebehandling),
@@ -169,6 +168,9 @@ class JoarkClient(
             dokumenter = createDokument(uploadedDocument)
         )
 
+    private fun createJournalpostObject(klagebehandling: Klagebehandling, uploadedDocument: ByteArray?, fagsak: Boolean? = false): Journalpost {
+        return createJournalpostForUpdate(klagebehandling, uploadedDocument, fagsak).copy(journalposttype = JournalpostType.UTGAAENDE)
+    }
 
 
     private fun createAvsenderMottager(klagebehandling: Klagebehandling): AvsenderMottaker? {

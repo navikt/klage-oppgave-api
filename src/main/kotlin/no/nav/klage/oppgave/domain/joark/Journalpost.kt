@@ -3,7 +3,7 @@ package no.nav.klage.oppgave.domain.joark
 import no.nav.klage.oppgave.domain.kodeverk.Tema
 
 data class Journalpost(
-    val journalposttype: JournalpostType,
+    val journalposttype: JournalpostType? = null,
     val tema: Tema,
     val behandlingstema: String,
     val kanal: String = "NAV_NO",
