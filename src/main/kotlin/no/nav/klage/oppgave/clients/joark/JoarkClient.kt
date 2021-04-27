@@ -33,7 +33,12 @@ class JoarkClient(
         private const val JOURNALFOERENDE_ENHET = "4291"
     }
 
-    fun createJournalpostWithSystemUser(klagebehandling: Klagebehandling, uploadedDocument: ByteArray? = null, forsoekFerdigstill: Boolean? = false, fagsak: Boolean? = false): String {
+    fun createJournalpostWithSystemUser(
+        klagebehandling: Klagebehandling,
+        uploadedDocument: ByteArray? = null,
+        forsoekFerdigstill: Boolean? = false,
+        fagsak: Boolean? = false
+    ): String {
 
         val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument, fagsak)
 
@@ -79,12 +84,16 @@ class JoarkClient(
     }
 
     //TODO: Fiks oppdatering av journalpost
-    fun updateJournalpost(klagebehandling: Klagebehandling, journalpostId: String, uploadedDocument: ByteArray? = null): String {
+    fun updateJournalpost(
+        klagebehandling: Klagebehandling,
+        journalpostId: String,
+        uploadedDocument: ByteArray? = null
+    ): String {
 
         val journalpost = this.createJournalpostForUpdate(klagebehandling, uploadedDocument)
 
         val journalpostResponse = joarkWebClient.put()
-            .uri ("/${journalpostId}")
+            .uri("/${journalpostId}")
             .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
             .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
@@ -100,12 +109,16 @@ class JoarkClient(
         return journalpostResponse.journalpostId
     }
 
-    fun updateJournalpostSystemUser(klagebehandling: Klagebehandling, journalpostId: String, uploadedDocument: ByteArray? = null): String {
+    fun updateJournalpostSystemUser(
+        klagebehandling: Klagebehandling,
+        journalpostId: String,
+        uploadedDocument: ByteArray? = null
+    ): String {
 
         val journalpost = this.createJournalpostForUpdate(klagebehandling, uploadedDocument)
 
         val journalpostResponse = joarkWebClient.put()
-            .uri ("/${journalpostId}")
+            .uri("/${journalpostId}")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getStsSystembrukerToken()}")
             .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
             .contentType(MediaType.APPLICATION_JSON)
@@ -122,7 +135,7 @@ class JoarkClient(
 
     fun finalizeJournalpostSystemUser(journalpostId: String): String {
         val response = joarkWebClient.patch()
-            .uri ("/${journalpostId}/ferdigstill")
+            .uri("/${journalpostId}/ferdigstill")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getStsSystembrukerToken()}")
 //            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
             .contentType(MediaType.APPLICATION_JSON)
@@ -139,7 +152,7 @@ class JoarkClient(
 
     fun finalizeJournalpost(journalpostId: String): String {
         val response = joarkWebClient.patch()
-            .uri ("/${journalpostId}/ferdigstill")
+            .uri("/${journalpostId}/ferdigstill")
             .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
             .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
@@ -155,8 +168,12 @@ class JoarkClient(
         return response
     }
 
-    private fun createJournalpostForUpdate(klagebehandling: Klagebehandling, uploadedDocument: ByteArray?, fagsak: Boolean? = false): Journalpost =
-        Journalpost(
+    private fun createJournalpostForUpdate(
+        klagebehandling: Klagebehandling,
+        uploadedDocument: ByteArray?,
+        fagsak: Boolean? = false
+    ): UpdateJournalpost =
+        UpdateJournalpost(
             tema = klagebehandling.tema,
             behandlingstema = BEHANDLINGSTEMA_KLAGE_KLAGEINSTANS,
             avsenderMottaker = createAvsenderMottager(klagebehandling),
@@ -168,9 +185,23 @@ class JoarkClient(
             dokumenter = createDokument(uploadedDocument)
         )
 
-    private fun createJournalpostObject(klagebehandling: Klagebehandling, uploadedDocument: ByteArray?, fagsak: Boolean? = false): Journalpost {
-        return createJournalpostForUpdate(klagebehandling, uploadedDocument, fagsak).copy(journalposttype = JournalpostType.UTGAAENDE)
-    }
+    private fun createJournalpostObject(
+        klagebehandling: Klagebehandling,
+        uploadedDocument: ByteArray?,
+        fagsak: Boolean? = false
+    ): Journalpost =
+        Journalpost(
+            journalposttype = JournalpostType.UTGAAENDE,
+            tema = klagebehandling.tema,
+            behandlingstema = BEHANDLINGSTEMA_KLAGE_KLAGEINSTANS,
+            avsenderMottaker = createAvsenderMottager(klagebehandling),
+            sak = createSak(klagebehandling, fagsak),
+            tittel = BREV_TITTEL,
+            journalfoerendeEnhet = JOURNALFOERENDE_ENHET,
+            eksternReferanseId = tracer.currentSpan().context().traceIdString(),
+            bruker = createBruker(klagebehandling),
+            dokumenter = createDokument(uploadedDocument)
+        )
 
 
     private fun createAvsenderMottager(klagebehandling: Klagebehandling): AvsenderMottaker? {
@@ -215,13 +246,14 @@ class JoarkClient(
             brevkode = BREVKODE,
             dokumentVarianter = listOf(
                 DokumentVariant(
+                    filnavn = "TEST",
                     filtype = "PDFA",
                     variantformat = "ARKIV",
                     fysiskDokument = Base64.getEncoder().encodeToString(uploadedDocument)
                 )
             ),
 
-        )
+            )
         return listOf(hovedDokument)
     }
 }
