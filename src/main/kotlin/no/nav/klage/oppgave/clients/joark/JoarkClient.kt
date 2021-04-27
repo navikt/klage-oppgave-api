@@ -180,7 +180,6 @@ class JoarkClient(
             sak = createSak(klagebehandling, fagsak),
             tittel = BREV_TITTEL,
             journalfoerendeEnhet = JOURNALFOERENDE_ENHET,
-            eksternReferanseId = tracer.currentSpan().context().traceIdString(),
             bruker = createBruker(klagebehandling),
             dokumenter = createDokument(uploadedDocument)
         )
