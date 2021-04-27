@@ -29,7 +29,16 @@ class UnprotectedJoarkController(
         @RequestParam finalize: Boolean,
         @RequestParam fagsak: Boolean
     ): String {
-        return vedleggService.addVedlegg(id.toUUIDOrException(), vedlegg, finalize, fagsak)
+        return vedleggService.addVedleggSystemUser(id.toUUIDOrException(), vedlegg, finalize, fagsak)
+    }
+
+    @PostMapping(value = ["/klagebehandlinger/{id}/journalfoer/{journalpostId}"], consumes = ["multipart/form-data"])
+    fun oppdater(
+        @PathVariable id: String,
+        @PathVariable journalpostId: String,
+        @RequestParam vedlegg: MultipartFile,
+    ): String {
+        return vedleggService.updateVedleggSystemUser(id.toUUIDOrException(), vedlegg, journalpostId)
     }
 
     @PatchMapping("/klagebehandlinger/{journalpostId}/ferdigstill")

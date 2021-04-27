@@ -1,16 +1,21 @@
 package no.nav.klage.oppgave.service
 
+import no.nav.klage.oppgave.clients.joark.JoarkClient
 import no.nav.klage.oppgave.domain.kafka.KlagevedtakFattet
 import no.nav.klage.oppgave.domain.klage.Klagebehandling
+import no.nav.klage.oppgave.domain.klage.KlagebehandlingAggregatFunctions.setJournalpostIdInVedtak
 import no.nav.klage.oppgave.domain.klage.KlagebehandlingAggregatFunctions.setUtfallInVedtak
 import no.nav.klage.oppgave.domain.klage.Vedtak
 import no.nav.klage.oppgave.domain.kodeverk.Utfall
+import no.nav.klage.oppgave.exceptions.VedtakFinalizedException
 import no.nav.klage.oppgave.exceptions.VedtakNotFoundException
+import no.nav.klage.oppgave.util.AttachmentValidator
 import no.nav.klage.oppgave.repositories.KlagebehandlingRepository
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 @Service
@@ -18,7 +23,10 @@ import java.util.*
 class VedtakService(
     private val klagebehandlingRepository: KlagebehandlingRepository,
     private val vedtakKafkaProducer: VedtakKafkaProducer,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val applicationEventPublisher: ApplicationEventPublisher,
+    private val attachmentValidator: AttachmentValidator,
+    private val joarkClient: JoarkClient
+
 ) {
 
     companion object {
@@ -41,8 +49,42 @@ class VedtakService(
             klagebehandling.setUtfallInVedtak(vedtakId, utfall, utfoerendeSaksbehandlerIdent)
         applicationEventPublisher.publishEvent(event)
         return getVedtakFromKlagebehandling(klagebehandling, vedtakId)
-
     }
+
+    fun setJournalpostId(
+        klagebehandling: Klagebehandling,
+        vedtakId: UUID,
+        journalpostId: String,
+        utfoerendeSaksbehandlerIdent: String
+    ): Vedtak {
+        val event =
+            klagebehandling.setJournalpostIdInVedtak(vedtakId, journalpostId, utfoerendeSaksbehandlerIdent)
+        applicationEventPublisher.publishEvent(event)
+        return getVedtakFromKlagebehandling(klagebehandling, vedtakId)
+    }
+
+    fun addVedlegg(
+        klagebehandling: Klagebehandling,
+        vedtakId: UUID,
+        vedlegg: MultipartFile,
+        utfoerendeSaksbehandlerIdent: String
+    ): Vedtak {
+        val vedtak = getVedtakFromKlagebehandling(klagebehandling, vedtakId)
+        if (vedtak.finalized != null) throw VedtakFinalizedException("Vedtak med id $vedtakId er ferdigstilt")
+        attachmentValidator.validateAttachment(vedlegg)
+        if (vedtak.journalpostId != null) {
+//            joarkClient.updateJournalpost(klagebehandling, vedlegg.bytes)
+            return vedtak
+        } else {
+            return setJournalpostId(
+                klagebehandling,
+                vedtakId,
+                joarkClient.createJournalpost(klagebehandling, vedlegg.bytes),
+                utfoerendeSaksbehandlerIdent
+            )
+        }
+    }
+
 
     fun dispatchVedtakToKafka(klagebehandlingId: UUID, vedtakId: UUID) {
         val klage = klagebehandlingRepository.findById(klagebehandlingId).orElseThrow()
@@ -67,5 +109,4 @@ class VedtakService(
             it.id == vedtakId
         } ?: throw VedtakNotFoundException("Vedtak med id $vedtakId ikke funnet")
     }
-
 }

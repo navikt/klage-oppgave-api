@@ -1,6 +1,7 @@
 package no.nav.klage.oppgave.service
 
 import no.nav.klage.oppgave.clients.joark.JoarkClient
+import no.nav.klage.oppgave.domain.klage.Klagebehandling
 import no.nav.klage.oppgave.util.AttachmentValidator
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.stereotype.Service
@@ -18,18 +19,26 @@ class VedleggService(
         private val logger = getLogger(javaClass.enclosingClass)
     }
 
-    fun addVedlegg(klageBehandlingId: UUID, vedlegg: MultipartFile? = null, finalize: Boolean, fagsak: Boolean): String {
+    fun addVedleggSystemUser(klageBehandlingId: UUID, vedlegg: MultipartFile? = null, finalize: Boolean, fagsak: Boolean): String {
         val klagebehandling = klagebehandlingService.getKlagebehandling(klageBehandlingId)
         return if (vedlegg != null) {
             attachmentValidator.validateAttachment(vedlegg)
-            joarkClient.createJournalpost(klagebehandling, vedlegg.bytes, finalize, fagsak)
+            joarkClient.createJournalpostWithSystemUser(klagebehandling, vedlegg.bytes, finalize, fagsak)
         } else {
-            joarkClient.createJournalpost(klagebehandling, vedlegg, finalize, fagsak)
+            joarkClient.createJournalpostWithSystemUser(klagebehandling, vedlegg, finalize, fagsak)
         }
+    }
+
+    fun updateVedleggSystemUser(klageBehandlingId: UUID, vedlegg: MultipartFile, journalpostId: String): String {
+        val klagebehandling = klagebehandlingService.getKlagebehandling(klageBehandlingId)
+
+        attachmentValidator.validateAttachment(vedlegg)
+        return joarkClient.updateJournalpostSystemUser(klagebehandling, journalpostId, vedlegg.bytes)
+
     }
 
     fun ferdigstillJournalpost(journalpostId: String): String {
         logger.debug("Attempting finalizing of journalpost $journalpostId")
-        return joarkClient.finalizeJournalpost(journalpostId)
+        return joarkClient.finalizeJournalpostSystemUser(journalpostId)
     }
 }

@@ -140,7 +140,8 @@ class KlagebehandlingMapper(
             id = vedtak.id,
             utfall = vedtak.utfall,
             hjemler = vedtak.hjemler,
-            brevMottakere = vedtak.brevmottakere
+            brevMottakere = vedtak.brevmottakere,
+            finalized = vedtak.finalized
         )
 
 

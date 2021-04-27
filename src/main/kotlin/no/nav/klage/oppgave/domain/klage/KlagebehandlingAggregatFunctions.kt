@@ -354,6 +354,27 @@ object KlagebehandlingAggregatFunctions {
         return KlagebehandlingEndretEvent(klagebehandling = this, endringslogginnslag = listOfNotNull(endringslogg))
     }
 
+    fun Klagebehandling.setJournalpostIdInVedtak(
+        vedtakId: UUID,
+        nyVerdi: String,
+        saksbehandlerident: String
+    ): KlagebehandlingEndretEvent {
+        val vedtak = getVedtakFromKlagebehandling(this, vedtakId)
+        val gammelVerdi = vedtak.journalpostId
+        val tidspunkt = LocalDateTime.now()
+        vedtak.journalpostId = nyVerdi
+        vedtak.modified = tidspunkt
+        val endringslogg =
+            endringslogg(
+                saksbehandlerident,
+                Felt.TILDELT_SAKSBEHANDLERIDENT,
+                gammelVerdi,
+                nyVerdi,
+                tidspunkt
+            )
+        return KlagebehandlingEndretEvent(klagebehandling = this, endringslogginnslag = listOfNotNull(endringslogg))
+    }
+
     fun Klagebehandling.addSaksdokument(
         saksdokument: Saksdokument,
         saksbehandlerident: String

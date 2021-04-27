@@ -3,12 +3,14 @@ package no.nav.klage.oppgave.api.controller
 import io.swagger.annotations.Api
 import no.nav.klage.oppgave.api.mapper.KlagebehandlingMapper
 import no.nav.klage.oppgave.api.view.VedtakUtfallInput
+import no.nav.klage.oppgave.api.view.VedtakVedleggInput
 import no.nav.klage.oppgave.api.view.VedtakView
 import no.nav.klage.oppgave.config.SecurityConfiguration.Companion.ISSUER_AAD
 import no.nav.klage.oppgave.domain.AuditLogEvent
 import no.nav.klage.oppgave.exceptions.BehandlingsidWrongFormatException
 import no.nav.klage.oppgave.repositories.InnloggetSaksbehandlerRepository
 import no.nav.klage.oppgave.service.KlagebehandlingService
+import no.nav.klage.oppgave.service.VedleggService
 import no.nav.klage.oppgave.service.VedtakService
 import no.nav.klage.oppgave.util.AuditLogger
 import no.nav.klage.oppgave.util.getLogger
@@ -24,7 +26,8 @@ class KlagebehandlingVedtakController(
     private val klagebehandlingMapper: KlagebehandlingMapper,
     private val vedtakService: VedtakService,
     private val auditLogger: AuditLogger,
-    private val klagebehandlingService: KlagebehandlingService
+    private val klagebehandlingService: KlagebehandlingService,
+    private val vedleggService: VedleggService
 ) {
 
     companion object {
@@ -67,6 +70,27 @@ class KlagebehandlingVedtakController(
                 ),
                 vedtakId.toUUIDOrException(),
                 input.utfall,
+                innloggetSaksbehandlerRepository.getInnloggetIdent()
+            )
+        )
+    }
+
+    @PutMapping("/klagebehandlinger/{klagebehandlingid}/vedtak/{vedtakid}/vedlegg")
+    fun putVedlegg(
+        @PathVariable("klagebehandlingid") klagebehandlingId: String,
+        @PathVariable("vedtakid") vedtakId: String,
+        @RequestBody input: VedtakVedleggInput
+    ): VedtakView {
+        logMethodDetails("putVedlegg", klagebehandlingId, vedtakId)
+
+        return klagebehandlingMapper.mapVedtakToVedtakView(
+            vedtakService.addVedlegg(
+                klagebehandlingService.getKlagebehandlingForUpdate(
+                    klagebehandlingId.toUUIDOrException(),
+                    input.klagebehandlingVersjon
+                ),
+                vedtakId.toUUIDOrException(),
+                input.vedlegg,
                 innloggetSaksbehandlerRepository.getInnloggetIdent()
             )
         )

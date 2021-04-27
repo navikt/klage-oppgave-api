@@ -33,7 +33,7 @@ class JoarkClient(
         private const val JOURNALFOERENDE_ENHET = "4291"
     }
 
-    fun createJournalpost(klagebehandling: Klagebehandling, uploadedDocument: ByteArray? = null, forsoekFerdigstill: Boolean? = false, fagsak: Boolean? = false): String {
+    fun createJournalpostWithSystemUser(klagebehandling: Klagebehandling, uploadedDocument: ByteArray? = null, forsoekFerdigstill: Boolean? = false, fagsak: Boolean? = false): String {
 
         val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument, fagsak)
 
@@ -44,7 +44,6 @@ class JoarkClient(
                     .build()
             }
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getStsSystembrukerToken()}")
-//            .header("Nav-Consumer-Token", "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
             .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(journalpost)
@@ -58,11 +57,92 @@ class JoarkClient(
         return journalpostResponse.journalpostId
     }
 
-    fun finalizeJournalpost(journalpostId: String): String {
+    fun createJournalpost(klagebehandling: Klagebehandling, uploadedDocument: ByteArray? = null): String {
+
+        val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument)
+
+        val journalpostResponse = joarkWebClient.post()
+
+            .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
+            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(journalpost)
+            .retrieve()
+            .bodyToMono(JournalpostResponse::class.java)
+            .block()
+            ?: throw RuntimeException("Journalpost could not be created for klagebehandling with id ${klagebehandling.id}.")
+
+        logger.debug("Journalpost successfully created in Joark with id {}.", journalpostResponse.journalpostId)
+
+        return journalpostResponse.journalpostId
+    }
+
+    //TODO: Fiks oppdatering av journalpost
+    fun updateJournalpost(klagebehandling: Klagebehandling, journalpostId: String, uploadedDocument: ByteArray? = null): String {
+
+        val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument)
+
+        val journalpostResponse = joarkWebClient.put()
+            .uri ("/${journalpostId}")
+            .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
+            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(journalpost)
+            .retrieve()
+            .bodyToMono(JournalpostResponse::class.java)
+            .block()
+            ?: throw RuntimeException("Journalpost could not be updated for klagebehandling with id ${klagebehandling.id}.")
+
+        logger.debug("Journalpost successfully updated in Joark with id {}.", journalpostResponse.journalpostId)
+
+        return journalpostResponse.journalpostId
+    }
+
+    fun updateJournalpostSystemUser(klagebehandling: Klagebehandling, journalpostId: String, uploadedDocument: ByteArray? = null): String {
+
+        val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument)
+
+        val journalpostResponse = joarkWebClient.put()
+            .uri ("/${journalpostId}")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getStsSystembrukerToken()}")
+            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(journalpost)
+            .retrieve()
+            .bodyToMono(JournalpostResponse::class.java)
+            .block()
+            ?: throw RuntimeException("Journalpost could not be updated for klagebehandling with id ${klagebehandling.id}.")
+
+        logger.debug("Journalpost successfully updated in Joark with id {}.", journalpostResponse.journalpostId)
+
+        return journalpostResponse.journalpostId
+    }
+
+    fun finalizeJournalpostSystemUser(journalpostId: String): String {
         val response = joarkWebClient.patch()
             .uri ("/${journalpostId}/ferdigstill")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getStsSystembrukerToken()}")
 //            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(FerdigstillJournalpostPayload(JOURNALFOERENDE_ENHET))
+            .retrieve()
+            .bodyToMono(String::class.java)
+            .block()
+            ?: throw RuntimeException("Journalpost with id $journalpostId could not be finalized.")
+
+        logger.debug("Journalpost with id $journalpostId was succesfully finalized.")
+
+        return response
+    }
+
+    fun finalizeJournalpost(journalpostId: String): String {
+        val response = joarkWebClient.patch()
+            .uri ("/${journalpostId}/ferdigstill")
+            .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
+            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(FerdigstillJournalpostPayload(JOURNALFOERENDE_ENHET))
             .retrieve()
@@ -112,15 +192,13 @@ class JoarkClient(
         }
     }
 
-    private fun createSak(klagebehandling: Klagebehandling, fagsak: Boolean? = false): Sak? {
-        //Finn ut mer her
-        return if (fagsak!!) Sak(Sakstype.FAGSAK, FagsaksSystem.K9, "12345") else
-            Sak(Sakstype.GENERELL_SAK)
-
+    private fun createSak(klagebehandling: Klagebehandling, fagsak: Boolean? = false): Sak {
+        //TODO: Hent fra klagebehandling
+        return Sak(Sakstype.GENERELL_SAK)
     }
 
     private fun createBruker(klagebehandling: Klagebehandling): Bruker? {
-        return klagebehandling.klager.partId.let {
+        return klagebehandling.sakenGjelder.partId.let {
             Bruker(
                 it.value,
                 BrukerIdType.FNR
