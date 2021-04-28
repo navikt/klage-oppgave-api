@@ -49,6 +49,14 @@ class UnprotectedJoarkController(
 //        return joarkClient.createJournalpost(klagebehandlingService.getKlagebehandling(id.toUUIDOrException()), null, true)
     }
 
+    @PatchMapping("/klagebehandlinger/{journalpostId}/avbryt")
+    fun avbryt(
+        @PathVariable journalpostId: String
+    ): String {
+        return vedleggService.avbrytJournalpost(journalpostId)
+//        return joarkClient.createJournalpost(klagebehandlingService.getKlagebehandling(id.toUUIDOrException()), null, true)
+    }
+
     @GetMapping("/klagebehandlinger/{journalpostId}/pdf")
     fun getInnsendtKlage(
         @PathVariable journalpostId: String

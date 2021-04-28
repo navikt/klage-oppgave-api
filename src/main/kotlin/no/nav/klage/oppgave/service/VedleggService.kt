@@ -41,4 +41,9 @@ class VedleggService(
         logger.debug("Attempting finalizing of journalpost $journalpostId")
         return joarkClient.finalizeJournalpostSystemUser(journalpostId)
     }
+
+    fun avbrytJournalpost(journalpostId: String): String {
+        logger.debug("Attempting cancelling of journalpost $journalpostId")
+        return joarkClient.cancelJournalpostSystemUser(journalpostId)
+    }
 }

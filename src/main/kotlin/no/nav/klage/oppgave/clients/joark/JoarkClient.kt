@@ -150,6 +150,23 @@ class JoarkClient(
         return response
     }
 
+    fun cancelJournalpostSystemUser(journalpostId: String): String {
+        val response = joarkWebClient.patch()
+            .uri("/${journalpostId}/feilregistrer/avbryt")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getStsSystembrukerToken()}")
+//            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(FerdigstillJournalpostPayload(JOURNALFOERENDE_ENHET))
+            .retrieve()
+            .bodyToMono(String::class.java)
+            .block()
+            ?: throw RuntimeException("Journalpost with id $journalpostId could not be cancelled.")
+
+        logger.debug("Journalpost with id $journalpostId was succesfully cancelled.")
+
+        return response
+    }
+
     fun finalizeJournalpost(journalpostId: String): String {
         val response = joarkWebClient.patch()
             .uri("/${journalpostId}/ferdigstill")
