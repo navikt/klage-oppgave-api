@@ -40,7 +40,7 @@ class Vedtak(
     @Column(name = "journalpost_id")
     var journalpostId: String? = null,
     @Column(name = "finalized")
-    val finalized: LocalDateTime? = null
+    var finalized: LocalDateTime? = null
 ) {
     override fun toString(): String {
         return "Vedtak(id=$id, " +

@@ -2,6 +2,7 @@ package no.nav.klage.oppgave.api.controller
 
 import io.swagger.annotations.Api
 import no.nav.klage.oppgave.api.mapper.KlagebehandlingMapper
+import no.nav.klage.oppgave.api.view.VedtakFullfoerInput
 import no.nav.klage.oppgave.api.view.VedtakUtfallInput
 import no.nav.klage.oppgave.api.view.VedtakVedleggInput
 import no.nav.klage.oppgave.api.view.VedtakView
@@ -100,7 +101,17 @@ class KlagebehandlingVedtakController(
     fun fullfoerVedtak(
         @PathVariable("klagebehandlingid") klagebehandlingId: String,
         @PathVariable("vedtakid") vedtakId: String,
+        @RequestBody input: VedtakFullfoerInput
     ) {
+        vedtakService.finalizeJournalpost(
+            klagebehandlingService.getKlagebehandlingForUpdate(
+                klagebehandlingId.toUUIDOrException(),
+                input.klagebehandlingVersjon
+            ),
+            vedtakId.toUUIDOrException(),
+            innloggetSaksbehandlerRepository.getInnloggetIdent()
+        )
+
         vedtakService.dispatchVedtakToKafka(klagebehandlingId.toUUIDOrException(), vedtakId.toUUIDOrException())
     }
 

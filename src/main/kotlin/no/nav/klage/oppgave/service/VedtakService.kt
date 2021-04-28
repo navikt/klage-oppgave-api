@@ -3,14 +3,16 @@ package no.nav.klage.oppgave.service
 import no.nav.klage.oppgave.clients.joark.JoarkClient
 import no.nav.klage.oppgave.domain.kafka.KlagevedtakFattet
 import no.nav.klage.oppgave.domain.klage.Klagebehandling
+import no.nav.klage.oppgave.domain.klage.KlagebehandlingAggregatFunctions.setFinalizedIdInVedtak
 import no.nav.klage.oppgave.domain.klage.KlagebehandlingAggregatFunctions.setJournalpostIdInVedtak
 import no.nav.klage.oppgave.domain.klage.KlagebehandlingAggregatFunctions.setUtfallInVedtak
 import no.nav.klage.oppgave.domain.klage.Vedtak
 import no.nav.klage.oppgave.domain.kodeverk.Utfall
+import no.nav.klage.oppgave.exceptions.JournalpostNotFoundException
 import no.nav.klage.oppgave.exceptions.VedtakFinalizedException
 import no.nav.klage.oppgave.exceptions.VedtakNotFoundException
-import no.nav.klage.oppgave.util.AttachmentValidator
 import no.nav.klage.oppgave.repositories.KlagebehandlingRepository
+import no.nav.klage.oppgave.util.AttachmentValidator
 import no.nav.klage.oppgave.util.getLogger
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -63,6 +65,34 @@ class VedtakService(
         return getVedtakFromKlagebehandling(klagebehandling, vedtakId)
     }
 
+    fun setFinalized(
+        klagebehandling: Klagebehandling,
+        vedtakId: UUID,
+        utfoerendeSaksbehandlerIdent: String
+    ): Vedtak {
+        val event =
+            klagebehandling.setFinalizedIdInVedtak(vedtakId, utfoerendeSaksbehandlerIdent)
+        applicationEventPublisher.publishEvent(event)
+        return getVedtakFromKlagebehandling(klagebehandling, vedtakId)
+    }
+
+    fun finalizeJournalpost(
+        klagebehandling: Klagebehandling,
+        vedtakId: UUID,
+        utfoerendeSaksbehandlerIdent: String
+    ): Vedtak? {
+        val vedtak = getVedtakFromKlagebehandling(klagebehandling, vedtakId)
+        if (vedtak.finalized != null) throw VedtakFinalizedException("Vedtak med id $vedtakId er allerede ferdigstilt")
+        if (vedtak.journalpostId == null) throw JournalpostNotFoundException("Vedtak med id $vedtakId er ikke journalført")
+        return try {
+            joarkClient.finalizeJournalpost(vedtak.journalpostId!!)
+            setFinalized(klagebehandling, vedtakId, utfoerendeSaksbehandlerIdent)
+        } catch (e: Exception) {
+            logger.warn("Kunne ikke ferdigstille journalpost ${vedtak.journalpostId}")
+            null
+        }
+    }
+
     fun addVedlegg(
         klagebehandling: Klagebehandling,
         vedtakId: UUID,
@@ -73,16 +103,15 @@ class VedtakService(
         if (vedtak.finalized != null) throw VedtakFinalizedException("Vedtak med id $vedtakId er ferdigstilt")
         attachmentValidator.validateAttachment(vedlegg)
         if (vedtak.journalpostId != null) {
-//            joarkClient.updateJournalpost(klagebehandling, vedlegg.bytes)
-            return vedtak
-        } else {
-            return setJournalpostId(
-                klagebehandling,
-                vedtakId,
-                joarkClient.createJournalpost(klagebehandling, vedlegg.bytes),
-                utfoerendeSaksbehandlerIdent
-            )
+            joarkClient.cancelJournalpost(vedtak.journalpostId!!)
         }
+
+        return setJournalpostId(
+            klagebehandling,
+            vedtakId,
+            joarkClient.createJournalpost(klagebehandling, vedlegg.bytes),
+            utfoerendeSaksbehandlerIdent
+        )
     }
 
 
