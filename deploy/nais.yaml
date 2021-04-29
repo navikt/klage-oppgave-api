@@ -84,6 +84,8 @@ spec:
     outbound:
       rules:
         - application: klage-redis
+        - application: clamav
+          namespace: clamav
       external:
       {{#each externalHosts as |host|}}
         - host: {{host}}
@@ -98,6 +100,7 @@ spec:
     - secret: norg2
     - secret: axsys
     - secret: elastic
+    - secret: journalpost-apikey
     - secret: ereg
   env:
     - name: SPRING_PROFILES_ACTIVE

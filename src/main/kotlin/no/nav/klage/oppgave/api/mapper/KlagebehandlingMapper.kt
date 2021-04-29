@@ -9,6 +9,7 @@ import no.nav.klage.oppgave.clients.egenansatt.EgenAnsattService
 import no.nav.klage.oppgave.clients.norg2.Norg2Client
 import no.nav.klage.oppgave.clients.pdl.PdlFacade
 import no.nav.klage.oppgave.clients.pdl.Person
+import no.nav.klage.oppgave.clients.saf.rest.ArkivertDokument
 import no.nav.klage.oppgave.domain.elasticsearch.EsKlagebehandling
 import no.nav.klage.oppgave.domain.klage.Klagebehandling
 import no.nav.klage.oppgave.domain.klage.PartId
@@ -17,6 +18,7 @@ import no.nav.klage.oppgave.domain.klage.Vedtak
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.klage.oppgave.util.getSecureLogger
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class KlagebehandlingMapper(
@@ -135,13 +137,26 @@ class KlagebehandlingMapper(
         )
     }
 
-    fun mapVedtakToVedtakView(vedtak: Vedtak): VedtakView =
-        VedtakView(
-            id = vedtak.id,
-            utfall = vedtak.utfall,
-            hjemler = vedtak.hjemler,
-            brevMottakere = vedtak.brevmottakere
-        )
+    fun mapVedtakToVedtakView(vedtak: Vedtak, dokument: ArkivertDokument? = null): VedtakView {
+        if (dokument != null) {
+            return VedtakView(
+                id = vedtak.id,
+                utfall = vedtak.utfall,
+                hjemler = vedtak.hjemler,
+                brevMottakere = vedtak.brevmottakere,
+                finalized = vedtak.finalized,
+                content = Base64.getEncoder().encodeToString(dokument.bytes)
+            )
+        } else {
+            return VedtakView(
+                id = vedtak.id,
+                utfall = vedtak.utfall,
+                hjemler = vedtak.hjemler,
+                brevMottakere = vedtak.brevmottakere,
+                finalized = vedtak.finalized
+            )
+        }
+    }
 
 
     fun mapKlagebehandlingToKvalitetsvurderingView(klagebehandling: Klagebehandling): KvalitetsvurderingView {

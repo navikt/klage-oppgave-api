@@ -38,7 +38,9 @@ class Vedtak(
     @Column(name = "created")
     val created: LocalDateTime = LocalDateTime.now(),
     @Column(name = "journalpost_id")
-    var journalpostId: String? = null
+    var journalpostId: String? = null,
+    @Column(name = "finalized")
+    var finalized: LocalDateTime? = null
 ) {
     override fun toString(): String {
         return "Vedtak(id=$id, " +

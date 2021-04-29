@@ -1,0 +1,166 @@
+package no.nav.klage.oppgave.clients.joark
+
+import brave.Tracer
+import no.nav.klage.oppgave.clients.ereg.EregClient
+import no.nav.klage.oppgave.clients.pdl.PdlFacade
+import no.nav.klage.oppgave.domain.joark.*
+import no.nav.klage.oppgave.domain.klage.Klagebehandling
+import no.nav.klage.oppgave.domain.klage.PartIdType
+import no.nav.klage.oppgave.service.TokenService
+import no.nav.klage.oppgave.util.getLogger
+import no.nav.klage.oppgave.util.getSecureLogger
+import org.apache.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.stereotype.Component
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.reactive.function.client.WebClient
+import java.util.*
+
+@Component
+class JoarkClient(
+    private val joarkWebClient: WebClient,
+    private val tokenService: TokenService,
+    private val tracer: Tracer,
+    private val pdlFacade: PdlFacade,
+    private val eregClient: EregClient
+) {
+    companion object {
+        @Suppress("JAVA_CLASS_ON_COMPANION")
+        private val logger = getLogger(javaClass.enclosingClass)
+        private val secureLogger = getSecureLogger()
+        private const val BREV_TITTEL = "Brev fra Klageinstans"
+        private const val BREVKODE = "BREV_FRA_KLAGEINSTANS"
+        private const val BEHANDLINGSTEMA_KLAGE_KLAGEINSTANS = "ab0164"
+        private const val JOURNALFOERENDE_ENHET = "4291"
+    }
+
+    fun createJournalpost(klagebehandling: Klagebehandling, uploadedDocument: MultipartFile): String {
+
+        val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument)
+
+        val journalpostResponse = joarkWebClient.post()
+
+            .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
+            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(journalpost)
+            .retrieve()
+            .bodyToMono(JournalpostResponse::class.java)
+            .block()
+            ?: throw RuntimeException("Journalpost could not be created for klagebehandling with id ${klagebehandling.id}.")
+
+        logger.debug("Journalpost successfully created in Joark with id {}.", journalpostResponse.journalpostId)
+
+        return journalpostResponse.journalpostId
+    }
+
+    fun cancelJournalpost(journalpostId: String): String {
+        val response = joarkWebClient.patch()
+            .uri("/${journalpostId}/feilregistrer/avbryt")
+            .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
+            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(FerdigstillJournalpostPayload(JOURNALFOERENDE_ENHET))
+            .retrieve()
+            .bodyToMono(String::class.java)
+            .block()
+            ?: throw RuntimeException("Journalpost with id $journalpostId could not be cancelled.")
+
+        logger.debug("Journalpost with id $journalpostId was succesfully cancelled.")
+
+        return response
+    }
+
+
+    fun finalizeJournalpost(journalpostId: String): String {
+        val response = joarkWebClient.patch()
+            .uri("/${journalpostId}/ferdigstill")
+            .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
+            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(FerdigstillJournalpostPayload(JOURNALFOERENDE_ENHET))
+            .retrieve()
+            .bodyToMono(String::class.java)
+            .block()
+            ?: throw RuntimeException("Journalpost with id $journalpostId could not be finalized.")
+
+        logger.debug("Journalpost with id $journalpostId was succesfully finalized.")
+
+        return response
+    }
+
+    private fun createJournalpostObject(
+        klagebehandling: Klagebehandling,
+        uploadedDocument: MultipartFile,
+        fagsak: Boolean? = false
+    ): Journalpost =
+        Journalpost(
+            journalposttype = JournalpostType.UTGAAENDE,
+            tema = klagebehandling.tema,
+            behandlingstema = BEHANDLINGSTEMA_KLAGE_KLAGEINSTANS,
+            avsenderMottaker = createAvsenderMottager(klagebehandling),
+            sak = createSak(klagebehandling, fagsak),
+            tittel = BREV_TITTEL,
+            journalfoerendeEnhet = JOURNALFOERENDE_ENHET,
+            eksternReferanseId = tracer.currentSpan().context().traceIdString(),
+            bruker = createBruker(klagebehandling),
+            dokumenter = createDokument(uploadedDocument)
+        )
+
+
+    private fun createAvsenderMottager(klagebehandling: Klagebehandling): AvsenderMottaker? {
+        val klager = klagebehandling.klager
+        if (klager.partId.type.equals(PartIdType.PERSON)) {
+            val person = pdlFacade.getPersonInfo(klager.partId.value)
+            return person.let {
+                AvsenderMottaker(
+                    id = it.foedselsnr,
+                    idType = AvsenderMottakerIdType.FNR,
+                    navn = it.settSammenNavn()
+                )
+            }
+        } else {
+            return AvsenderMottaker(
+                klager.partId.value,
+                AvsenderMottakerIdType.ORGNR,
+                //TODO: Finn en bedre løsning på dette etter hvert
+                navn = eregClient.hentOrganisasjon(klager.partId.value)?.navn?.navnelinje1
+            )
+        }
+    }
+
+    private fun createSak(klagebehandling: Klagebehandling, fagsak: Boolean? = false): Sak {
+        //TODO: Hent fra klagebehandling
+        return Sak(Sakstype.GENERELL_SAK)
+    }
+
+    private fun createBruker(klagebehandling: Klagebehandling): Bruker? {
+        return klagebehandling.sakenGjelder.partId.let {
+            Bruker(
+                it.value,
+                BrukerIdType.FNR
+            )
+        }
+    }
+
+
+    private fun createDokument(uploadedDocument: MultipartFile): List<Dokument> {
+        val hovedDokument = Dokument(
+            tittel = BREV_TITTEL,
+            brevkode = BREVKODE,
+            dokumentVarianter = listOf(
+                DokumentVariant(
+                    filnavn = uploadedDocument.originalFilename ?: "Opplastet_dokument",
+                    filtype = "PDFA",
+                    variantformat = "ARKIV",
+                    fysiskDokument = Base64.getEncoder().encodeToString(uploadedDocument.bytes)
+                )
+            ),
+
+            )
+        return listOf(hovedDokument)
+    }
+}

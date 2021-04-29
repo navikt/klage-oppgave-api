@@ -90,6 +90,11 @@ class DokumentService(
         return safRestClient.getDokument(dokumentInfoId, journalpostId)
     }
 
+    fun getMainDokument(journalpostId: String): ArkivertDokument {
+        val dokumentInfoId = fetchDokumentInfoIdForJournalpostAsSystembruker(journalpostId)
+        return getArkivertDokument(journalpostId, dokumentInfoId.first())
+    }
+
     private fun harArkivVariantformat(dokumentInfo: DokumentInfo): Boolean =
         dokumentInfo.dokumentvarianter.any { dv ->
             dv.variantformat == Variantformat.ARKIV
