@@ -16,6 +16,10 @@ import no.nav.klage.oppgave.service.VedtakService
 import no.nav.klage.oppgave.util.AuditLogger
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -52,7 +56,15 @@ class KlagebehandlingVedtakController(
                 )
             }
         return klagebehandlingMapper.mapVedtakToVedtakView(
-            vedtakService.getVedtak(klagebehandling, vedtakId.toUUIDOrException())
+            vedtakService.getVedtak(
+                klagebehandling,
+                vedtakId.toUUIDOrException()
+            ),
+            vedtakService.getVedlegg(
+                klagebehandling,
+                vedtakId.toUUIDOrException(),
+                innloggetSaksbehandlerRepository.getInnloggetIdent()
+            )
         )
     }
 
@@ -76,33 +88,40 @@ class KlagebehandlingVedtakController(
         )
     }
 
-    @PutMapping("/klagebehandlinger/{klagebehandlingid}/vedtak/{vedtakid}/vedlegg")
-    fun putVedlegg(
+    @PostMapping("/klagebehandlinger/{klagebehandlingid}/vedtak/{vedtakid}/vedlegg")
+    fun postVedlegg(
         @PathVariable("klagebehandlingid") klagebehandlingId: String,
         @PathVariable("vedtakid") vedtakId: String,
         @RequestBody input: VedtakVedleggInput
     ): VedtakView {
-        logMethodDetails("putVedlegg", klagebehandlingId, vedtakId)
+        logMethodDetails("postVedlegg", klagebehandlingId, vedtakId)
+        val klagebehandling = klagebehandlingService.getKlagebehandlingForUpdate(
+            klagebehandlingId.toUUIDOrException(),
+            input.klagebehandlingVersjon
+        )
 
         return klagebehandlingMapper.mapVedtakToVedtakView(
             vedtakService.addVedlegg(
-                klagebehandlingService.getKlagebehandlingForUpdate(
-                    klagebehandlingId.toUUIDOrException(),
-                    input.klagebehandlingVersjon
-                ),
+                klagebehandling,
                 vedtakId.toUUIDOrException(),
                 input.vedlegg,
+                innloggetSaksbehandlerRepository.getInnloggetIdent()
+            ),
+            vedtakService.getVedlegg(
+                klagebehandling,
+                vedtakId.toUUIDOrException(),
                 innloggetSaksbehandlerRepository.getInnloggetIdent()
             )
         )
     }
 
-    @PostMapping("/klagebehandlinger/{klagebehandlingid}/vedtak/{vedtakid}/")
+    @PostMapping("/klagebehandlinger/{klagebehandlingid}/vedtak/{vedtakid}/fullfoer")
     fun fullfoerVedtak(
         @PathVariable("klagebehandlingid") klagebehandlingId: String,
         @PathVariable("vedtakid") vedtakId: String,
         @RequestBody input: VedtakFullfoerInput
     ) {
+        logMethodDetails("fullfoerVedlegg", klagebehandlingId, vedtakId)
         vedtakService.finalizeJournalpost(
             klagebehandlingService.getKlagebehandlingForUpdate(
                 klagebehandlingId.toUUIDOrException(),
@@ -113,6 +132,29 @@ class KlagebehandlingVedtakController(
         )
 
         vedtakService.dispatchVedtakToKafka(klagebehandlingId.toUUIDOrException(), vedtakId.toUUIDOrException())
+    }
+
+    @ResponseBody
+    @GetMapping("/klagebehandlinger/{klagebehandlingid}/vedtak/{vedtakid}/pdf")
+    fun getVedlegg(
+        @PathVariable("klagebehandlingid") klagebehandlingId: String,
+        @PathVariable("vedtakid") vedtakId: String,
+    ): ResponseEntity<ByteArray> {
+        logMethodDetails("getVedlegg", klagebehandlingId, vedtakId)
+        val klagebehandling = klagebehandlingService.getKlagebehandling(klagebehandlingId.toUUIDOrException())
+        val content = vedtakService.getVedlegg(
+            klagebehandling,
+            vedtakId.toUUIDOrException(),
+            innloggetSaksbehandlerRepository.getInnloggetIdent()
+        )
+        val responseHeaders = HttpHeaders()
+        responseHeaders.contentType = MediaType.valueOf("application/pdf")
+        responseHeaders.add("Content-Disposition", "inline; filename=" + "vedlegg.pdf")
+        return ResponseEntity(
+            content?.bytes,
+            responseHeaders,
+            HttpStatus.OK
+        )
     }
 
     private fun String.toUUIDOrException() =

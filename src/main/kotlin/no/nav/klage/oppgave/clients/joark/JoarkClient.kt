@@ -12,6 +12,7 @@ import no.nav.klage.oppgave.util.getSecureLogger
 import org.apache.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.reactive.function.client.WebClient
 import java.util.*
 
@@ -35,7 +36,7 @@ class JoarkClient(
 
     fun createJournalpostWithSystemUser(
         klagebehandling: Klagebehandling,
-        uploadedDocument: ByteArray? = null,
+        uploadedDocument: MultipartFile,
         forsoekFerdigstill: Boolean? = false,
         fagsak: Boolean? = false
     ): String {
@@ -62,7 +63,7 @@ class JoarkClient(
         return journalpostResponse.journalpostId
     }
 
-    fun createJournalpost(klagebehandling: Klagebehandling, uploadedDocument: ByteArray? = null): String {
+    fun createJournalpost(klagebehandling: Klagebehandling, uploadedDocument: MultipartFile): String {
 
         val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument)
 
@@ -79,56 +80,6 @@ class JoarkClient(
             ?: throw RuntimeException("Journalpost could not be created for klagebehandling with id ${klagebehandling.id}.")
 
         logger.debug("Journalpost successfully created in Joark with id {}.", journalpostResponse.journalpostId)
-
-        return journalpostResponse.journalpostId
-    }
-
-    //TODO: Fiks oppdatering av journalpost
-    fun updateJournalpost(
-        klagebehandling: Klagebehandling,
-        journalpostId: String,
-        uploadedDocument: ByteArray? = null
-    ): String {
-
-        val journalpost = this.createJournalpostForUpdate(klagebehandling, uploadedDocument)
-
-        val journalpostResponse = joarkWebClient.put()
-            .uri("/${journalpostId}")
-            .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
-            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(journalpost)
-            .retrieve()
-            .bodyToMono(JournalpostResponse::class.java)
-            .block()
-            ?: throw RuntimeException("Journalpost could not be updated for klagebehandling with id ${klagebehandling.id}.")
-
-        logger.debug("Journalpost successfully updated in Joark with id {}.", journalpostResponse.journalpostId)
-
-        return journalpostResponse.journalpostId
-    }
-
-    fun updateJournalpostSystemUser(
-        klagebehandling: Klagebehandling,
-        journalpostId: String,
-        uploadedDocument: ByteArray? = null
-    ): String {
-
-        val journalpost = this.createJournalpostForUpdate(klagebehandling, uploadedDocument)
-
-        val journalpostResponse = joarkWebClient.put()
-            .uri("/${journalpostId}")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getStsSystembrukerToken()}")
-            .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(journalpost)
-            .retrieve()
-            .bodyToMono(JournalpostResponse::class.java)
-            .block()
-            ?: throw RuntimeException("Journalpost could not be updated for klagebehandling with id ${klagebehandling.id}.")
-
-        logger.debug("Journalpost successfully updated in Joark with id {}.", journalpostResponse.journalpostId)
 
         return journalpostResponse.journalpostId
     }
@@ -204,25 +155,9 @@ class JoarkClient(
         return response
     }
 
-    private fun createJournalpostForUpdate(
-        klagebehandling: Klagebehandling,
-        uploadedDocument: ByteArray?,
-        fagsak: Boolean? = false
-    ): UpdateJournalpost =
-        UpdateJournalpost(
-            tema = klagebehandling.tema,
-            behandlingstema = BEHANDLINGSTEMA_KLAGE_KLAGEINSTANS,
-            avsenderMottaker = createAvsenderMottager(klagebehandling),
-            sak = createSak(klagebehandling, fagsak),
-            tittel = BREV_TITTEL,
-            journalfoerendeEnhet = JOURNALFOERENDE_ENHET,
-            bruker = createBruker(klagebehandling),
-            dokumenter = createDokument(uploadedDocument)
-        )
-
     private fun createJournalpostObject(
         klagebehandling: Klagebehandling,
-        uploadedDocument: ByteArray?,
+        uploadedDocument: MultipartFile,
         fagsak: Boolean? = false
     ): Journalpost =
         Journalpost(
@@ -275,16 +210,16 @@ class JoarkClient(
     }
 
 
-    private fun createDokument(uploadedDocument: ByteArray?): List<Dokument> {
+    private fun createDokument(uploadedDocument: MultipartFile): List<Dokument> {
         val hovedDokument = Dokument(
             tittel = BREV_TITTEL,
             brevkode = BREVKODE,
             dokumentVarianter = listOf(
                 DokumentVariant(
-                    filnavn = "TEST",
+                    filnavn = uploadedDocument.originalFilename ?: "Opplastet_dokument",
                     filtype = "PDFA",
                     variantformat = "ARKIV",
-                    fysiskDokument = Base64.getEncoder().encodeToString(uploadedDocument)
+                    fysiskDokument = Base64.getEncoder().encodeToString(uploadedDocument.bytes)
                 )
             ),
 

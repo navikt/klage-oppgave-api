@@ -1,6 +1,8 @@
 package no.nav.klage.oppgave.service
 
 import no.nav.klage.oppgave.clients.joark.JoarkClient
+import no.nav.klage.oppgave.clients.saf.graphql.hentDokumentoversiktBrukerQuery
+import no.nav.klage.oppgave.clients.saf.rest.ArkivertDokument
 import no.nav.klage.oppgave.domain.kafka.KlagevedtakFattet
 import no.nav.klage.oppgave.domain.klage.Klagebehandling
 import no.nav.klage.oppgave.domain.klage.KlagebehandlingAggregatFunctions.setFinalizedIdInVedtak
@@ -27,8 +29,8 @@ class VedtakService(
     private val vedtakKafkaProducer: VedtakKafkaProducer,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val attachmentValidator: AttachmentValidator,
-    private val joarkClient: JoarkClient
-
+    private val joarkClient: JoarkClient,
+    private val dokumentService: DokumentService
 ) {
 
     companion object {
@@ -109,11 +111,23 @@ class VedtakService(
         return setJournalpostId(
             klagebehandling,
             vedtakId,
-            joarkClient.createJournalpost(klagebehandling, vedlegg.bytes),
+            joarkClient.createJournalpost(klagebehandling, vedlegg),
             utfoerendeSaksbehandlerIdent
         )
     }
 
+    fun getVedlegg(
+        klagebehandling: Klagebehandling,
+        vedtakId: UUID,
+        utfoerendeSaksbehandlerIdent: String
+    ): ArkivertDokument? {
+        val vedtak = getVedtakFromKlagebehandling(klagebehandling, vedtakId)
+        return if (vedtak.journalpostId != null) {
+            dokumentService.getMainDokument(vedtak.journalpostId!!)
+        } else {
+            null
+        }
+    }
 
     fun dispatchVedtakToKafka(klagebehandlingId: UUID, vedtakId: UUID) {
         val klage = klagebehandlingRepository.findById(klagebehandlingId).orElseThrow()

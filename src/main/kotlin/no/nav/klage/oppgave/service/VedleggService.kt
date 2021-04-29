@@ -19,22 +19,10 @@ class VedleggService(
         private val logger = getLogger(javaClass.enclosingClass)
     }
 
-    fun addVedleggSystemUser(klageBehandlingId: UUID, vedlegg: MultipartFile? = null, finalize: Boolean, fagsak: Boolean): String {
+    fun addVedleggSystemUser(klageBehandlingId: UUID, vedlegg: MultipartFile, finalize: Boolean, fagsak: Boolean): String {
         val klagebehandling = klagebehandlingService.getKlagebehandling(klageBehandlingId)
-        return if (vedlegg != null) {
-            attachmentValidator.validateAttachment(vedlegg)
-            joarkClient.createJournalpostWithSystemUser(klagebehandling, vedlegg.bytes, finalize, fagsak)
-        } else {
-            joarkClient.createJournalpostWithSystemUser(klagebehandling, vedlegg, finalize, fagsak)
-        }
-    }
-
-    fun updateVedleggSystemUser(klageBehandlingId: UUID, vedlegg: MultipartFile, journalpostId: String): String {
-        val klagebehandling = klagebehandlingService.getKlagebehandling(klageBehandlingId)
-
         attachmentValidator.validateAttachment(vedlegg)
-        return joarkClient.updateJournalpostSystemUser(klagebehandling, journalpostId, vedlegg.bytes)
-
+        return joarkClient.createJournalpostWithSystemUser(klagebehandling, vedlegg, finalize, fagsak)
     }
 
     fun ferdigstillJournalpost(journalpostId: String): String {

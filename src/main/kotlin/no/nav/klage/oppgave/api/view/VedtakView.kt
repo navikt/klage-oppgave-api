@@ -11,5 +11,6 @@ data class VedtakView(
     val utfall: Utfall? = null,
     val hjemler: MutableSet<Hjemmel> = mutableSetOf(),
     val brevMottakere: MutableSet<PartId> = mutableSetOf(),
-    val finalized: LocalDateTime? = null
+    val finalized: LocalDateTime? = null,
+    val content: String? = null
 )
