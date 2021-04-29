@@ -11,6 +11,7 @@ import no.nav.klage.oppgave.domain.AuditLogEvent
 import no.nav.klage.oppgave.exceptions.BehandlingsidWrongFormatException
 import no.nav.klage.oppgave.repositories.InnloggetSaksbehandlerRepository
 import no.nav.klage.oppgave.service.KlagebehandlingService
+import no.nav.klage.oppgave.service.TilgangService
 import no.nav.klage.oppgave.service.VedtakService
 import no.nav.klage.oppgave.util.AuditLogger
 import no.nav.klage.oppgave.util.getLogger
@@ -30,7 +31,8 @@ class KlagebehandlingVedtakController(
     private val klagebehandlingMapper: KlagebehandlingMapper,
     private val vedtakService: VedtakService,
     private val auditLogger: AuditLogger,
-    private val klagebehandlingService: KlagebehandlingService
+    private val klagebehandlingService: KlagebehandlingService,
+    private val tilgangService: TilgangService
 ) {
 
     companion object {
@@ -93,6 +95,9 @@ class KlagebehandlingVedtakController(
         @RequestBody input: VedtakVedleggInput
     ): VedtakView {
         logMethodDetails("postVedlegg", klagebehandlingId, vedtakId)
+
+        tilgangService.verifySaksbehandlersTilgangTilEnhet(input.journalfoerendeEnhet)
+
         val klagebehandling = klagebehandlingService.getKlagebehandlingForUpdate(
             klagebehandlingId.toUUIDOrException(),
             input.klagebehandlingVersjon
@@ -103,7 +108,8 @@ class KlagebehandlingVedtakController(
                 klagebehandling,
                 vedtakId.toUUIDOrException(),
                 input.vedlegg,
-                innloggetSaksbehandlerRepository.getInnloggetIdent()
+                innloggetSaksbehandlerRepository.getInnloggetIdent(),
+                input.journalfoerendeEnhet
             ),
             vedtakService.getVedlegg(
                 klagebehandling,
@@ -119,14 +125,15 @@ class KlagebehandlingVedtakController(
         @PathVariable("vedtakid") vedtakId: String,
         @RequestBody input: VedtakFullfoerInput
     ) {
-        logMethodDetails("fullfoerVedlegg", klagebehandlingId, vedtakId)
+        logMethodDetails("fullfoerVedtak", klagebehandlingId, vedtakId)
         vedtakService.finalizeJournalpost(
             klagebehandlingService.getKlagebehandlingForUpdate(
                 klagebehandlingId.toUUIDOrException(),
                 input.klagebehandlingVersjon
             ),
             vedtakId.toUUIDOrException(),
-            innloggetSaksbehandlerRepository.getInnloggetIdent()
+            innloggetSaksbehandlerRepository.getInnloggetIdent(),
+            input.journalfoerendeEnhet
         )
 
         vedtakService.dispatchVedtakToKafka(klagebehandlingId.toUUIDOrException(), vedtakId.toUUIDOrException())

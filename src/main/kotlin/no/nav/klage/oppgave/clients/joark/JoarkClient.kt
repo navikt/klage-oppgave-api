@@ -34,9 +34,9 @@ class JoarkClient(
         private const val JOURNALFOERENDE_ENHET = "4291"
     }
 
-    fun createJournalpost(klagebehandling: Klagebehandling, uploadedDocument: MultipartFile): String {
+    fun createJournalpost(klagebehandling: Klagebehandling, uploadedDocument: MultipartFile, journalfoerendeEnhet: String): String {
 
-        val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument)
+        val journalpost = this.createJournalpostObject(klagebehandling, uploadedDocument, journalfoerendeEnhet)
 
         val journalpostResponse = joarkWebClient.post()
 
@@ -55,14 +55,14 @@ class JoarkClient(
         return journalpostResponse.journalpostId
     }
 
-    fun cancelJournalpost(journalpostId: String): String {
+    fun cancelJournalpost(journalpostId: String, journalfoerendeEnhet: String): String {
         val response = joarkWebClient.patch()
             .uri("/${journalpostId}/feilregistrer/avbryt")
             .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
             .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(FerdigstillJournalpostPayload(JOURNALFOERENDE_ENHET))
+            .bodyValue(FerdigstillJournalpostPayload(journalfoerendeEnhet))
             .retrieve()
             .bodyToMono(String::class.java)
             .block()
@@ -74,14 +74,14 @@ class JoarkClient(
     }
 
 
-    fun finalizeJournalpost(journalpostId: String): String {
+    fun finalizeJournalpost(journalpostId: String, journalfoerendeEnhet: String): String {
         val response = joarkWebClient.patch()
             .uri("/${journalpostId}/ferdigstill")
             .header("Nav-Consumer-Token", "Bearer ${tokenService.getStsSystembrukerToken()}")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
             .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(FerdigstillJournalpostPayload(JOURNALFOERENDE_ENHET))
+            .bodyValue(FerdigstillJournalpostPayload(journalfoerendeEnhet))
             .retrieve()
             .bodyToMono(String::class.java)
             .block()
@@ -95,16 +95,16 @@ class JoarkClient(
     private fun createJournalpostObject(
         klagebehandling: Klagebehandling,
         uploadedDocument: MultipartFile,
-        fagsak: Boolean? = false
+        journalfoerendeEnhet: String
     ): Journalpost =
         Journalpost(
             journalposttype = JournalpostType.UTGAAENDE,
             tema = klagebehandling.tema,
             behandlingstema = BEHANDLINGSTEMA_KLAGE_KLAGEINSTANS,
             avsenderMottaker = createAvsenderMottager(klagebehandling),
-            sak = createSak(klagebehandling, fagsak),
+            sak = createSak(klagebehandling),
             tittel = BREV_TITTEL,
-            journalfoerendeEnhet = JOURNALFOERENDE_ENHET,
+            journalfoerendeEnhet = journalfoerendeEnhet,
             eksternReferanseId = tracer.currentSpan().context().traceIdString(),
             bruker = createBruker(klagebehandling),
             dokumenter = createDokument(uploadedDocument)
@@ -132,9 +132,16 @@ class JoarkClient(
         }
     }
 
-    private fun createSak(klagebehandling: Klagebehandling, fagsak: Boolean? = false): Sak {
-        //TODO: Hent fra klagebehandling
-        return Sak(Sakstype.GENERELL_SAK)
+    private fun createSak(klagebehandling: Klagebehandling): Sak {
+        return if (klagebehandling.sakFagsakId == null || klagebehandling.sakFagsystem == null) {
+            Sak(Sakstype.GENERELL_SAK)
+        } else {
+            Sak(
+                sakstype = Sakstype.FAGSAK,
+                fagsaksystem = klagebehandling.sakFagsystem?.navn?.let { FagsaksSystem.valueOf(it) },
+                fagsakid = klagebehandling.sakFagsakId
+            )
+        }
     }
 
     private fun createBruker(klagebehandling: Klagebehandling): Bruker? {

@@ -80,13 +80,14 @@ class VedtakService(
     fun finalizeJournalpost(
         klagebehandling: Klagebehandling,
         vedtakId: UUID,
-        utfoerendeSaksbehandlerIdent: String
+        utfoerendeSaksbehandlerIdent: String,
+        journalfoerendeEnhet: String
     ): Vedtak? {
         val vedtak = getVedtakFromKlagebehandling(klagebehandling, vedtakId)
         if (vedtak.finalized != null) throw VedtakFinalizedException("Vedtak med id $vedtakId er allerede ferdigstilt")
         if (vedtak.journalpostId == null) throw JournalpostNotFoundException("Vedtak med id $vedtakId er ikke journalført")
         return try {
-            joarkClient.finalizeJournalpost(vedtak.journalpostId!!)
+            joarkClient.finalizeJournalpost(vedtak.journalpostId!!, journalfoerendeEnhet)
             setFinalized(klagebehandling, vedtakId, utfoerendeSaksbehandlerIdent)
         } catch (e: Exception) {
             logger.warn("Kunne ikke ferdigstille journalpost ${vedtak.journalpostId}")
@@ -98,19 +99,20 @@ class VedtakService(
         klagebehandling: Klagebehandling,
         vedtakId: UUID,
         vedlegg: MultipartFile,
-        utfoerendeSaksbehandlerIdent: String
+        utfoerendeSaksbehandlerIdent: String,
+        journalfoerendeEnhet: String
     ): Vedtak {
         val vedtak = getVedtakFromKlagebehandling(klagebehandling, vedtakId)
         if (vedtak.finalized != null) throw VedtakFinalizedException("Vedtak med id $vedtakId er ferdigstilt")
         attachmentValidator.validateAttachment(vedlegg)
         if (vedtak.journalpostId != null) {
-            joarkClient.cancelJournalpost(vedtak.journalpostId!!)
+            joarkClient.cancelJournalpost(vedtak.journalpostId!!, journalfoerendeEnhet)
         }
 
         return setJournalpostId(
             klagebehandling,
             vedtakId,
-            joarkClient.createJournalpost(klagebehandling, vedlegg),
+            joarkClient.createJournalpost(klagebehandling, vedlegg, journalfoerendeEnhet),
             utfoerendeSaksbehandlerIdent
         )
     }

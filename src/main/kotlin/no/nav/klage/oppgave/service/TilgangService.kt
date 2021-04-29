@@ -27,6 +27,12 @@ class TilgangService(
         }
     }
 
+    fun verifySaksbehandlersTilgangTilEnhet(enhetId: String) {
+        if (!innloggetSaksbehandlerRepository.harTilgangTilEnhet(enhetId)) {
+            throw MissingTilgangException("Not authorized to act as this enhet")
+        }
+    }
+
     fun harSaksbehandlerTilgangTil(fnr: String): Boolean {
         val personInfo = pdlFacade.getPersonInfo(fnr)
         if (personInfo.harBeskyttelsesbehovFortrolig()) {

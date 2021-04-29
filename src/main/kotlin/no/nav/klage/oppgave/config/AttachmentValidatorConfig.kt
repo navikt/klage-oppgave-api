@@ -9,10 +9,5 @@ import org.springframework.context.annotation.Configuration
 class AttachmentValidatorConfig(private val clamAvClient: ClamAvClient) {
 
     @Bean
-    fun attachmentValidator(): AttachmentValidator {
-        return AttachmentValidator(
-            clamAvClient
-        )
-    }
-
+    fun attachmentValidator() = AttachmentValidator(clamAvClient)
 }
