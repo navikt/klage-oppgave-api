@@ -31,7 +31,6 @@ class JoarkClient(
         private const val BREV_TITTEL = "Brev fra Klageinstans"
         private const val BREVKODE = "BREV_FRA_KLAGEINSTANS"
         private const val BEHANDLINGSTEMA_KLAGE_KLAGEINSTANS = "ab0164"
-        private const val JOURNALFOERENDE_ENHET = "4291"
     }
 
     fun createJournalpost(klagebehandling: Klagebehandling, uploadedDocument: MultipartFile, journalfoerendeEnhet: String): String {
