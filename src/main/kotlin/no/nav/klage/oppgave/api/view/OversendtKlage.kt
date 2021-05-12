@@ -121,6 +121,20 @@ private fun KildeFagsystem.mapFagsystem(): Fagsystem =
         KildeFagsystem.AO01 -> Fagsystem.AO01
         KildeFagsystem.FS36 -> Fagsystem.FS36
         KildeFagsystem.FS39 -> Fagsystem.FS39
+        KildeFagsystem.AO11 -> Fagsystem.AO11
+        KildeFagsystem.BISYS -> Fagsystem.BISYS
+        KildeFagsystem.FS38 -> Fagsystem.FS38
+        KildeFagsystem.IT01 -> Fagsystem.IT01
+        KildeFagsystem.K9 -> Fagsystem.K9
+        KildeFagsystem.OB36 -> Fagsystem.OB36
+        KildeFagsystem.OEBS -> Fagsystem.OEBS
+        KildeFagsystem.PP01 -> Fagsystem.PP01
+        KildeFagsystem.UFM -> Fagsystem.UFM
+        KildeFagsystem.BA -> Fagsystem.BA
+        KildeFagsystem.EF -> Fagsystem.EF
+        KildeFagsystem.KONT -> Fagsystem.KONT
+        KildeFagsystem.SUPSTONAD -> Fagsystem.SUPSTONAD
+        KildeFagsystem.OMSORGSPENGER -> Fagsystem.OMSORGSPENGER
     }
 
 class HjemmelFraFoersteInstans private constructor(
@@ -265,6 +279,20 @@ data class OversendtSak(
 enum class KildeFagsystem {
     FS36,
     FS39,
-    AO01; // Blir satt av Dolly
+    AO01,
+    AO11,
+    BISYS,
+    FS38,
+    IT01,
+    K9,
+    OB36,
+    OEBS,
+    PP01,
+    UFM,
+    BA,
+    EF,
+    KONT,
+    SUPSTONAD,
+    OMSORGSPENGER
 }
 

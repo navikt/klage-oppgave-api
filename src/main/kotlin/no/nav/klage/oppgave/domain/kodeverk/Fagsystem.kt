@@ -6,7 +6,21 @@ import javax.persistence.Converter
 enum class Fagsystem(override val id: String, override val navn: String, override val beskrivelse: String) : Kode {
     FS36("1", "FS36", "Vedtaksløsning Foreldrepenger"),
     FS39("2", "FS39", "Saksbehandling for Folketrygdloven kapittel 9"),
-    AO01("3", "AO01", "Arena"); // Blir satt av Dolly
+    AO01("3", "AO01", "Arena"),
+    AO11("4", "AO11", "Grisen"),
+    BISYS("5", "BISYS", "BISYS"),
+    FS38("6", "FS38", "Melosys"),
+    IT01("7", "IT01", "Infotrygd"),
+    K9("8", "K9", "Sykdom i familien"),
+    OB36("9", "OB36", "Utbetalingsmelding"),
+    OEBS("10", "OEBS", "OEBS"),
+    PP01("11", "PP01", "Pesys"),
+    UFM("12", "UFM", "Unntak fra medlemskap"),
+    BA("13", "BA", "Barnetrygd"),
+    EF("14", "EF", "Enslig forsørger"),
+    KONT("15", "KONT", "Kontantstøtte"),
+    SUPSTONAD("16", "SUPSTONAD", "Supplerende Stønad"),
+    OMSORGSPENGER("17", "OMSORGSPENGER", "Omsorgspenger");
 
     companion object {
         fun of(id: String): Fagsystem {
