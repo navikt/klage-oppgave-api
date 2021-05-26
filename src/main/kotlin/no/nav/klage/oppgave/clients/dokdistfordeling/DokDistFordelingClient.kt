@@ -19,25 +19,32 @@ class DokDistFordelingClient(
         @Suppress("JAVA_CLASS_ON_COMPANION")
         private val logger = getLogger(javaClass.enclosingClass)
         private val secureLogger = getSecureLogger()
-
     }
 
     @Value("\${spring.application.name}")
     lateinit var applicationName: String
 
     fun distribuerJournalpost(journalpostId: String): DistribuerJournalpostResponse {
-        val payload = DistribuerJournalpostRequestTo(journalpostId = journalpostId)
+        val payload = DistribuerJournalpostRequestTo(
+            journalpostId = journalpostId,
+            bestillendeFagSystem = applicationName,
+            dokumentProdApp = applicationName
+        )
         val distribuerJournalpostResponse = dokDistWebClient.post()
             .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
             .header("Nav-Consumer-Id", applicationName)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithGraphScope()}")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenService.getSaksbehandlerAccessTokenWithSafScope()}")
             .bodyValue(payload)
             .retrieve()
             .bodyToMono(DistribuerJournalpostResponse::class.java)
             .block()
             ?: throw RuntimeException("Journalpost with id $journalpostId could not be distributed.")
 
-        logger.debug("Journalpost with id {} successfully distributed, resulting in bestillingsId {}.", journalpostId, distribuerJournalpostResponse.bestillingsId)
+        logger.debug(
+            "Journalpost with id {} successfully distributed, resulting in bestillingsId {}.",
+            journalpostId,
+            distribuerJournalpostResponse.bestillingsId
+        )
 
         return distribuerJournalpostResponse
     }

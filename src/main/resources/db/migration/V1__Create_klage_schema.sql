@@ -134,7 +134,7 @@ CREATE TABLE klage.vedtak
     journalpost_id      TEXT,
     modified            TIMESTAMP WITH TIME ZONE NOT NULL,
     created             TIMESTAMP WITH TIME ZONE NOT NULL,
-    ferdigstilt_i_joark TIMESTAMP WITH TIME ZONE NOT NULL,
+    ferdigstilt_i_joark TIMESTAMP WITH TIME ZONE,
     ferdig_distribuert  TIMESTAMP WITH TIME ZONE,
     CONSTRAINT fk_vedtak_klagebehandling
         FOREIGN KEY (klagebehandling_id)

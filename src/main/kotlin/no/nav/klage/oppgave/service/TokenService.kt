@@ -53,6 +53,12 @@ class TokenService(
         return response.accessToken
     }
 
+    fun getSaksbehandlerAccessTokenWithJoarkScope(): String {
+        val clientProperties = clientConfigurationProperties.registration["dokarkiv-onbehalfof"]
+        val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
+        return response.accessToken
+    }
+
     fun getAppAccessTokenWithSafScope(): String {
         val clientProperties = clientConfigurationProperties.registration["saf-maskintilmaskin"]
         val response = oAuth2AccessTokenService.getAccessToken(clientProperties)

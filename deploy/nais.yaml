@@ -116,6 +116,7 @@ spec:
     - secret: journalpost-apikey
     - secret: ereg
     - secret: influx
+    - secret: dokdist-apikey
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: {{springProfile}}
