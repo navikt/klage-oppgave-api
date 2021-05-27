@@ -27,6 +27,7 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.data.elasticsearch.core.query.Query
 import java.time.LocalDateTime
+import java.util.*
 
 
 open class ElasticsearchService(
@@ -128,6 +129,10 @@ open class ElasticsearchService(
     open fun countAntallSaksdokumenterMedian(): Long {
         return 3L
         //TODO: Andreas må fikse dette!! :-)
+    }
+
+    open fun countAntallSaksdokumenterPerKlagebehandlingId(): Map<UUID, Long> {
+        return mapOf(UUID.randomUUID() to 10L)
     }
 
 
