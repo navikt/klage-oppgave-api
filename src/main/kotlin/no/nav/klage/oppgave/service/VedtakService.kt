@@ -2,6 +2,7 @@ package no.nav.klage.oppgave.service
 
 import no.nav.klage.oppgave.api.mapper.KlagebehandlingMapper
 import no.nav.klage.oppgave.api.view.*
+import no.nav.klage.oppgave.api.view.VedtakVedleggInput
 import no.nav.klage.oppgave.clients.joark.JoarkClient
 import no.nav.klage.oppgave.clients.saf.graphql.Journalstatus.FERDIGSTILT
 import no.nav.klage.oppgave.clients.saf.graphql.SafGraphQlClient
@@ -23,6 +24,7 @@ import no.nav.klage.oppgave.exceptions.VedtakFinalizedException
 import no.nav.klage.oppgave.util.AttachmentValidator
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.klage.oppgave.util.getSecureLogger
+import no.nav.slackposter.SlackClient
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -38,6 +40,7 @@ class VedtakService(
     private val joarkClient: JoarkClient,
     private val dokumentService: DokumentService,
     private val safClient: SafGraphQlClient,
+    private val slackClient: SlackClient,
     private val tilgangService: TilgangService,
     private val klagebehandlingMapper: KlagebehandlingMapper
 ) {
@@ -92,7 +95,7 @@ class VedtakService(
     fun setJournalpostId(
         klagebehandling: Klagebehandling,
         vedtakId: UUID,
-        journalpostId: String,
+        journalpostId: String?,
         utfoerendeSaksbehandlerIdent: String
     ): Vedtak {
         val event =
@@ -111,6 +114,35 @@ class VedtakService(
             klagebehandling.setVedtakFerdigstiltIJoark(vedtakId, utfoerendeSaksbehandlerIdent)
         applicationEventPublisher.publishEvent(event)
         return klagebehandling.getVedtak(vedtakId)
+    }
+
+    fun slettFilTilknyttetVedtak(
+        klagebehandlingId: UUID,
+        vedtakId: UUID,
+        input: VedtakSlettVedleggInput,
+        innloggetIdent: String
+    ): Vedtak {
+        val klagebehandling = klagebehandlingService.getKlagebehandlingForUpdate(
+            klagebehandlingId,
+            input.klagebehandlingVersjon
+        )
+
+        tilgangService.verifySaksbehandlersTilgangTilEnhet(klagebehandling.tildeltEnhet!!)
+
+        val vedtak = klagebehandling.getVedtak(vedtakId)
+
+        if (vedtak.journalpostId == null) {
+            return vedtak
+        }
+
+        postJournalpostCancelledToSlack(vedtak.journalpostId!!)
+
+        return setJournalpostId(
+            klagebehandling,
+            vedtak.id,
+            null,
+            innloggetIdent
+        )
     }
 
     fun oppdaterUtfall(
@@ -203,6 +235,12 @@ class VedtakService(
         utfoerendeSaksbehandlerIdent: String
     ): Vedtak {
         attachmentValidator.validateAttachment(vedlegg)
+        if (vedtak.journalpostId != null) {
+            postJournalpostCancelledToSlack(vedtak.journalpostId!!)
+//            Legg inn kansellering når det blir mulig
+//            joarkClient.cancelJournalpost(vedtak.journalpostId!!, journalfoerendeEnhet)
+        }
+
         val journalpostId = joarkClient.createJournalpost(klagebehandling, vedlegg, klagebehandling.tildeling!!.enhet!!)
 
         return setJournalpostId(
@@ -283,4 +321,15 @@ class VedtakService(
             throw JournalpostFinalizationException("Klarte ikke å journalføre vedtak")
         }
     }
+
+    private fun postJournalpostCancelledToSlack(journalpostId: String) {
+        slackClient.postMessage(
+            String.format(
+                "Journalpost med id %s er slettet av bruker.",
+                journalpostId
+            )
+        )
+    }
+
+
 }

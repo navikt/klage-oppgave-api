@@ -5,6 +5,7 @@ import no.nav.klage.oppgave.api.mapper.KlagebehandlingMapper
 import no.nav.klage.oppgave.api.view.*
 import no.nav.klage.oppgave.config.SecurityConfiguration.Companion.ISSUER_AAD
 import no.nav.klage.oppgave.domain.AuditLogEvent
+import no.nav.klage.oppgave.domain.klage.Vedtak
 import no.nav.klage.oppgave.domain.kodeverk.Grunn
 import no.nav.klage.oppgave.domain.kodeverk.Hjemmel
 import no.nav.klage.oppgave.domain.kodeverk.Utfall
@@ -128,6 +129,22 @@ class KlagebehandlingVedtakController(
         logMethodDetails("postVedlegg", klagebehandlingId, vedtakId)
 
         return vedtakService.knyttVedtaksFilTilVedtak(
+            klagebehandlingId.toUUIDOrException(),
+            vedtakId.toUUIDOrException(),
+            input,
+            innloggetSaksbehandlerRepository.getInnloggetIdent()
+        )
+    }
+
+    @DeleteMapping("/klagebehandlinger/{klagebehandlingid}/vedtak/{vedtakid}/vedlegg")
+    fun deleteVedlegg(
+        @PathVariable("klagebehandlingid") klagebehandlingId: String,
+        @PathVariable("vedtakid") vedtakId: String,
+        @RequestBody input: VedtakSlettVedleggInput
+    ): Vedtak {
+        logMethodDetails("deleteVedlegg", klagebehandlingId, vedtakId)
+
+        return vedtakService.slettFilTilknyttetVedtak(
             klagebehandlingId.toUUIDOrException(),
             vedtakId.toUUIDOrException(),
             input,

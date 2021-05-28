@@ -26,3 +26,7 @@ data class VedtakFullfoerInput(
     val journalfoerendeEnhet: String,
     val klagebehandlingVersjon: Long
 )
+
+data class VedtakSlettVedleggInput(
+    val klagebehandlingVersjon: Long
+)

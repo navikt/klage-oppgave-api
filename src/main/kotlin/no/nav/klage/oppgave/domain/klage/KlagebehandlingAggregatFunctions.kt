@@ -385,7 +385,7 @@ object KlagebehandlingAggregatFunctions {
 
     fun Klagebehandling.setJournalpostIdInVedtak(
         vedtakId: UUID,
-        nyVerdi: String,
+        nyVerdi: String?,
         saksbehandlerident: String
     ): KlagebehandlingEndretEvent {
         val vedtak = this.getVedtak(vedtakId)
