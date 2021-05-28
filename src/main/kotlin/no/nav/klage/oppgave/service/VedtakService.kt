@@ -113,7 +113,6 @@ class VedtakService(
         return klagebehandling.getVedtak(vedtakId)
     }
 
-    @Transactional
     fun oppdaterUtfall(
         klagebehandlingId: UUID,
         vedtakId: UUID,
@@ -131,7 +130,6 @@ class VedtakService(
         )
     }
 
-    @Transactional
     fun oppdaterGrunn(
         klagebehandlingId: UUID,
         vedtakId: UUID,
@@ -149,7 +147,6 @@ class VedtakService(
         )
     }
 
-    @Transactional
     fun oppdaterHjemler(
         klagebehandlingId: UUID,
         vedtakId: UUID,
@@ -167,7 +164,6 @@ class VedtakService(
         )
     }
 
-    @Transactional
     fun knyttVedtaksFilTilVedtak(
         klagebehandlingId: UUID,
         vedtakId: UUID,
