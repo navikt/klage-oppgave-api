@@ -11,6 +11,7 @@ import no.nav.klage.oppgave.repositories.InnloggetSaksbehandlerRepository
 import no.nav.klage.oppgave.service.DokumentService
 import no.nav.klage.oppgave.service.KlagebehandlingService
 import no.nav.klage.oppgave.service.VedtakService
+import no.nav.klage.oppgave.service.distribusjon.KlagebehandlingSchedulerService
 import no.nav.klage.oppgave.util.AuditLogger
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -30,7 +31,8 @@ class KlagebehandlingVedtakController(
     private val vedtakService: VedtakService,
     private val auditLogger: AuditLogger,
     private val klagebehandlingService: KlagebehandlingService,
-    private val dokumentService: DokumentService
+    private val dokumentService: DokumentService,
+    private val klagebehandlingSchedulerService: KlagebehandlingSchedulerService
 ) {
 
     companion object {
@@ -163,6 +165,13 @@ class KlagebehandlingVedtakController(
             innloggetSaksbehandlerRepository.getInnloggetIdent()
         )
         return klagebehandlingMapper.mapKlagebehandlingToKlagebehandlingDetaljerView(klagebehandling)
+    }
+
+    @GetMapping("/klagebehandlinger/distribuer")
+    fun distribuer(
+
+    ) {
+        klagebehandlingSchedulerService.distribuerVedtak()
     }
 
     @ResponseBody
