@@ -127,7 +127,7 @@ class VedtakService(
             input.klagebehandlingVersjon
         )
 
-        tilgangService.verifySaksbehandlersTilgangTilEnhet(klagebehandling.tildeltEnhet!!)
+        tilgangService.verifySaksbehandlersTilgangTilEnhet(klagebehandling.tildeling!!.enhet!!)
 
         val vedtak = klagebehandling.getVedtak(vedtakId)
 
