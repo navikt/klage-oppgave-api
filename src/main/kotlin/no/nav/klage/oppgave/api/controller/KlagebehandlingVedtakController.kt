@@ -76,13 +76,10 @@ class KlagebehandlingVedtakController(
     ): VedtakView {
         logMethodDetails("putUtfall", klagebehandlingId, vedtakId)
         return klagebehandlingMapper.mapVedtakToVedtakView(
-            vedtakService.setUtfall(
-                klagebehandlingService.getKlagebehandlingForUpdate(
-                    klagebehandlingId.toUUIDOrException(),
-                    input.klagebehandlingVersjon
-                ),
+            vedtakService.oppdaterUtfall(
+                klagebehandlingId.toUUIDOrException(),
                 vedtakId.toUUIDOrException(),
-                input.utfall?.let { Utfall.of(it) },
+                input,
                 innloggetSaksbehandlerRepository.getInnloggetIdent()
             )
         )
@@ -96,13 +93,10 @@ class KlagebehandlingVedtakController(
     ): VedtakView {
         logMethodDetails("putGrunn", klagebehandlingId, vedtakId)
         return klagebehandlingMapper.mapVedtakToVedtakView(
-            vedtakService.setGrunn(
-                klagebehandlingService.getKlagebehandlingForUpdate(
-                    klagebehandlingId.toUUIDOrException(),
-                    input.klagebehandlingVersjon
-                ),
+            vedtakService.oppdaterGrunn(
+                klagebehandlingId.toUUIDOrException(),
                 vedtakId.toUUIDOrException(),
-                input.grunn?.let { Grunn.of(it) },
+                input,
                 innloggetSaksbehandlerRepository.getInnloggetIdent()
             )
         )
@@ -116,13 +110,10 @@ class KlagebehandlingVedtakController(
     ): VedtakView {
         logMethodDetails("putHjemler", klagebehandlingId, vedtakId)
         return klagebehandlingMapper.mapVedtakToVedtakView(
-            vedtakService.setHjemler(
-                klagebehandlingService.getKlagebehandlingForUpdate(
-                    klagebehandlingId.toUUIDOrException(),
-                    input.klagebehandlingVersjon
-                ),
+            vedtakService.oppdaterHjemler(
+                klagebehandlingId.toUUIDOrException(),
                 vedtakId.toUUIDOrException(),
-                input.hjemler?.map { Hjemmel.of(it) }?.toSet() ?: emptySet(),
+                input,
                 innloggetSaksbehandlerRepository.getInnloggetIdent()
             )
         )
