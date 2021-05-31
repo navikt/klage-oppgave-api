@@ -150,12 +150,10 @@ class KlagebehandlingMapper(
         )
     }
 
-    fun getVedleggView(vedtakJournalpostId: String?): VedleggView {
-        return if (vedtakJournalpostId != null) {
-            val arkivertDokumentWithTitle = dokumentService.getArkivertDokumentWithTitle(vedtakJournalpostId)
+    fun getVedleggView(vedtakJournalpostId: String?): VedleggView? {
+        return vedtakJournalpostId?.let {
+            val arkivertDokumentWithTitle = dokumentService.getArkivertDokumentWithTitle(it)
             mapArkivertDokumentWithTitleToVedleggView(arkivertDokumentWithTitle)
-        } else {
-            VedleggView()
         }
     }
 
