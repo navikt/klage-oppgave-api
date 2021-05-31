@@ -16,6 +16,8 @@ import no.nav.klage.oppgave.domain.klage.Klagebehandling
 import no.nav.klage.oppgave.domain.klage.PartId
 import no.nav.klage.oppgave.domain.klage.Vedtak
 import no.nav.klage.oppgave.domain.kodeverk.PartIdType
+import no.nav.klage.oppgave.repositories.InnloggetSaksbehandlerRepository
+import no.nav.klage.oppgave.service.VedtakService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.klage.oppgave.util.getSecureLogger
 import org.springframework.stereotype.Service
@@ -26,7 +28,9 @@ class KlagebehandlingMapper(
     private val pdlFacade: PdlFacade,
     private val egenAnsattService: EgenAnsattService,
     private val norg2Client: Norg2Client,
-    private val eregClient: EregClient
+    private val eregClient: EregClient,
+    private val vedtakService: VedtakService,
+    private val innloggetSaksbehandlerRepository: InnloggetSaksbehandlerRepository,
 ) {
 
     companion object {
@@ -239,7 +243,10 @@ class KlagebehandlingMapper(
             sendTilbakemelding = klagebehandling.kvalitetsvurdering?.sendTilbakemelding,
             tilbakemelding = klagebehandling.kvalitetsvurdering?.tilbakemelding,
             klagebehandlingVersjon = klagebehandling.versjon,
-            vedtak = klagebehandling.vedtak.map { mapVedtakToVedtakView(it) },
+            vedtak = klagebehandling.vedtak.map { mapVedtakToVedtakView(it, vedtakService.getVedleggView(
+                it,
+                innloggetSaksbehandlerRepository.getInnloggetIdent()
+            )) },
             kommentarFraFoersteinstans = klagebehandling.kommentarFraFoersteinstans
         )
     }

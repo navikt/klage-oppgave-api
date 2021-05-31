@@ -220,8 +220,7 @@ class VedtakService(
         )
 
         return getVedleggView(
-            klagebehandling,
-            vedtakId,
+            klagebehandling.getVedtak(vedtakId),
             innloggetIdent
         )
     }
@@ -251,12 +250,10 @@ class VedtakService(
     }
 
     fun getVedleggView(
-        klagebehandling: Klagebehandling,
-        vedtakId: UUID,
+        vedtak: Vedtak,
         utfoerendeSaksbehandlerIdent: String
     ): VedleggView? {
-        val vedtak = klagebehandling.getVedtak(vedtakId)
-        if (vedtak.journalpostId == null) throw JournalpostNotFoundException("Vedtak med id $vedtakId er ikke journalført")
+        if (vedtak.journalpostId == null) throw JournalpostNotFoundException("Vedtak med id ${vedtak.id} er ikke journalført")
         val mainDokument = dokumentService.getMainDokument(vedtak.journalpostId!!)
         val mainDokumentName = dokumentService.getMainDokumentTitle(vedtak.journalpostId!!)
         return klagebehandlingMapper.mapArkivertDokumentToVedleggView(

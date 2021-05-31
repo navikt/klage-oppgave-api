@@ -59,8 +59,7 @@ class KlagebehandlingVedtakController(
                 vedtakId.toUUIDOrException()
             ),
             vedtakService.getVedleggView(
-                klagebehandling,
-                vedtakId.toUUIDOrException(),
+                klagebehandling.getVedtak(vedtakId.toUUIDOrException()),
                 innloggetSaksbehandlerRepository.getInnloggetIdent()
             )
         )
@@ -181,8 +180,7 @@ class KlagebehandlingVedtakController(
             innloggetSaksbehandlerRepository.getInnloggetIdent()
         )
         val vedleggView = vedtakService.getVedleggView(
-            klagebehandling,
-            vedtakId.toUUIDOrException(),
+            klagebehandling.getVedtak(vedtakId.toUUIDOrException()),
             innloggetSaksbehandlerRepository.getInnloggetIdent()
         )
         val responseHeaders = HttpHeaders()
