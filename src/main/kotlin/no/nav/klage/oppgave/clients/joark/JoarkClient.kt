@@ -163,7 +163,7 @@ class JoarkClient(
             brevkode = BREVKODE,
             dokumentVarianter = listOf(
                 DokumentVariant(
-                    filnavn = uploadedDocument.originalFilename ?: "Opplastet_dokument",
+                    filnavn = uploadedDocument.originalFilename ?: uploadedDocument.name ?: "Opplastet_dokument",
                     filtype = "PDFA",
                     variantformat = "ARKIV",
                     fysiskDokument = Base64.getEncoder().encodeToString(uploadedDocument.bytes)
