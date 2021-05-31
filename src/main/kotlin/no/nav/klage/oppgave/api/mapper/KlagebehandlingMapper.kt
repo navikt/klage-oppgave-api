@@ -7,13 +7,14 @@ import no.nav.klage.oppgave.clients.ereg.EregClient
 import no.nav.klage.oppgave.clients.norg2.Norg2Client
 import no.nav.klage.oppgave.clients.pdl.PdlFacade
 import no.nav.klage.oppgave.clients.pdl.Person
-import no.nav.klage.oppgave.clients.saf.rest.ArkivertDokument
+import no.nav.klage.oppgave.domain.ArkivertDokumentWithTitle
 import no.nav.klage.oppgave.domain.elasticsearch.EsKlagebehandling
 import no.nav.klage.oppgave.domain.klage.BrevMottaker
 import no.nav.klage.oppgave.domain.klage.Klagebehandling
 import no.nav.klage.oppgave.domain.klage.PartId
 import no.nav.klage.oppgave.domain.klage.Vedtak
 import no.nav.klage.oppgave.domain.kodeverk.PartIdType
+import no.nav.klage.oppgave.service.DokumentService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.klage.oppgave.util.getSecureLogger
 import org.springframework.stereotype.Service
@@ -24,7 +25,8 @@ class KlagebehandlingMapper(
     private val pdlFacade: PdlFacade,
     private val egenAnsattService: EgenAnsattService,
     private val norg2Client: Norg2Client,
-    private val eregClient: EregClient
+    private val eregClient: EregClient,
+    private val dokumentService: DokumentService
 ) {
 
     companion object {
@@ -137,34 +139,32 @@ class KlagebehandlingMapper(
         )
     }
 
-    fun mapVedtakToVedtakView(vedtak: Vedtak, vedleggView: VedleggView? = null): VedtakView {
-        if (vedleggView != null) {
-            return VedtakView(
-                id = vedtak.id,
-                utfall = vedtak.utfall?.id,
-                grunn = vedtak.grunn?.id,
-                hjemler = vedtak.hjemler.map { it.id }.toSet(),
-                brevMottakere = vedtak.brevmottakere.map { mapBrevmottaker(it) }.toSet(),
-                file = vedleggView,
-                ferdigstilt = vedtak.ferdigstiltIJoark
-            )
+    fun mapVedtakToVedtakView(vedtak: Vedtak): VedtakView {
+        return VedtakView(
+            id = vedtak.id,
+            utfall = vedtak.utfall?.id,
+            grunn = vedtak.grunn?.id,
+            hjemler = vedtak.hjemler.map { it.id }.toSet(),
+            brevMottakere = vedtak.brevmottakere.map { mapBrevmottaker(it) }.toSet(),
+            file = getVedleggView(vedtak.journalpostId),
+            ferdigstilt = vedtak.ferdigstiltIJoark
+        )
+    }
+
+    fun getVedleggView(vedtakJournalpostId: String?): VedleggView {
+        return if (vedtakJournalpostId != null) {
+            val arkivertDokumentWithTitle = dokumentService.getArkivertDokumentWithTitle(vedtakJournalpostId)
+            mapArkivertDokumentWithTitleToVedleggView(arkivertDokumentWithTitle)
         } else {
-            return VedtakView(
-                id = vedtak.id,
-                utfall = vedtak.utfall?.id,
-                grunn = vedtak.grunn?.id,
-                hjemler = vedtak.hjemler.map { it.id }.toSet(),
-                brevMottakere = vedtak.brevmottakere.map { mapBrevmottaker(it) }.toSet(),
-                ferdigstilt = vedtak.ferdigstiltIJoark
-            )
+            VedleggView()
         }
     }
 
-    fun mapArkivertDokumentToVedleggView(arkivertDokument: ArkivertDokument, dokumentName: String): VedleggView {
+    fun mapArkivertDokumentWithTitleToVedleggView(arkivertDokumentWithTitle: ArkivertDokumentWithTitle): VedleggView {
         return VedleggView(
-            dokumentName,
-            arkivertDokument.bytes.size.toLong(),
-            Base64.getEncoder().encodeToString(arkivertDokument.bytes)
+            arkivertDokumentWithTitle.title,
+            arkivertDokumentWithTitle.content.size.toLong(),
+            Base64.getEncoder().encodeToString(arkivertDokumentWithTitle.content)
         )
     }
 
@@ -198,6 +198,5 @@ class KlagebehandlingMapper(
         } else {
             null
         }
-
 }
 

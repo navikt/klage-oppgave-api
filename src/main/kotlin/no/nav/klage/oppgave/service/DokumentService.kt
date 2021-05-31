@@ -5,6 +5,7 @@ import no.nav.klage.oppgave.api.view.DokumenterResponse
 import no.nav.klage.oppgave.clients.saf.graphql.*
 import no.nav.klage.oppgave.clients.saf.rest.ArkivertDokument
 import no.nav.klage.oppgave.clients.saf.rest.SafRestClient
+import no.nav.klage.oppgave.domain.ArkivertDokumentWithTitle
 import no.nav.klage.oppgave.domain.klage.Klagebehandling
 import no.nav.klage.oppgave.domain.klage.Saksdokument
 import no.nav.klage.oppgave.exceptions.JournalpostNotFoundException
@@ -104,6 +105,16 @@ class DokumentService(
             logger.warn("Unable to find journalpost $journalpostId", e)
             "Unknown"
         }
+    }
+
+    fun getArkivertDokumentWithTitle(journalpostId: String): ArkivertDokumentWithTitle {
+        val title = getMainDokumentTitle(journalpostId)
+        val dokument = getMainDokument(journalpostId)
+        return ArkivertDokumentWithTitle(
+            title,
+            dokument.bytes,
+            dokument.contentType
+        )
     }
 
     private fun harArkivVariantformat(dokumentInfo: DokumentInfo): Boolean =

@@ -5,8 +5,8 @@ import no.nav.klage.oppgave.api.mapper.KlagebehandlingMapper
 import no.nav.klage.oppgave.api.view.*
 import no.nav.klage.oppgave.config.SecurityConfiguration.Companion.ISSUER_AAD
 import no.nav.klage.oppgave.domain.AuditLogEvent
-import no.nav.klage.oppgave.domain.klage.Vedtak
 import no.nav.klage.oppgave.exceptions.BehandlingsidWrongFormatException
+import no.nav.klage.oppgave.exceptions.JournalpostNotFoundException
 import no.nav.klage.oppgave.repositories.InnloggetSaksbehandlerRepository
 import no.nav.klage.oppgave.service.DokumentService
 import no.nav.klage.oppgave.service.KlagebehandlingService
@@ -16,7 +16,6 @@ import no.nav.klage.oppgave.util.getLogger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -57,11 +56,6 @@ class KlagebehandlingVedtakController(
             vedtakService.getVedtak(
                 klagebehandling,
                 vedtakId.toUUIDOrException()
-            ),
-            vedtakService.getVedleggView(
-                klagebehandling,
-                vedtakId.toUUIDOrException(),
-                innloggetSaksbehandlerRepository.getInnloggetIdent()
             )
         )
     }
@@ -125,11 +119,13 @@ class KlagebehandlingVedtakController(
     ): VedleggView? {
         logMethodDetails("postVedlegg", klagebehandlingId, vedtakId)
 
-        return vedtakService.knyttVedtaksFilTilVedtak(
-            klagebehandlingId.toUUIDOrException(),
-            vedtakId.toUUIDOrException(),
-            input,
-            innloggetSaksbehandlerRepository.getInnloggetIdent()
+        return klagebehandlingMapper.getVedleggView(
+            vedtakService.knyttVedtaksFilTilVedtak(
+                klagebehandlingId.toUUIDOrException(),
+                vedtakId.toUUIDOrException(),
+                input,
+                innloggetSaksbehandlerRepository.getInnloggetIdent()
+            ).journalpostId
         )
     }
 
@@ -175,21 +171,15 @@ class KlagebehandlingVedtakController(
     ): ResponseEntity<ByteArray> {
         logMethodDetails("getVedlegg", klagebehandlingId, vedtakId)
         val klagebehandling = klagebehandlingService.getKlagebehandling(klagebehandlingId.toUUIDOrException())
-        val arkivertDokument = vedtakService.getVedleggArkivertDokument(
-            klagebehandling,
-            vedtakId.toUUIDOrException(),
-            innloggetSaksbehandlerRepository.getInnloggetIdent()
-        )
-        val vedleggView = vedtakService.getVedleggView(
-            klagebehandling,
-            vedtakId.toUUIDOrException(),
-            innloggetSaksbehandlerRepository.getInnloggetIdent()
-        )
+        val vedtak = vedtakService.getVedtak(klagebehandling, vedtakId.toUUIDOrException())
+        if (vedtak.journalpostId == null) throw JournalpostNotFoundException("Vedtak med id $vedtakId er ikke journalført")
+        val arkivertDokumentWithTitle = dokumentService.getArkivertDokumentWithTitle(vedtak.journalpostId!!)
+
         val responseHeaders = HttpHeaders()
-        responseHeaders.contentType = MediaType.valueOf("application/pdf")
-        responseHeaders.add("Content-Disposition", "inline; filename=${vedleggView?.name}")
+        responseHeaders.contentType = arkivertDokumentWithTitle.contentType
+        responseHeaders.add("Content-Disposition", "inline; filename=${arkivertDokumentWithTitle.title}")
         return ResponseEntity(
-            arkivertDokument.bytes,
+            arkivertDokumentWithTitle.content,
             responseHeaders,
             HttpStatus.OK
         )
