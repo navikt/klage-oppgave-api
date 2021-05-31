@@ -40,8 +40,7 @@ class VedtakService(
     private val dokumentService: DokumentService,
     private val safClient: SafGraphQlClient,
     private val slackClient: SlackClient,
-    private val tilgangService: TilgangService,
-    private val klagebehandlingMapper: KlagebehandlingMapper
+    private val tilgangService: TilgangService
 ) {
 
     companion object {
