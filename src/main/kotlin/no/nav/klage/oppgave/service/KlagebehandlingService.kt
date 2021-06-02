@@ -542,11 +542,11 @@ class KlagebehandlingService(
 
     fun toggleDokumentFromKlagebehandling(
         klagebehandlingId: UUID,
-        klagebehandlingVersjon: Long?,
+        klagebehandlingVersjon: Long,
         journalpostId: String,
         dokumentInfoId: String,
         saksbehandlerIdent: String
-    ): Boolean {
+    ): Pair<Boolean, Long> {
         val klagebehandling = klagebehandlingRepository.getOne(klagebehandlingId)
 
         if (klagebehandling.saksdokumenter.none { it.journalpostId == journalpostId && it.dokumentInfoId == dokumentInfoId }) {
@@ -557,7 +557,7 @@ class KlagebehandlingService(
                 dokumentInfoId,
                 saksbehandlerIdent
             )
-            return true
+            return Pair(true, klagebehandling.versjon)
         } else {
             disconnectDokumentFromKlagebehandling(
                 klagebehandlingId,
@@ -566,7 +566,7 @@ class KlagebehandlingService(
                 dokumentInfoId,
                 saksbehandlerIdent
             )
-            return false
+            return Pair(false, klagebehandling.versjon)
         }
     }
 

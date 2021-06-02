@@ -64,7 +64,16 @@ enum class Tema(override val id: String, override val navn: String, override val
     VEN("53", "VEN", "Ventelønn"),
     YRA("54", "YRA", "Yrkesrettet attføring"),
     YRK("55", "YRK", "Yrkesskade / Menerstatning"),
-    GOS("56", "GOS", "Gosys") //Er ikke egentlig et tema, men returneres fra Axsys likevel
+    GOS("56", "GOS", "Gosys"), //Er ikke egentlig et tema, men returneres fra Axsys likevel
+    BII("57", "BII", "Bidrag innkreving"),
+    KLA("58", "KLA", "Klage/Anke"),
+    KNA("59", "KNA", "Kontakt NAV"),
+    KOM("60", "KOM", "Kommunale tjenester"),
+    LGA("61", "LG", "Lønnsgaranti"),
+    MOT("62", "MOT", "3 - Skanning"),
+    OKO("63", "OKO", "Økonomi"),
+    OVR("64", "OVR", "4 - Øvrig"),
+    CON("65", "CON", "Condictio indebiti") //Er ikke egentlig et tema, men returneres fra Axsys likevel
     ;
 
     override fun toString(): String {

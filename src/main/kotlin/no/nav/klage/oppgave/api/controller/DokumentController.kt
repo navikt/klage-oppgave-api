@@ -69,10 +69,10 @@ class DokumentController(
         @PathVariable behandlingsid: String
     ): DokumentReferanserResponse {
         val klagebehandlingId = parseAndValidate(behandlingsid)
+        val klagebehandling =
+            klagebehandlingService.getKlagebehandling(klagebehandlingId)
         return DokumentReferanserResponse(
-            klagebehandlingService.fetchJournalpostIderConnectedToKlagebehandling(
-                klagebehandlingId
-            )
+            klagebehandling.versjon, klagebehandling.saksdokumenter.map { it.journalpostId }
         )
     }
 
@@ -81,13 +81,14 @@ class DokumentController(
         notes = "Sletter knytningen mellom en journalpost fra SAF og klagebehandlingen den har vært knyttet til."
     )
     @DeleteMapping(
-        "/klagebehandlinger/{behandlingsId}/journalposter/{journalpostId}/dokumenter/{dokumentInfoId}",
+        "/klagebehandlinger/{behandlingsId}/versjon/{behandlingsVersjon}/journalposter/{journalpostId}/dokumenter/{dokumentInfoId}",
         produces = ["application/json"]
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun disconnectDokument(
         @ApiParam(value = "Id til klagebehandlingen i vårt system")
         @PathVariable behandlingsId: String,
+        @PathVariable behandlingsVersjon: Long,
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String
     ) {
@@ -95,7 +96,7 @@ class DokumentController(
         val innloggetIdent = innloggetSaksbehandlerRepository.getInnloggetIdent()
         klagebehandlingService.disconnectDokumentFromKlagebehandling(
             klagebehandlingId,
-            null, //dropper optimistic locking her
+            behandlingsVersjon,
             journalpostId,
             dokumentInfoId,
             innloggetIdent
@@ -117,7 +118,7 @@ class DokumentController(
         val innloggetIdent = innloggetSaksbehandlerRepository.getInnloggetIdent()
         klagebehandlingService.connectDokumentToKlagebehandling(
             klagebehandlingId,
-            null, //dropper optimistic locking her
+            dokumentKnytning.klagebehandlingVersjon,
             dokumentKnytning.journalpostId,
             dokumentKnytning.dokumentInfoId,
             innloggetIdent
@@ -137,14 +138,14 @@ class DokumentController(
     ): ToggleDokumentResponse {
         val klagebehandlingId = parseAndValidate(behandlingsid)
         val innloggetIdent = innloggetSaksbehandlerRepository.getInnloggetIdent()
-        val bleTilknyttet = klagebehandlingService.toggleDokumentFromKlagebehandling(
+        val (bleTilknyttet, klagebehandlingVersjon) = klagebehandlingService.toggleDokumentFromKlagebehandling(
             klagebehandlingId,
-            null, //dropper optimistic locking her
+            toggleDokument.klagebehandlingVersjon,
             toggleDokument.journalpostId,
             toggleDokument.dokumentInfoId,
             innloggetIdent
         )
-        return ToggleDokumentResponse(tilknyttet = bleTilknyttet)
+        return ToggleDokumentResponse(tilknyttet = bleTilknyttet, klagebehandlingVersjon = klagebehandlingVersjon)
     }
 
     @ResponseBody

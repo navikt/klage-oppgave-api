@@ -38,6 +38,7 @@ class DokumentService(
                     previousPageRef
                 )
             return DokumenterResponse(
+                klagebehandlingVersjon = klagebehandling.versjon,
                 dokumenter = dokumentoversiktBruker.journalposter.map { journalpost ->
                     dokumentMapper.mapJournalpostToDokumentReferanse(journalpost, klagebehandling)
                 },
@@ -48,7 +49,11 @@ class DokumentService(
                 }
             )
         } else {
-            return DokumenterResponse(dokumenter = emptyList(), pageReference = null)
+            return DokumenterResponse(
+                klagebehandlingVersjon = klagebehandling.versjon,
+                dokumenter = emptyList(),
+                pageReference = null
+            )
         }
     }
 
@@ -56,7 +61,13 @@ class DokumentService(
         return klagebehandling.saksdokumenter
             .mapNotNull { safGraphQlClient.getJournalpost(it.journalpostId) }
             .map { dokumentMapper.mapJournalpostToDokumentReferanse(it, klagebehandling) }
-            .let { DokumenterResponse(dokumenter = it, pageReference = null) }
+            .let {
+                DokumenterResponse(
+                    klagebehandlingVersjon = klagebehandling.versjon,
+                    dokumenter = it,
+                    pageReference = null
+                )
+            }
     }
 
     fun validateJournalpostExists(journalpostId: String) {
