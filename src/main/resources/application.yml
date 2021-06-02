@@ -54,6 +54,8 @@ spring:
     open-in-view: false
   lifecycle:
     timeout-per-shutdown-phase: 20s
+  codec:
+    max-in-memory-size: 15MB
 
 server:
   port: 7081
