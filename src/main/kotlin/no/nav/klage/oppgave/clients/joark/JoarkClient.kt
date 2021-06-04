@@ -58,14 +58,14 @@ class JoarkClient(
         return journalpostResponse.journalpostId
     }
 
-    fun cancelJournalpost(journalpostId: String, journalfoerendeEnhet: String): String {
+    fun cancelJournalpost(journalpostId: String): String {
         val response = joarkWebClient.patch()
-            .uri("/${journalpostId}/feilregistrer/avbryt")
+            .uri("/${journalpostId}/feilregistrer/settStatusAvbryt")
             .header("Nav-Consumer-Token", "Bearer ${tokenUtil.getStsSystembrukerToken()}")
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${tokenUtil.getSaksbehandlerAccessTokenWithJoarkScope()}")
             .header("Nav-Call-Id", tracer.currentSpan().context().traceIdString())
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(FerdigstillJournalpostPayload(journalfoerendeEnhet))
+            .bodyValue(AvbrytJournalpostPayload(journalpostId))
             .retrieve()
             .bodyToMono(String::class.java)
             .block()
