@@ -128,12 +128,9 @@ class VedtakService(
             return klagebehandling
         }
 
-        joarkClient.cancelJournalpost(vedtak.journalpostId!!)
-
-        return setJournalpostIdOgOpplastet(
+        return kansellerJournalpost(
             klagebehandling,
-            vedtak.id,
-            null,
+            vedtak,
             innloggetIdent
         )
     }
@@ -206,40 +203,23 @@ class VedtakService(
 
         if (vedtak.ferdigstiltIJoark != null) throw VedtakFinalizedException("Vedtak med id $vedtakId er ferdigstilt")
 
-        return addFileToVedtak(
-            klagebehandling,
-            vedtak,
-            input.vedlegg,
-            innloggetIdent
-        )
-    }
-
-
-    private fun addFileToVedtak(
-        klagebehandling: Klagebehandling,
-        vedtak: Vedtak,
-        vedlegg: MultipartFile,
-        utfoerendeSaksbehandlerIdent: String
-    ): Klagebehandling {
-        attachmentValidator.validateAttachment(vedlegg)
         if (vedtak.journalpostId != null) {
-            joarkClient.cancelJournalpost(vedtak.journalpostId!!)
-
-            setJournalpostIdOgOpplastet(
+            kansellerJournalpost(
                 klagebehandling,
-                vedtak.id,
-                null,
-                utfoerendeSaksbehandlerIdent
+                vedtak,
+                innloggetIdent
             )
         }
 
-        val journalpostId = joarkClient.createJournalpost(klagebehandling, vedlegg, klagebehandling.tildeling!!.enhet!!)
+        attachmentValidator.validateAttachment(input.vedlegg)
+
+        val journalpostId = joarkClient.createJournalpost(klagebehandling, input.vedlegg, klagebehandling.tildeling!!.enhet!!)
 
         return setJournalpostIdOgOpplastet(
             klagebehandling,
             vedtak.id,
             journalpostId,
-            utfoerendeSaksbehandlerIdent
+            innloggetIdent
         )
     }
 
@@ -288,5 +268,21 @@ class VedtakService(
             logger.warn("Kunne ikke ferdigstille journalpost ${vedtak.journalpostId}")
             throw JournalpostFinalizationException("Klarte ikke å journalføre vedtak")
         }
+    }
+
+    private fun kansellerJournalpost(
+        klagebehandling: Klagebehandling,
+        vedtak: Vedtak,
+        utfoerendeSaksbehandlerIdent: String
+    ): Klagebehandling {
+        if (vedtak.journalpostId != null) {
+            joarkClient.cancelJournalpost(vedtak.journalpostId!!)
+        }
+        return setJournalpostIdOgOpplastet(
+            klagebehandling,
+            vedtak.id,
+            null,
+            utfoerendeSaksbehandlerIdent
+        )
     }
 }
