@@ -35,19 +35,19 @@ class KlagebehandlingDistribusjonService(
                     logger.debug("Vedtak ${vedtak.id} i klagebehandling $klagebehandlingId er ikke distribuert")
 
                     klagebehandling = lagBrevmottakere(klagebehandling, vedtak)
-
-                    vedtak.brevmottakere
+                    val nyttVedtak = klagebehandling.getVedtak(vedtak.id)
+                    nyttVedtak.brevmottakere
                         .filter { brevMottaker -> brevMottaker.erIkkeDistribuertTil() }
                         .forEach { brevMottaker ->
                             logger.debug("Vedtak ${vedtak.id} i klagebehandling $klagebehandlingId er ikke distribuert til brevmottaker ${brevMottaker.id}")
 
                             klagebehandling =
-                                lagJournalpostKopierForSekundaereMottakere(klagebehandling, vedtak, brevMottaker)
+                                lagJournalpostKopierForSekundaereMottakere(klagebehandling, nyttVedtak, brevMottaker)
 
-                            klagebehandling = distribuerVedtakTilBrevmottaker(klagebehandling, vedtak, brevMottaker)
+                            klagebehandling = distribuerVedtakTilBrevmottaker(klagebehandling, nyttVedtak, brevMottaker)
                         }
 
-                    klagebehandling = markerVedtakSomFerdigDistribuert(klagebehandling, vedtak)
+                    klagebehandling = markerVedtakSomFerdigDistribuert(klagebehandling, nyttVedtak)
                 }
 
             avsluttKlagebehandling(klagebehandling)

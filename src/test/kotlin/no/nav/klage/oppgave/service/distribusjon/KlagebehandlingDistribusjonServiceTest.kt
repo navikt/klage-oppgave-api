@@ -1,6 +1,8 @@
 package no.nav.klage.oppgave.service.distribusjon
 
 import com.ninjasquad.springmockk.MockkBean
+import com.ninjasquad.springmockk.SpykBean
+import io.mockk.verify
 import no.nav.klage.oppgave.clients.dokdistfordeling.DokDistFordelingClient
 import no.nav.klage.oppgave.db.TestPostgresqlContainer
 import no.nav.klage.oppgave.domain.klage.*
@@ -95,40 +97,42 @@ internal class KlagebehandlingDistribusjonServiceTest {
 
     private val klagebehandlingId = UUID.randomUUID()
 
+    @SpykBean
+    lateinit var vedtakDistribusjonService: VedtakDistribusjonService
+
+    private val mottak = Mottak(
+        tema = Tema.OMS,
+        type = Type.KLAGE,
+        kildesystem = Fagsystem.FS39,
+        kildeReferanse = "1234234",
+        klager = Klager(partId = PartId(type = PartIdType.PERSON, value = "23452354")),
+        oversendtKaDato = LocalDateTime.now()
+    )
+
+    private val klage = Klagebehandling(
+        id = klagebehandlingId,
+        klager = Klager(partId = PartId(type = PartIdType.PERSON, value = "23452354")),
+        sakenGjelder = SakenGjelder(
+            partId = PartId(type = PartIdType.PERSON, value = "23452354"),
+            skalMottaKopi = false
+        ),
+        tema = Tema.OMS,
+        type = Type.KLAGE,
+        frist = LocalDate.now(),
+        hjemler = mutableSetOf(
+            Hjemmel.FTL_8_7
+        ),
+        created = LocalDateTime.now(),
+        modified = LocalDateTime.now(),
+        mottattKlageinstans = LocalDateTime.now(),
+        kildesystem = Fagsystem.FS39,
+        mottakId = mottak.id,
+        vedtak = mutableSetOf(Vedtak(journalpostId = "1"))
+    )
+
     @Test
     fun `save klagebehandling`() {
-
-        val mottak = Mottak(
-            tema = Tema.OMS,
-            type = Type.KLAGE,
-            kildesystem = Fagsystem.FS39,
-            kildeReferanse = "1234234",
-            klager = Klager(partId = PartId(type = PartIdType.PERSON, value = "23452354")),
-            oversendtKaDato = LocalDateTime.now()
-        )
-
         mottakRepository.save(mottak)
-
-        val klage = Klagebehandling(
-            id = klagebehandlingId,
-            klager = Klager(partId = PartId(type = PartIdType.PERSON, value = "23452354")),
-            sakenGjelder = SakenGjelder(
-                partId = PartId(type = PartIdType.PERSON, value = "23452354"),
-                skalMottaKopi = false
-            ),
-            tema = Tema.OMS,
-            type = Type.KLAGE,
-            frist = LocalDate.now(),
-            hjemler = mutableSetOf(
-                Hjemmel.FTL_8_7
-            ),
-            created = LocalDateTime.now(),
-            modified = LocalDateTime.now(),
-            mottattKlageinstans = LocalDateTime.now(),
-            kildesystem = Fagsystem.FS39,
-            mottakId = mottak.id,
-            vedtak = mutableSetOf(Vedtak(journalpostId = "1"))
-        )
 
         klagebehandlingRepository.save(klage)
 
@@ -139,4 +143,27 @@ internal class KlagebehandlingDistribusjonServiceTest {
         println(klagebehandling.versjon)
     }
 
+    @Test
+    fun `dokumentdistribusjon kalles en gang for vedtak med en mottager`() {
+        mottakRepository.save(mottak)
+
+        klagebehandlingRepository.save(klage)
+
+        klagebehandlingDistribusjonService.distribuerKlagebehandling(klagebehandlingId)
+
+        verify(exactly = 0) {
+            vedtakDistribusjonService.lagKopiAvJournalpostForMottaker(
+                any(),
+                any(),
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            vedtakDistribusjonService.distribuerJournalpostTilMottaker(
+                klagebehandlingId,
+                any(),
+                any()
+            )
+        }
+    }
 }
