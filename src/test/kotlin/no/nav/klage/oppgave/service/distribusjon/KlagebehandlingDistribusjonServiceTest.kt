@@ -2,7 +2,8 @@ package no.nav.klage.oppgave.service.distribusjon
 
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.SpykBean
-import io.mockk.verify
+import io.mockk.every
+import no.nav.klage.oppgave.clients.dokdistfordeling.DistribuerJournalpostResponse
 import no.nav.klage.oppgave.clients.dokdistfordeling.DokDistFordelingClient
 import no.nav.klage.oppgave.db.TestPostgresqlContainer
 import no.nav.klage.oppgave.domain.klage.*
@@ -15,6 +16,7 @@ import no.nav.klage.oppgave.service.KlagebehandlingService
 import no.nav.klage.oppgave.service.TilgangService
 import no.nav.klage.oppgave.service.VedtakKafkaProducer
 import no.nav.klage.oppgave.util.TokenUtil
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
@@ -70,16 +72,8 @@ internal class KlagebehandlingDistribusjonServiceTest {
         lateinit var tokenUtil: TokenUtil
 
         @MockkBean(relaxed = true)
-        lateinit var kafkaVedtakEventRepository: KafkaVedtakEventRepository
-
-        @MockkBean(relaxed = true)
         lateinit var vedtakKafkaProducer: VedtakKafkaProducer
 
-        @MockkBean(relaxed = true)
-        lateinit var dokDistFordelingClient: DokDistFordelingClient
-
-        @MockkBean(relaxed = true)
-        lateinit var klagebehandlingAvslutningService: KlagebehandlingAvslutningService
     }
 
     //@Autowired
@@ -95,25 +89,38 @@ internal class KlagebehandlingDistribusjonServiceTest {
     @Autowired
     lateinit var klagebehandlingDistribusjonService: KlagebehandlingDistribusjonService
 
+    @MockkBean
+    lateinit var dokDistFordelingClient: DokDistFordelingClient
+
     private val klagebehandlingId = UUID.randomUUID()
+
+    private val vedtakId = UUID.randomUUID()
+
+    private val fnr = "12345678910"
 
     @SpykBean
     lateinit var vedtakDistribusjonService: VedtakDistribusjonService
+
+    @SpykBean
+    lateinit var kafkaVedtakEventRepository: KafkaVedtakEventRepository
+
+    @SpykBean
+    lateinit var klagebehandlingAvslutningService: KlagebehandlingAvslutningService
 
     private val mottak = Mottak(
         tema = Tema.OMS,
         type = Type.KLAGE,
         kildesystem = Fagsystem.FS39,
         kildeReferanse = "1234234",
-        klager = Klager(partId = PartId(type = PartIdType.PERSON, value = "23452354")),
+        klager = Klager(partId = PartId(type = PartIdType.PERSON, value = fnr)),
         oversendtKaDato = LocalDateTime.now()
     )
 
     private val klage = Klagebehandling(
         id = klagebehandlingId,
-        klager = Klager(partId = PartId(type = PartIdType.PERSON, value = "23452354")),
+        klager = Klager(partId = PartId(type = PartIdType.PERSON, value = fnr)),
         sakenGjelder = SakenGjelder(
-            partId = PartId(type = PartIdType.PERSON, value = "23452354"),
+            partId = PartId(type = PartIdType.PERSON, value = fnr),
             skalMottaKopi = false
         ),
         tema = Tema.OMS,
@@ -127,7 +134,13 @@ internal class KlagebehandlingDistribusjonServiceTest {
         mottattKlageinstans = LocalDateTime.now(),
         kildesystem = Fagsystem.FS39,
         mottakId = mottak.id,
-        vedtak = mutableSetOf(Vedtak(journalpostId = "1"))
+        vedtak = mutableSetOf(
+            Vedtak(
+                id = vedtakId,
+                journalpostId = "1",
+                utfall = Utfall.MEDHOLD
+            )
+        )
     )
 
     @Test
@@ -144,26 +157,23 @@ internal class KlagebehandlingDistribusjonServiceTest {
     }
 
     @Test
-    fun `dokumentdistribusjon kalles en gang for vedtak med en mottager`() {
+    fun `distribusjon av klagebehandling fører til dokdistReferanse, ferdig distribuert vedtak og avsluttet klagebehandling`() {
+        val dokdistResponse = DistribuerJournalpostResponse(UUID.randomUUID())
+
+        every { dokDistFordelingClient.distribuerJournalpost(any())  } returns dokdistResponse
+
         mottakRepository.save(mottak)
 
         klagebehandlingRepository.save(klage)
 
         klagebehandlingDistribusjonService.distribuerKlagebehandling(klagebehandlingId)
 
-        verify(exactly = 0) {
-            vedtakDistribusjonService.lagKopiAvJournalpostForMottaker(
-                any(),
-                any(),
-                any()
-            )
-        }
-        verify(exactly = 1) {
-            vedtakDistribusjonService.distribuerJournalpostTilMottaker(
-                klagebehandlingId,
-                any(),
-                any()
-            )
-        }
+        val result = klagebehandlingRepository.getOne(klagebehandlingId)
+        val resultingVedtak = result.getVedtak(vedtakId)
+        val brevMottakere = resultingVedtak.brevmottakere
+
+        assertThat(brevMottakere.first().dokdistReferanse).isNotNull
+        assertThat(resultingVedtak.ferdigDistribuert).isNotNull
+        assertThat(result.avsluttet).isNotNull
     }
 }

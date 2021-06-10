@@ -84,9 +84,9 @@ class VedtakDistribusjonService(
     }
 
     @Transactional
-    fun markerVedtakSomFerdigDistribuert(klagebehandlingId: UUID, vedtak: Vedtak): Klagebehandling {
+    fun markerVedtakSomFerdigDistribuert(klagebehandlingId: UUID, vedtakId: UUID): Klagebehandling {
         val klagebehandling = klagebehandlingService.getKlagebehandlingForUpdateBySystembruker(klagebehandlingId, null)
-        val event = klagebehandling.setVedtakFerdigDistribuert(vedtak.id, SYSTEMBRUKER)
+        val event = klagebehandling.setVedtakFerdigDistribuert(vedtakId, SYSTEMBRUKER)
         applicationEventPublisher.publishEvent(event)
         return klagebehandling
     }
