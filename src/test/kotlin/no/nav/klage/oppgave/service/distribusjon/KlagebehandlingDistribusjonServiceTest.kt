@@ -162,6 +162,8 @@ internal class KlagebehandlingDistribusjonServiceTest {
 
         every { dokDistFordelingClient.distribuerJournalpost(any())  } returns dokdistResponse
 
+        every { kafkaVedtakEventRepository.save(any()) } returns null
+
         mottakRepository.save(mottak)
 
         klagebehandlingRepository.save(klage)
