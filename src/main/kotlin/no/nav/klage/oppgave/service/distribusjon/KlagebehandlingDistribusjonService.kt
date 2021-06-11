@@ -31,12 +31,12 @@ class KlagebehandlingDistribusjonService(
             var klagebehandling = klagebehandlingService.getKlagebehandling(klagebehandlingId)
             klagebehandling.vedtak
                 .filter { vedtak -> vedtak.erIkkeFerdigDistribuert() }
-                .forEach { vedtak ->
+                .forEach { vedtak -> 
                     logger.debug("Vedtak ${vedtak.id} i klagebehandling $klagebehandlingId er ikke distribuert")
 
-                    klagebehandling = lagBrevmottakere(klagebehandling, vedtak)
-                    val vedtakMedOppdaterteBrevmottakere = klagebehandling.getVedtak(vedtak.id)
-                    vedtakMedOppdaterteBrevmottakere.brevmottakere
+                    klagebehandling = lagBrevmottakere(klagebehandling, vedtak.id)
+                    val brevmottakere = klagebehandling.getVedtak(vedtak.id).brevmottakere
+                    brevmottakere
                         .filter { brevMottaker -> brevMottaker.erIkkeDistribuertTil() }
                         .forEach { brevMottaker ->
                             logger.debug("Vedtak ${vedtak.id} i klagebehandling $klagebehandlingId er ikke distribuert til brevmottaker ${brevMottaker.id}")
@@ -58,11 +58,12 @@ class KlagebehandlingDistribusjonService(
 
     private fun lagBrevmottakere(
         klagebehandling: Klagebehandling,
-        vedtak: Vedtak
+        vedtakId: UUID
     ): Klagebehandling {
+        val vedtak = klagebehandling.getVedtak(vedtakId)
         if (vedtak.harIngenBrevMottakere()) {
-            logger.debug("Vedtak ${vedtak.id} i klagebehandling ${klagebehandling.id} har ingen brevmottakere, vi oppretter det")
-            return vedtakDistribusjonService.lagBrevmottakere(klagebehandling.id, vedtak.id)
+            logger.debug("Vedtak $vedtakId i klagebehandling ${klagebehandling.id} har ingen brevmottakere, vi oppretter det")
+            return vedtakDistribusjonService.lagBrevmottakere(klagebehandling.id, vedtakId)
         }
         return klagebehandling
     }
