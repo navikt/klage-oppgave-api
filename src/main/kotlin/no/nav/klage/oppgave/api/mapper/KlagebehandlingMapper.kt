@@ -17,6 +17,7 @@ import no.nav.klage.oppgave.service.DokumentService
 import no.nav.klage.oppgave.util.getLogger
 import no.nav.klage.oppgave.util.getSecureLogger
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -139,23 +140,24 @@ class KlagebehandlingMapper(
             grunn = vedtak.grunn?.id,
             hjemler = vedtak.hjemler.map { it.id }.toSet(),
             brevMottakere = vedtak.brevmottakere.map { mapBrevmottaker(it) }.toSet(),
-            file = getVedleggView(vedtak.journalpostId),
+            file = getVedleggView(vedtak.journalpostId, vedtak.opplastet),
             ferdigstilt = vedtak.ferdigstiltIJoark,
             opplastet = vedtak.opplastet
         )
     }
 
-    fun getVedleggView(vedtakJournalpostId: String?): VedleggView? {
-        return vedtakJournalpostId?.let {
-            val arkivertDokumentWithTitle = dokumentService.getArkivertDokumentWithTitle(it)
-            mapArkivertDokumentWithTitleToVedleggView(arkivertDokumentWithTitle)
-        }
+    fun getVedleggView(vedtakJournalpostId: String?, opplastet: LocalDateTime?): VedleggView? {
+        return if (vedtakJournalpostId != null && opplastet != null) {
+            val arkivertDokumentWithTitle = dokumentService.getArkivertDokumentWithTitle(vedtakJournalpostId)
+            mapArkivertDokumentWithTitleToVedleggView(arkivertDokumentWithTitle, opplastet)
+        } else null
     }
 
-    fun mapArkivertDokumentWithTitleToVedleggView(arkivertDokumentWithTitle: ArkivertDokumentWithTitle): VedleggView {
+    fun mapArkivertDokumentWithTitleToVedleggView(arkivertDokumentWithTitle: ArkivertDokumentWithTitle, opplastet: LocalDateTime): VedleggView {
         return VedleggView(
             arkivertDokumentWithTitle.title,
-            arkivertDokumentWithTitle.content.size.toLong()
+            arkivertDokumentWithTitle.content.size.toLong(),
+            opplastet
         )
     }
 
@@ -195,10 +197,11 @@ class KlagebehandlingMapper(
     }
 
     fun mapToVedleggEditedView(klagebehandling: Klagebehandling, vedtakId: UUID): VedleggEditedView {
+        val vedtak = klagebehandling.getVedtak(vedtakId)
         return VedleggEditedView(
             klagebehandling.versjon,
             klagebehandling.modified,
-            klagebehandling.getVedtak(vedtakId).opplastet
+            file = getVedleggView(vedtak.journalpostId, vedtak.opplastet),
         )
     }
 
