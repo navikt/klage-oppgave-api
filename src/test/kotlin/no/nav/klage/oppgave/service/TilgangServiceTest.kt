@@ -164,6 +164,37 @@ class TilgangServiceTest {
     }
 
     @Test
+    fun `verifySaksbehandlersSkrivetilgang gir ok for medunderskriver`() {
+        val medunderskriverIdent = "Z654321"
+
+        val klage = Klagebehandling(
+            versjon = 2L,
+            klager = Klager(partId = PartId(type = PartIdType.PERSON, value = "23452354")),
+            sakenGjelder = SakenGjelder(
+                partId = PartId(type = PartIdType.PERSON, value = "23452354"),
+                skalMottaKopi = false
+            ),
+            tema = Tema.OMS,
+            type = Type.KLAGE,
+            frist = LocalDate.now(),
+            hjemler = mutableSetOf(
+                Hjemmel.FTL_8_7
+            ),
+            created = LocalDateTime.now(),
+            modified = LocalDateTime.now(),
+            mottattKlageinstans = LocalDateTime.now(),
+            kildesystem = Fagsystem.FS39,
+            mottakId = UUID.randomUUID(),
+            tildeling = Tildeling(saksbehandlerident = "Z123456", enhet = "", tidspunkt = LocalDateTime.now()),
+            medunderskriver = MedunderskriverTildeling(saksbehandlerident = medunderskriverIdent, tidspunkt = LocalDateTime.now())
+        )
+
+        every { innloggetSaksbehandlerRepository.getInnloggetIdent() }.returns(medunderskriverIdent)
+
+        assertThat(tilgangService.verifySaksbehandlersSkrivetilgang(klage)).isEqualTo(Unit)
+    }
+
+    @Test
     fun `harSaksbehandlerTilgangTil gir false på fortrolig`() {
         every { pdlFacade.getPersonInfo(any()) }.returns(
             Person(

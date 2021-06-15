@@ -28,12 +28,13 @@ class TilgangService(
             throw KlagebehandlingAvsluttetException("Kan ikke endre avsluttet klagebehandling")
         }
         val ident = innloggetSaksbehandlerRepository.getInnloggetIdent()
-        if (klagebehandling.tildeling?.saksbehandlerident == null ||
-            ident != klagebehandling.tildeling?.saksbehandlerident
-        ) {
-            throw MissingTilgangException("Kun saksbehandler tildelt klage kan endre")
+        if (!saksbehandlerHarSkrivetilgang(klagebehandling, ident)) {
+            throw MissingTilgangException("Kun tildelt saksbehandler/medunderskriver kan endre klagebehandlingen")
         }
     }
+
+    private fun saksbehandlerHarSkrivetilgang(klagebehandling: Klagebehandling, ident: String): Boolean =
+        ident == klagebehandling.tildeling?.saksbehandlerident || ident == klagebehandling.medunderskriver?.saksbehandlerident
 
     fun verifySystembrukersSkrivetilgang(klagebehandling: Klagebehandling) {
         if (klagebehandling.avsluttet != null) {
