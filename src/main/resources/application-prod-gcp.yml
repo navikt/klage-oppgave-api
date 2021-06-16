@@ -9,6 +9,8 @@ OPPGAVE_APP_CLIENT_ID: 50346823-61a0-49e7-ad89-ea2b1a0e90f8
 
 OPPGAVE_URL: https://api-gw.oera.no/oppgave/api/v1/oppgaver
 
+EREG_URL: https://api-gw.oera.no/ereg/api
+
 AXSYS_URL: https://api-gw.oera.no/axsys/api/v2
 AXSYS_CLUSTER: prod-fss
 AXSYS_NAMESPACE: org
@@ -41,7 +43,7 @@ ROLE_GOSYS_OPPGAVE_BEHANDLER: 185a4e29-5f9c-4319-bdb3-0f5f2b30ac90
 ROLE_ADMIN: cd78b8e8-73a3-4fb6-8234-7bebb5e5b9e9
 
 JOARK_SERVICE_URL: https://api-gw.oera.no/dokarkiv/rest/journalpostapi/v1/journalpost
-DOKDIST_SERVICE_URL: TODO
+DOKDIST_SERVICE_URL: https://api-gw.oera.no/dokdistfordeling/rest/v1/distribuerjournalpost
 
 CLAM_AV_URL: http://clamav.clamav/scan
 
