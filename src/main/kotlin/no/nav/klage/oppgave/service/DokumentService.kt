@@ -56,7 +56,7 @@ class DokumentService(
 
     fun fetchJournalposterConnectedToKlagebehandling(klagebehandling: Klagebehandling): DokumenterResponse {
         val dokumentReferanser = klagebehandling.saksdokumenter
-            .mapNotNull { safGraphQlClient.getJournalpost(it.journalpostId) }
+            .mapNotNull { safGraphQlClient.getJournalpostAsSaksbehandler(it.journalpostId) }
             .map { dokumentMapper.mapJournalpostToDokumentReferanse(it, klagebehandling) }
         return DokumenterResponse(
             dokumenter = dokumentReferanser,
@@ -68,7 +68,7 @@ class DokumentService(
 
     fun validateJournalpostExists(journalpostId: String) {
         try {
-            safGraphQlClient.getJournalpost(journalpostId)
+            safGraphQlClient.getJournalpostAsSaksbehandler(journalpostId)
         } catch (e: Exception) {
             logger.warn("Unable to find journalpost $journalpostId", e)
             null
@@ -94,12 +94,27 @@ class DokumentService(
         }
     }
 
+    fun fetchDokumentInfoIdForJournalpostAsSaksbehandler(journalpostId: String): List<String> {
+        return try {
+            val journalpost = safGraphQlClient.getJournalpostAsSaksbehandler(journalpostId)
+            journalpost?.dokumenter?.filter { harArkivVariantformat(it) }?.map { it.dokumentInfoId } ?: emptyList()
+        } catch (e: Exception) {
+            logger.warn("Unable to find journalpost $journalpostId", e)
+            emptyList()
+        }
+    }
+
     fun getArkivertDokument(journalpostId: String, dokumentInfoId: String): ArkivertDokument {
         return safRestClient.getDokument(dokumentInfoId, journalpostId)
     }
 
     fun getMainDokument(journalpostId: String): ArkivertDokument {
         val dokumentInfoId = fetchDokumentInfoIdForJournalpostAsSystembruker(journalpostId)
+        return getArkivertDokument(journalpostId, dokumentInfoId.first())
+    }
+
+    fun getMainDokumentAsSaksbehandler(journalpostId: String): ArkivertDokument {
+        val dokumentInfoId = fetchDokumentInfoIdForJournalpostAsSaksbehandler(journalpostId)
         return getArkivertDokument(journalpostId, dokumentInfoId.first())
     }
 
@@ -114,9 +129,20 @@ class DokumentService(
         }
     }
 
-    fun getArkivertDokumentWithTitle(journalpostId: String): ArkivertDokumentWithTitle {
-        val title = getMainDokumentTitle(journalpostId)
-        val dokument = getMainDokument(journalpostId)
+    fun getMainDokumentTitleAsSaksbehandler(journalpostId: String): String {
+        return try {
+            val journalpost = safGraphQlClient.getJournalpostAsSaksbehandler(journalpostId)
+            val dokumentVariant = journalpost?.dokumenter?.filter { harArkivVariantformat(it) }
+            return dokumentVariant?.first()?.dokumentvarianter?.first()?.filnavn!!
+        } catch (e: Exception) {
+            logger.warn("Unable to find journalpost $journalpostId", e)
+            "Unknown"
+        }
+    }
+
+    fun getArkivertDokumentWithTitleAsSaksbehandler(journalpostId: String): ArkivertDokumentWithTitle {
+        val title = getMainDokumentTitleAsSaksbehandler(journalpostId)
+        val dokument = getMainDokumentAsSaksbehandler(journalpostId)
         return ArkivertDokumentWithTitle(
             title,
             dokument.bytes,

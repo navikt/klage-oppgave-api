@@ -106,7 +106,7 @@ class KlagebehandlingMapper(
 
     fun getVedleggView(vedtakJournalpostId: String?, opplastet: LocalDateTime?): VedleggView? {
         return if (vedtakJournalpostId != null && opplastet != null) {
-            val arkivertDokumentWithTitle = dokumentService.getArkivertDokumentWithTitle(vedtakJournalpostId)
+            val arkivertDokumentWithTitle = dokumentService.getArkivertDokumentWithTitleAsSaksbehandler(vedtakJournalpostId)
             mapArkivertDokumentWithTitleToVedleggView(arkivertDokumentWithTitle, opplastet)
         } else null
     }

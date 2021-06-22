@@ -28,7 +28,7 @@ class KlagebehandlingDistribusjonService(
     @Transactional(propagation = Propagation.NEVER)
     fun distribuerKlagebehandling(klagebehandlingId: UUID) {
         try {
-            var klagebehandling = klagebehandlingService.getKlagebehandling(klagebehandlingId)
+            var klagebehandling = klagebehandlingService.getKlagebehandlingForUpdateBySystembruker(klagebehandlingId, null)
             klagebehandling.vedtak
                 .filter { vedtak -> vedtak.erIkkeFerdigDistribuert() }
                 .forEach { vedtak -> 

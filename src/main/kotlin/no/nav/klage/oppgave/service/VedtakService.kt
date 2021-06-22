@@ -218,7 +218,7 @@ class VedtakService(
         journalfoerendeEnhet: String
     ): Klagebehandling {
         return try {
-            val journalpost = safClient.getJournalpost(vedtak.journalpostId!!)
+            val journalpost = safClient.getJournalpostAsSaksbehandler(vedtak.journalpostId!!)
                 ?: throw JournalpostNotFoundException("Journalpost med id ${vedtak.journalpostId} finnes ikke")
             if (journalpost.journalstatus != FERDIGSTILT) {
                 joarkClient.finalizeJournalpost(vedtak.journalpostId!!, journalfoerendeEnhet)

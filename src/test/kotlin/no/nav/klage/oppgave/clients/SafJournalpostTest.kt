@@ -55,7 +55,7 @@ internal class SafJournalpostTest {
             tracerMock
         )
 
-        return safClient.getJournalpost("whatever")
+        return safClient.getJournalpostAsSaksbehandler("whatever")
     }
 
     @Language("json")

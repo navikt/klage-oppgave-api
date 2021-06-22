@@ -118,7 +118,7 @@ class KlagebehandlingVedtakController(
         val klagebehandling = klagebehandlingService.getKlagebehandling(klagebehandlingId.toUUIDOrException())
         val vedtak = vedtakService.getVedtak(klagebehandling, vedtakId.toUUIDOrException())
         if (vedtak.journalpostId == null) throw JournalpostNotFoundException("Vedtak med id $vedtakId er ikke journalført")
-        val arkivertDokumentWithTitle = dokumentService.getArkivertDokumentWithTitle(vedtak.journalpostId!!)
+        val arkivertDokumentWithTitle = dokumentService.getArkivertDokumentWithTitleAsSaksbehandler(vedtak.journalpostId!!)
 
         val responseHeaders = HttpHeaders()
         responseHeaders.contentType = arkivertDokumentWithTitle.contentType
