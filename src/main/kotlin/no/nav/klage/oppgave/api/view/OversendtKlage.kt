@@ -83,7 +83,7 @@ data class OversendtKlage(
     @ApiModelProperty(
         notes = "Legges ved melding ut fra KA på Kafka, brukes for filtrering",
         required = true,
-        example = "FS39"
+        example = "K9"
     )
     val kilde: KildeFagsystem,
     @ApiModelProperty(
@@ -284,7 +284,7 @@ data class OversendtSak(
     val fagsakId: String,
     @ApiModelProperty(
         required = true,
-        example = "FS39"
+        example = "K9"
     )
     val fagsystem: KildeFagsystem
 )

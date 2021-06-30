@@ -116,7 +116,7 @@ class KlagebehandlingServiceTest {
         val mottak = Mottak(
             tema = Tema.OMS,
             type = Type.KLAGE,
-            kildesystem = Fagsystem.FS39,
+            kildesystem = Fagsystem.K9,
             kildeReferanse = "1234234",
             klager = Klager(partId = PartId(type = PartIdType.PERSON, value = "23452354")),
             oversendtKaDato = LocalDateTime.now()
@@ -140,7 +140,7 @@ class KlagebehandlingServiceTest {
             created = LocalDateTime.now(),
             modified = LocalDateTime.now(),
             mottattKlageinstans = LocalDateTime.now(),
-            kildesystem = Fagsystem.FS39,
+            kildesystem = Fagsystem.K9,
             mottakId = mottak.id
         )
 

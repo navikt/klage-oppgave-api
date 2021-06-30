@@ -50,7 +50,7 @@ class TilgangServiceTest {
             created = LocalDateTime.now(),
             modified = LocalDateTime.now(),
             mottattKlageinstans = LocalDateTime.now(),
-            kildesystem = Fagsystem.FS39,
+            kildesystem = Fagsystem.K9,
             mottakId = UUID.randomUUID(),
             avsluttet = LocalDateTime.now()
         )
@@ -80,7 +80,7 @@ class TilgangServiceTest {
             created = LocalDateTime.now(),
             modified = LocalDateTime.now(),
             mottattKlageinstans = LocalDateTime.now(),
-            kildesystem = Fagsystem.FS39,
+            kildesystem = Fagsystem.K9,
             mottakId = UUID.randomUUID(),
             avsluttetAvSaksbehandler = LocalDateTime.now()
         )
@@ -110,7 +110,7 @@ class TilgangServiceTest {
             created = LocalDateTime.now(),
             modified = LocalDateTime.now(),
             mottattKlageinstans = LocalDateTime.now(),
-            kildesystem = Fagsystem.FS39,
+            kildesystem = Fagsystem.K9,
             mottakId = UUID.randomUUID(),
             tildeling = Tildeling(saksbehandlerident = "Z123456", enhet = "", tidspunkt = LocalDateTime.now())
         )
@@ -138,7 +138,7 @@ class TilgangServiceTest {
             created = LocalDateTime.now(),
             modified = LocalDateTime.now(),
             mottattKlageinstans = LocalDateTime.now(),
-            kildesystem = Fagsystem.FS39,
+            kildesystem = Fagsystem.K9,
             mottakId = UUID.randomUUID()
         )
 
@@ -165,7 +165,7 @@ class TilgangServiceTest {
             created = LocalDateTime.now(),
             modified = LocalDateTime.now(),
             mottattKlageinstans = LocalDateTime.now(),
-            kildesystem = Fagsystem.FS39,
+            kildesystem = Fagsystem.K9,
             mottakId = UUID.randomUUID(),
             tildeling = Tildeling(saksbehandlerident = "Z123456", enhet = "", tidspunkt = LocalDateTime.now())
         )

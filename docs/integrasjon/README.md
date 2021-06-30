@@ -28,7 +28,7 @@ Eksempel
   "dvhReferanse": "687686978",
   "fagsak": {
     "fagsakId": "123455",
-    "fagsystem": "FS39"
+    "fagsystem": "K9"
   },
   "frist": "2021-04-26",
   "hjemler": [
